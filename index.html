@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.9</title>
+<title>Contador de Pasos v1.10</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -86,6 +86,11 @@
   .hidden { display: none !important; }
   .music-head { display: flex; justify-content: space-between; align-items: baseline; }
   .music-head h2 { margin: 0; }
+  .sum-flex { display: flex; align-items: center; gap: 8px; }
+  .sum-flex .grow { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini-play { width: 34px; height: 34px; border-radius: 50%; padding: 0; font-size: 0.85rem; flex: none; display: flex; align-items: center; justify-content: center; }
+  .cast-mini { color: #4ade80; font-size: 0.8rem; font-weight: 600; }
+  details[open] .mini-play { display: none; }
   .music-time { color: #94a3b8; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
   .music-title { color: #cbd5e1; font-size: 0.85rem; margin: 6px 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .music-title.err { color: #f87171; white-space: normal; }
@@ -193,10 +198,8 @@
   </div>
 
   <div class="card mt">
-    <div class="music-head">
-      <h2>🎵 Música para caminar</h2>
-      <span class="music-time" id="musicTime">--:--</span>
-    </div>
+    <details>
+    <summary class="sum-flex"><span class="grow">🎵 Música para caminar</span><span class="music-time" id="musicTime">--:--</span><button class="mini-play" id="mPlayMini" aria-label="Reproducir">▶</button></summary>
     <div class="music-title" id="musicTitle">Cargando música…</div>
     <input type="range" id="mSeek" min="0" max="100" value="0" step="1" aria-label="Posición">
     <div class="music-ctrls mt">
@@ -208,7 +211,6 @@
     <label class="check"><input type="checkbox" id="mAuto"> Que suene al empezar a contar (y se pause al pausar)</label>
     <div class="hint">Se repite en bucle: al terminar vuelve a empezar. Recuerda por dónde iba.</div>
     <button class="link-btn" id="mShow">Ver vídeo / cambiar música</button>
-    <div class="yt-wrap collapsed" id="ytWrap"><div id="ytPlayer"></div></div>
     <div id="mLinkBox" class="hidden">
       <label for="mUrl">Enlace de YouTube</label>
       <input type="url" id="mUrl" placeholder="https://www.youtube.com/watch?v=…">
@@ -218,6 +220,9 @@
       </div>
       <div class="hint">En iPhone el volumen se controla con los botones del teléfono.</div>
     </div>
+    </details>
+    <!-- el reproductor queda fuera del plegable para que la música siga sonando con la tarjeta cerrada -->
+    <div class="yt-wrap collapsed" id="ytWrap"><div id="ytPlayer"></div></div>
   </div>
 
   <div class="card">
@@ -257,7 +262,8 @@
   </div>
 
   <div class="card">
-    <h2>📺 Ver en el ordenador</h2>
+    <details>
+    <summary class="sum-flex"><span class="grow">📺 Ver en el ordenador</span><span class="cast-mini" id="castMini"></span></summary>
     <p class="note">En el ordenador abre esta dirección. Saldrá un código de 4 números; escríbelo aquí. Verás tus pasos en grande sobre el vídeo de paisajes.</p>
     <div class="url-box" id="castUrl"></div>
     <div class="row">
@@ -265,6 +271,7 @@
       <div><button class="btn-outline" id="castBtn">Conectar</button></div>
     </div>
     <div class="status" id="castStatus"></div>
+    </details>
   </div>
 
   <div class="card mt">
@@ -363,7 +370,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.9';
+const VERSION = 'v1.10';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -508,7 +515,6 @@ function initNative() {
   $('sensorBox').classList.add('hidden');
   $('installBtn').classList.add('hidden');
   $('apkCard').classList.add('hidden');
-  try { $('ver').textContent = VERSION + ' · app ' + AndroidPasos.version(); } catch (e) {}
   try { const h = JSON.parse(AndroidPasos.getHistory()); Object.keys(h).forEach(k => { db.days[k] = h[k]; }); } catch (e) {}
   syncNative();
   nativePoll();
@@ -953,6 +959,8 @@ function renderMusic() {
   const playing = musicPlaying();
   $('mPlay').textContent = playing ? '⏸' : '▶';
   $('mPlay').setAttribute('aria-label', playing ? 'Pausar' : 'Reproducir');
+  $('mPlayMini').textContent = playing ? '⏸' : '▶';
+  $('mPlayMini').setAttribute('aria-label', playing ? 'Pausar' : 'Reproducir');
   if (!ytReady) return;
   const cur = yt.getCurrentTime(), dur = yt.getDuration();
   $('musicTime').textContent = dur ? ytTime(cur) + ' / ' + ytTime(dur) : '--:--';
@@ -984,6 +992,7 @@ function bindMusic() {
   $('mAuto').checked = M.auto;
   $('mUrl').value = 'https://www.youtube.com/watch?v=' + M.id;
   $('mPlay').addEventListener('click', () => musicPlaying() ? musicPause() : musicPlay());
+  $('mPlayMini').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); musicPlaying() ? musicPause() : musicPlay(); });
   $('mBack').addEventListener('click', () => ytReady && yt.seekTo(Math.max(0, yt.getCurrentTime() - 30), true));
   $('mFwd').addEventListener('click', () => ytReady && yt.seekTo(yt.getCurrentTime() + 30, true));
   $('mSeek').addEventListener('input', () => { seeking = true; $('musicTime').textContent = ytTime($('mSeek').value) + ' / ' + ytTime($('mSeek').max); });
@@ -1021,7 +1030,10 @@ function loadPeer() {
 }
 
 let peer = null, conn = null, castOn = false, castRetry = null;
-function castStatus(t, cls = '') { $('castStatus').textContent = t; $('castStatus').className = 'status ' + cls; }
+function castStatus(t, cls = '') {
+  $('castStatus').textContent = t; $('castStatus').className = 'status ' + cls;
+  $('castMini').textContent = cls === 'ok' ? '✔ conectado' : '';
+}
 function castLater() { clearTimeout(castRetry); if (castOn) castRetry = setTimeout(castConnect, 5000); }
 async function castConnect() {
   const code = db.cast && db.cast.code;
