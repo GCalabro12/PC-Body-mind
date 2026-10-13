@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.5</title>
+<title>Contador de Pasos v1.6</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -117,20 +117,20 @@
   .scr-video { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
   .scr-video iframe { position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.78vh; transform: translate(-50%, -50%); border: 0; }
   .scr-video.off { visibility: hidden; }
-  .scr-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.45) 42%, rgba(15,23,42,0) 68%); pointer-events: none; }
-  .scr-panel { position: absolute; left: 4vw; bottom: 7vh; width: min(44vw, 680px); }
-  .scr-steps { font-size: clamp(64px, 12vw, 220px); font-weight: 800; line-height: 1; text-shadow: 0 4px 24px rgba(0,0,0,0.6); font-variant-numeric: tabular-nums; }
-  .scr-label { font-size: clamp(18px, 2.2vw, 36px); color: #cbd5e1; margin-top: 0.5vh; }
-  .scr-bar { height: 14px; background: rgba(255,255,255,0.18); border-radius: 99px; overflow: hidden; margin-top: 1.5vh; }
+  .scr-shade { position: absolute; inset: 0; background: linear-gradient(270deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.5) 45%, rgba(15,23,42,0) 75%); pointer-events: none; }
+  .scr-panel { position: absolute; top: 0.5vh; right: 1.5vw; width: min(60vw, 720px); text-align: right; }
+  .scr-steps { font-size: clamp(40px, min(21vw, 32vh), 280px); font-weight: 800; line-height: 0.95; text-shadow: 0 4px 24px rgba(0,0,0,0.6); font-variant-numeric: tabular-nums; }
+  .scr-label { font-size: clamp(12px, min(3vw, 4.5vh), 36px); color: #cbd5e1; margin-top: 0.3vh; }
+  .scr-bar { height: clamp(6px, 1.4vh, 14px); background: rgba(255,255,255,0.18); border-radius: 99px; overflow: hidden; margin-top: 1vh; }
   .scr-bar > div { height: 100%; width: 0; background: #4ade80; border-radius: 99px; transition: width 0.5s; }
   .scr-bar.yellow > div { background: #facc15; }
-  .scr-stats { display: flex; gap: 3.5vw; margin-top: 3.5vh; font-size: clamp(14px, 1.6vw, 26px); color: #cbd5e1; }
-  .scr-stats b { display: block; font-size: clamp(26px, 3.4vw, 58px); color: #fff; font-variant-numeric: tabular-nums; }
-  .scr-block { margin-top: 3.5vh; font-size: clamp(16px, 1.9vw, 30px); color: #facc15; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .scr-top { position: absolute; top: 2vh; right: 2vw; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-  .scr-top button { width: auto; padding: 0.5rem 0.9rem; font-size: 0.9rem; background: rgba(15,23,42,0.75); border: 1px solid #475569; }
+  .scr-stats { display: flex; justify-content: flex-end; gap: 3.5vw; margin-top: 2vh; font-size: clamp(11px, min(2vw, 3vh), 26px); color: #cbd5e1; }
+  .scr-stats b { display: block; font-size: clamp(18px, min(4.5vw, 7vh), 58px); color: #fff; font-variant-numeric: tabular-nums; }
+  .scr-block { margin-top: 2vh; font-size: clamp(12px, min(2.6vw, 4vh), 30px); color: #facc15; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .scr-top { position: absolute; top: 1.5vh; left: 1.5vw; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; max-width: 36vw; }
+  .scr-top button { width: auto; padding: 0.4rem 0.7rem; font-size: clamp(11px, 1.6vmin, 15px); background: rgba(15,23,42,0.75); border: 1px solid #475569; }
   .scr-top button:hover { background: rgba(51,65,85,0.9); }
-  .scr-conn { color: #cbd5e1; font-size: 0.9rem; background: rgba(15,23,42,0.75); padding: 0.55rem 0.9rem; border-radius: 0.7rem; }
+  .scr-conn { color: #cbd5e1; font-size: clamp(10px, 1.5vmin, 14px); background: rgba(15,23,42,0.75); padding: 0.4rem 0.7rem; border-radius: 0.6rem; }
   .scr-pair { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(15,23,42,0.9); padding: 24px; }
   .scr-pair h1 { font-size: clamp(28px, 4vw, 56px); }
   .scr-pair p { color: #cbd5e1; font-size: clamp(16px, 1.8vw, 26px); max-width: 900px; line-height: 1.5; }
@@ -139,7 +139,7 @@
   .scr-cele .emo { font-size: clamp(60px, 8vw, 140px); line-height: 1; }
   .scr-cele .big { font-size: clamp(40px, 6.5vw, 120px); font-weight: 800; color: #facc15; }
   .scr-cele .sub { font-size: clamp(18px, 2.4vw, 40px); color: #e2e8f0; }
-  .scr-toast { position: absolute; right: 4vw; bottom: 7vh; background: rgba(15,23,42,0.9); border-left: 8px solid #4ade80; padding: 2vh 2.5vw; border-radius: 1rem; font-size: clamp(22px, 2.8vw, 48px); font-weight: 800; animation: slideIn 0.4s ease; }
+  .scr-toast { position: absolute; right: 1.5vw; bottom: 3vh; background: rgba(15,23,42,0.9); border-right: 8px solid #4ade80; padding: 1.5vh 2vw; border-radius: 1rem; font-size: clamp(16px, min(3.5vw, 5vh), 48px); font-weight: 800; animation: slideIn 0.4s ease; }
   @keyframes scrPop { from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; } }
   @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } }
 </style>
@@ -344,7 +344,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.5';
+const VERSION = 'v1.6';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
