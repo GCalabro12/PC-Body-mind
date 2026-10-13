@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pasos">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👣</text></svg>">
+<title>Contador de Pasos v1.1</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
+  .wrap { width: 100%; max-width: 480px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 12px; }
+  h1 { color: #4ade80; font-size: 1.4rem; margin: 0; }
+  .ver { color: #64748b; font-size: 0.75rem; }
+  .date { color: #94a3b8; font-size: 0.85rem; }
+  .card { background: #1e293b; border-radius: 1rem; padding: 1.2rem; margin-bottom: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.35); }
+  .ring-box { position: relative; width: 240px; height: 240px; margin: 0 auto; }
+  .ring-box svg { transform: rotate(-90deg); }
+  .ring-bg { stroke: #334155; }
+  .ring-fg { stroke: #4ade80; transition: stroke-dashoffset 0.4s ease, stroke 0.4s; }
+  .ring-fg.done { stroke: #facc15; }
+  .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .steps { font-size: 3.2rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+  .goal-txt { color: #94a3b8; font-size: 0.9rem; margin-top: 6px; }
+  .pct { color: #4ade80; font-weight: 700; font-size: 0.95rem; margin-top: 4px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+  .stat { background: #0f172a; border-radius: 0.7rem; padding: 10px 6px; text-align: center; }
+  .stat b { display: block; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  .stat span { color: #94a3b8; font-size: 0.75rem; }
+  button { background: #16a34a; color: #fff; border: none; padding: 0.9rem 1.2rem; border-radius: 0.7rem; cursor: pointer; font-weight: 700; width: 100%; font-size: 1.05rem; font-family: inherit; transition: background 0.2s; }
+  button:hover { background: #15803d; }
+  button.stop { background: #dc2626; }
+  button.stop:hover { background: #b91c1c; }
+  .btn-outline { background: transparent; border: 1px solid #475569; color: #cbd5e1; font-size: 0.9rem; padding: 0.7rem; }
+  .btn-outline:hover { background: #334155; }
+  .status { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+  .status.ok { color: #4ade80; }
+  .status.err { color: #f87171; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; margin-right: 6px; animation: pulse 1.2s infinite; vertical-align: middle; }
+  @keyframes pulse { 50% { opacity: 0.25; } }
+  h2 { color: #4ade80; font-size: 1rem; margin: 0 0 12px; }
+  .chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; position: relative; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .bar { width: 100%; background: #334155; border-radius: 6px 6px 2px 2px; min-height: 3px; transition: height 0.4s; }
+  .bar.met { background: #4ade80; }
+  .bar.today { outline: 2px solid #facc15; outline-offset: 1px; }
+  .bar-val { font-size: 0.65rem; color: #94a3b8; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .bar-lbl { font-size: 0.75rem; color: #94a3b8; margin-top: 5px; }
+  .goal-line { position: absolute; left: 0; right: 0; border-top: 1px dashed #facc15; opacity: 0.6; pointer-events: none; }
+  .summary { display: flex; justify-content: space-between; color: #94a3b8; font-size: 0.8rem; margin-top: 12px; }
+  .summary b { color: #f8fafc; }
+  details summary { cursor: pointer; color: #4ade80; font-weight: 700; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: ' ▾'; color: #64748b; }
+  details[open] summary::after { content: ' ▴'; }
+  label { display: block; color: #94a3b8; font-size: 0.85rem; font-weight: 600; margin: 14px 0 5px; }
+  input[type="number"] { width: 100%; padding: 0.65rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1rem; font-family: inherit; }
+  input[type="range"] { width: 100%; accent-color: #4ade80; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  .hint { color: #64748b; font-size: 0.75rem; margin-top: 4px; line-height: 1.4; }
+  canvas { width: 100%; height: 80px; background: #0f172a; border-radius: 0.5rem; display: block; margin-top: 6px; }
+  .note { color: #94a3b8; font-size: 0.8rem; line-height: 1.5; }
+  .note b { color: #cbd5e1; }
+  .mt { margin-top: 12px; }
+  .hidden { display: none !important; }
+  .music-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .music-head h2 { margin: 0; }
+  .music-time { color: #94a3b8; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .music-title { color: #cbd5e1; font-size: 0.85rem; margin: 6px 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .music-title.err { color: #f87171; white-space: normal; }
+  .music-ctrls { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .icon-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; font-size: 1.1rem; background: #334155; display: flex; align-items: center; justify-content: center; }
+  .icon-btn:hover { background: #475569; }
+  .icon-btn.play { width: 62px; height: 62px; font-size: 1.5rem; background: #16a34a; }
+  .icon-btn.play:hover { background: #15803d; }
+  .vol-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; color: #94a3b8; font-size: 0.9rem; }
+  .check { display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.85rem; font-weight: 400; margin: 12px 0 0; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: #4ade80; }
+  .yt-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 0.5rem; overflow: hidden; background: #000; margin-top: 10px; }
+  .yt-wrap.collapsed { width: 1px; height: 1px; aspect-ratio: auto; opacity: 0; pointer-events: none; margin: 0; }
+  .yt-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  input[type="url"] { width: 100%; padding: 0.65rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 0.85rem; font-family: inherit; }
+  .link-btn { background: none; border: none; color: #4ade80; font-size: 0.85rem; padding: 0; width: auto; font-weight: 600; margin-top: 12px; }
+  .link-btn:hover { background: none; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>👣 Pasos <span class="ver" id="ver"></span></h1>
+    <span class="date" id="dateTxt"></span>
+  </header>
+
+  <div class="card">
+    <div class="ring-box">
+      <svg width="240" height="240" viewBox="0 0 240 240">
+        <circle class="ring-bg" cx="120" cy="120" r="104" fill="none" stroke-width="16"/>
+        <circle class="ring-fg" id="ring" cx="120" cy="120" r="104" fill="none" stroke-width="16" stroke-linecap="round"/>
+      </svg>
+      <div class="ring-center">
+        <div class="steps" id="steps">0</div>
+        <div class="goal-txt" id="goalTxt">de 8000 pasos</div>
+        <div class="pct" id="pct">0%</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="km">0,00</b><span>km</span></div>
+      <div class="stat"><b id="kcal">0</b><span>kcal</span></div>
+      <div class="stat"><b id="mins">0</b><span>min activos</span></div>
+    </div>
+  </div>
+
+  <button id="toggleBtn">▶ Empezar a contar</button>
+  <div class="status" id="status">Pulsa para empezar. Lleva el teléfono encima (bolsillo o mano).</div>
+
+  <div class="card mt">
+    <div class="music-head">
+      <h2>🎵 Música para caminar</h2>
+      <span class="music-time" id="musicTime">--:--</span>
+    </div>
+    <div class="music-title" id="musicTitle">Cargando música…</div>
+    <input type="range" id="mSeek" min="0" max="100" value="0" step="1" aria-label="Posición">
+    <div class="music-ctrls mt">
+      <button class="icon-btn" id="mBack" title="Retroceder 30 s" aria-label="Retroceder 30 segundos">⏪</button>
+      <button class="icon-btn play" id="mPlay" aria-label="Reproducir">▶</button>
+      <button class="icon-btn" id="mFwd" title="Avanzar 30 s" aria-label="Avanzar 30 segundos">⏩</button>
+    </div>
+    <div class="vol-row"><span>🔈</span><input type="range" id="mVol" min="0" max="100" step="5" aria-label="Volumen"><span>🔊</span></div>
+    <label class="check"><input type="checkbox" id="mAuto"> Que suene al empezar a contar (y se pause al pausar)</label>
+    <div class="hint">Se repite en bucle: al terminar vuelve a empezar. Recuerda por dónde iba.</div>
+    <button class="link-btn" id="mShow">Ver vídeo / cambiar música</button>
+    <div class="yt-wrap collapsed" id="ytWrap"><div id="ytPlayer"></div></div>
+    <div id="mLinkBox" class="hidden">
+      <label for="mUrl">Enlace de YouTube</label>
+      <input type="url" id="mUrl" placeholder="https://www.youtube.com/watch?v=…">
+      <div class="row mt">
+        <div><button class="btn-outline" id="mUse">Usar este enlace</button></div>
+        <div><button class="btn-outline" id="mDefault">Volver a la original</button></div>
+      </div>
+      <div class="hint">En iPhone el volumen se controla con los botones del teléfono.</div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <h2>Últimos 7 días</h2>
+    <div class="chart" id="chart"></div>
+    <div class="summary">
+      <span>Total: <b id="weekTotal">0</b></span>
+      <span>Media: <b id="weekAvg">0</b>/día</span>
+      <span>Metas: <b id="weekMet">0</b>/7</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <details id="settings">
+      <summary>Ajustes</summary>
+      <label for="goal">Meta diaria de pasos</label>
+      <input type="number" id="goal" min="500" max="100000" step="500" inputmode="numeric">
+      <div class="row">
+        <div>
+          <label for="height">Altura (cm)</label>
+          <input type="number" id="height" min="100" max="230" inputmode="numeric">
+        </div>
+        <div>
+          <label for="weight">Peso (kg)</label>
+          <input type="number" id="weight" min="30" max="250" inputmode="numeric">
+        </div>
+      </div>
+      <div class="hint">Se usan para calcular distancia (largo de zancada) y calorías aproximadas.</div>
+      <label for="sens">Sensibilidad: <span id="sensVal">5</span></label>
+      <input type="range" id="sens" min="1" max="10" step="1">
+      <div class="hint">Si cuenta de menos, súbela. Si cuenta pasos estando quieto, bájala. La línea amarilla es el umbral: cada pico que la cruza es un paso.</div>
+      <canvas id="signal" width="440" height="80"></canvas>
+      <div class="row mt">
+        <div><button class="btn-outline" id="addBtn">+100 pasos</button></div>
+        <div><button class="btn-outline" id="resetBtn">Reiniciar hoy</button></div>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Cómo funciona</summary>
+      <p class="note">La app usa el <b>acelerómetro</b> del teléfono y detecta el balanceo de cada paso. Solo empieza a sumar cuando detecta <b>4 pasos seguidos</b>, así se ignoran movimientos sueltos.</p>
+      <p class="note">⚠️ Al ser una app web, <b>solo cuenta mientras está abierta y con la pantalla encendida</b>. La app mantiene la pantalla despierta mientras cuenta; si la bloqueas o cambias de app, se pausa el conteo (lo ya contado se guarda).</p>
+      <p class="note">Los datos se guardan en este teléfono. Cada día empieza de cero a medianoche y el historial queda guardado.</p>
+    </details>
+  </div>
+</div>
+
+<script>
+const VERSION = 'v1.1';
+const KEY = 'pasos_app_v1';
+const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5 };
+const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
+const RING_C = 2 * Math.PI * 104;
+
+// ---------- Datos ----------
+let db = load();
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && d.days) return { settings: { ...DEFAULTS, ...d.settings }, days: d.days, running: !!d.running, music: { ...MUSIC_DEFAULT, ...d.music } };
+  } catch (e) {}
+  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT } };
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
+function dayKey(d = new Date()) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function today() {
+  const k = dayKey();
+  if (!db.days[k]) db.days[k] = { steps: 0, activeMs: 0 };
+  return db.days[k];
+}
+const fmt = n => Math.round(n).toLocaleString('es-ES');
+
+// ---------- Detector de pasos ----------
+// Magnitud de aceleración -> se quita la gravedad con una media lenta -> se suaviza ->
+// cada cruce ascendente del umbral es un pico. Los picos solo cuentan como pasos tras
+// 4 seguidos con ritmo de caminar (entre 0,25 s y 2 s), para ignorar sacudidas sueltas.
+const det = { g: 9.81, s: 0, armed: true, lastPeak: 0, streak: [], confirmed: false, events: 0 };
+const signal = [];
+function threshold() { return 2.6 - (db.settings.sens - 1) * 0.22; } // 1 → 2,6 m/s² · 10 → 0,62 m/s²
+
+function onMotion(e) {
+  const a = e.accelerationIncludingGravity;
+  if (!a || a.x == null) return;
+  det.events++;
+  const t = performance.now();
+  const mag = Math.hypot(a.x, a.y, a.z);
+  det.g += (mag - det.g) * 0.02;
+  det.s = det.s * 0.75 + (mag - det.g) * 0.25;
+  signal.push(det.s);
+  if (signal.length > 150) signal.shift();
+
+  const thr = threshold();
+  if (det.armed && det.s > thr) {
+    det.armed = false;
+    if (t - det.lastPeak > 250) peak(t);
+  } else if (!det.armed && det.s < thr * 0.2) {
+    det.armed = true;
+  }
+}
+
+function peak(t) {
+  const gap = t - det.lastPeak;
+  det.lastPeak = t;
+  if (gap > 2000) { det.streak = [t]; det.confirmed = false; return; }
+  if (det.confirmed) { addSteps(1, gap); return; }
+  det.streak.push(t);
+  if (det.streak.length >= 4) {
+    det.confirmed = true;
+    addSteps(det.streak.length, t - det.streak[0]);
+    det.streak = [];
+  }
+}
+
+function addSteps(n, activeMs) {
+  const d = today();
+  const before = d.steps;
+  d.steps += n;
+  d.activeMs += activeMs || 0;
+  if (before < db.settings.goal && d.steps >= db.settings.goal && navigator.vibrate) navigator.vibrate([150, 80, 150]);
+  save();
+  render();
+}
+
+// ---------- Inicio / pausa ----------
+let running = false, wakeLock = null, sensorCheck = null;
+
+async function start(fromGesture) {
+  if (typeof DeviceMotionEvent === 'undefined') {
+    return setStatus('Este dispositivo no tiene sensor de movimiento.', 'err');
+  }
+  if (!window.isSecureContext) {
+    return setStatus('Abre la app desde una dirección https:// para poder usar el sensor.', 'err');
+  }
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    if (!fromGesture) return; // iPhone: el permiso solo se puede pedir tras tocar el botón
+    try {
+      const r = await DeviceMotionEvent.requestPermission();
+      if (r !== 'granted') return setStatus('Sin permiso para el sensor de movimiento. Actívalo en Ajustes del navegador.', 'err');
+    } catch (e) {
+      return setStatus('No se pudo pedir permiso al sensor: ' + e.message, 'err');
+    }
+  }
+  Object.assign(det, { s: 0, armed: true, lastPeak: 0, streak: [], confirmed: false, events: 0 });
+  window.addEventListener('devicemotion', onMotion);
+  running = true;
+  db.running = true; save();
+  requestWake();
+  renderButton();
+  setStatus('<span class="dot"></span>Contando… mantén la app abierta', 'ok');
+  clearTimeout(sensorCheck);
+  sensorCheck = setTimeout(() => {
+    if (running && det.events === 0) setStatus('No llegan datos del sensor. ¿Estás en un ordenador? Ábrela en el teléfono.', 'err');
+  }, 2500);
+}
+
+function stop() {
+  window.removeEventListener('devicemotion', onMotion);
+  running = false;
+  db.running = false; save();
+  releaseWake();
+  renderButton();
+  setStatus('En pausa. Lo contado hoy está guardado.');
+}
+
+async function requestWake() {
+  try {
+    if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (e) {}
+}
+function releaseWake() { try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null; }
+document.addEventListener('visibilitychange', () => {
+  if (running && document.visibilityState === 'visible') {
+    requestWake();
+    det.lastPeak = 0; det.streak = []; det.confirmed = false;
+    render();
+  }
+});
+
+// ---------- Interfaz ----------
+const $ = id => document.getElementById(id);
+function setStatus(html, cls = '') { $('status').innerHTML = html; $('status').className = 'status ' + cls; }
+function renderButton() {
+  $('toggleBtn').textContent = running ? '⏸ Pausar' : '▶ Empezar a contar';
+  $('toggleBtn').className = running ? 'stop' : '';
+}
+
+function render() {
+  const s = db.settings, d = today();
+  const pct = d.steps / s.goal;
+  $('steps').textContent = fmt(d.steps);
+  $('goalTxt').textContent = 'de ' + fmt(s.goal) + ' pasos';
+  $('pct').textContent = pct >= 1 ? '¡Meta cumplida! 🎉' : Math.floor(pct * 100) + '%';
+  const ring = $('ring');
+  ring.style.strokeDasharray = RING_C;
+  ring.style.strokeDashoffset = RING_C * (1 - Math.min(pct, 1));
+  ring.classList.toggle('done', pct >= 1);
+  const km = d.steps * s.height * 0.415 / 100000;
+  $('km').textContent = km.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  $('kcal').textContent = fmt(d.steps * s.weight * 0.00057);
+  $('mins').textContent = fmt(d.activeMs / 60000);
+  const now = new Date();
+  $('dateTxt').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  renderChart();
+}
+
+function renderChart() {
+  const goal = db.settings.goal, days = [];
+  for (let i = 6; i >= 0; i--) {
+    const dt = new Date(); dt.setDate(dt.getDate() - i);
+    const rec = db.days[dayKey(dt)];
+    days.push({ dt, steps: rec ? rec.steps : 0, isToday: i === 0 });
+  }
+  const max = Math.max(goal * 1.1, ...days.map(x => x.steps));
+  const LBL = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+  const usable = 140 - 32; // alto del gráfico menos etiquetas
+  $('chart').innerHTML =
+    `<div class="goal-line" style="bottom:${18 + usable * goal / max}px"></div>` +
+    days.map(x => `
+      <div class="bar-col">
+        <div class="bar-val">${x.steps ? (x.steps >= 1000 ? (x.steps / 1000).toFixed(1).replace('.', ',') + 'k' : x.steps) : ''}</div>
+        <div class="bar ${x.steps >= goal ? 'met' : ''} ${x.isToday ? 'today' : ''}" style="height:${usable * x.steps / max}px"></div>
+        <div class="bar-lbl">${LBL[x.dt.getDay()]}</div>
+      </div>`).join('');
+  const total = days.reduce((a, x) => a + x.steps, 0);
+  $('weekTotal').textContent = fmt(total);
+  $('weekAvg').textContent = fmt(total / 7);
+  $('weekMet').textContent = days.filter(x => x.steps >= goal).length;
+}
+
+// Gráfico de la señal en vivo (solo con Ajustes abierto)
+const cv = $('signal'), ctx = cv.getContext('2d');
+function drawSignal() {
+  if ($('settings').open) {
+    const w = cv.width, h = cv.height, range = 6;
+    const y = v => h / 2 - (v / range) * (h / 2);
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, y(threshold())); ctx.lineTo(w, y(threshold())); ctx.stroke();
+    ctx.setLineDash([]); ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    signal.forEach((v, i) => {
+      const px = i * w / 149, py = Math.max(0, Math.min(h, y(v)));
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    });
+    ctx.stroke();
+    if (!running) { ctx.fillStyle = '#64748b'; ctx.font = '13px system-ui'; ctx.fillText('Empieza a contar para ver la señal', 12, h - 10); }
+  }
+  requestAnimationFrame(drawSignal);
+}
+
+// Ajustes
+function bindSettings() {
+  const s = db.settings;
+  $('goal').value = s.goal; $('height').value = s.height; $('weight').value = s.weight;
+  $('sens').value = s.sens; $('sensVal').textContent = s.sens;
+  const num = (id, min, max) => $(id).addEventListener('change', () => {
+    const v = Math.round(Number($(id).value));
+    if (v >= min && v <= max) { s[id] = v; save(); render(); } else $(id).value = s[id];
+  });
+  num('goal', 500, 100000); num('height', 100, 230); num('weight', 30, 250);
+  $('sens').addEventListener('input', () => { s.sens = Number($('sens').value); $('sensVal').textContent = s.sens; save(); });
+  $('addBtn').addEventListener('click', () => addSteps(100, 0));
+  $('resetBtn').addEventListener('click', () => {
+    if (confirm('¿Poner a cero los pasos de hoy?')) { db.days[dayKey()] = { steps: 0, activeMs: 0 }; save(); render(); }
+  });
+}
+
+// ---------- Música de fondo (YouTube en bucle) ----------
+const M = db.music;
+let yt = null, ytReady = false, wantPlay = false, seeking = false, lastSave = 0;
+const ytTime = s => {
+  s = Math.max(0, Math.floor(s || 0));
+  const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = String(s % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
+};
+
+window.onYouTubeIframeAPIReady = () => {
+  yt = new YT.Player('ytPlayer', {
+    videoId: M.id,
+    playerVars: { start: Math.floor(M.pos), playsinline: 1, rel: 0, modestbranding: 1 },
+    events: {
+      onReady: () => {
+        ytReady = true;
+        yt.setVolume(M.vol);
+        setMusicTitle();
+        if (wantPlay) yt.playVideo();
+        renderMusic();
+      },
+      onStateChange: e => {
+        if (e.data === YT.PlayerState.ENDED) { yt.seekTo(0, true); yt.playVideo(); } // bucle
+        if (e.data === YT.PlayerState.PLAYING) setMusicTitle();
+        renderMusic();
+      },
+      onError: e => {
+        $('musicTitle').textContent = 'No se puede reproducir este vídeo aquí (error ' + e.data + '). Prueba con otro enlace.';
+        $('musicTitle').className = 'music-title err';
+      }
+    }
+  });
+};
+
+function setMusicTitle() {
+  const t = ytReady && yt.getVideoData && yt.getVideoData().title;
+  $('musicTitle').className = 'music-title';
+  $('musicTitle').textContent = t || 'Música de YouTube';
+}
+const musicPlaying = () => ytReady && [YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(yt.getPlayerState());
+function musicPlay() { wantPlay = true; if (ytReady) yt.playVideo(); else $('musicTitle').textContent = 'Cargando música… sonará en un momento'; }
+function musicPause() { wantPlay = false; if (ytReady) yt.pauseVideo(); }
+
+function renderMusic() {
+  const playing = musicPlaying();
+  $('mPlay').textContent = playing ? '⏸' : '▶';
+  $('mPlay').setAttribute('aria-label', playing ? 'Pausar' : 'Reproducir');
+  if (!ytReady) return;
+  const cur = yt.getCurrentTime(), dur = yt.getDuration();
+  $('musicTime').textContent = dur ? ytTime(cur) + ' / ' + ytTime(dur) : '--:--';
+  if (!seeking && dur) { $('mSeek').max = Math.floor(dur); $('mSeek').value = Math.floor(cur); }
+  if (playing && Date.now() - lastSave > 5000) { M.pos = cur; lastSave = Date.now(); save(); }
+}
+
+function parseYouTube(url) {
+  const id = (url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([\w-]{11})/) || [])[1];
+  if (!id) return null;
+  const t = (url.match(/[?&](?:t|start)=([\dhms]+)/) || [])[1];
+  let pos = 0;
+  if (t) {
+    if (/^\d+$/.test(t)) pos = Number(t);
+    else { const g = u => Number((t.match(new RegExp('(\\d+)' + u)) || [0, 0])[1]); pos = g('h') * 3600 + g('m') * 60 + g('s'); }
+  }
+  return { id, pos };
+}
+function setMusic(id, pos) {
+  M.id = id; M.pos = pos; save();
+  if (!ytReady) return;
+  const opts = { videoId: id, startSeconds: pos };
+  wantPlay = true;
+  yt.loadVideoById(opts);
+}
+
+function bindMusic() {
+  $('mVol').value = M.vol;
+  $('mAuto').checked = M.auto;
+  $('mUrl').value = 'https://www.youtube.com/watch?v=' + M.id;
+  $('mPlay').addEventListener('click', () => musicPlaying() ? musicPause() : musicPlay());
+  $('mBack').addEventListener('click', () => ytReady && yt.seekTo(Math.max(0, yt.getCurrentTime() - 30), true));
+  $('mFwd').addEventListener('click', () => ytReady && yt.seekTo(yt.getCurrentTime() + 30, true));
+  $('mSeek').addEventListener('input', () => { seeking = true; $('musicTime').textContent = ytTime($('mSeek').value) + ' / ' + ytTime($('mSeek').max); });
+  $('mSeek').addEventListener('change', () => { seeking = false; if (ytReady) yt.seekTo(Number($('mSeek').value), true); });
+  $('mVol').addEventListener('input', () => { M.vol = Number($('mVol').value); if (ytReady) { yt.setVolume(M.vol); yt.unMute(); } save(); });
+  $('mAuto').addEventListener('change', () => { M.auto = $('mAuto').checked; save(); });
+  $('mShow').addEventListener('click', () => {
+    const open = $('ytWrap').classList.toggle('collapsed');
+    $('mLinkBox').classList.toggle('hidden', open);
+    $('mShow').textContent = open ? 'Ver vídeo / cambiar música' : 'Ocultar vídeo';
+  });
+  $('mUse').addEventListener('click', () => {
+    const p = parseYouTube($('mUrl').value.trim());
+    if (!p) return alert('No reconozco ese enlace de YouTube.');
+    setMusic(p.id, p.pos);
+  });
+  $('mDefault').addEventListener('click', () => {
+    $('mUrl').value = 'https://www.youtube.com/watch?v=' + MUSIC_DEFAULT.id + '&t=' + MUSIC_DEFAULT.pos + 's';
+    setMusic(MUSIC_DEFAULT.id, MUSIC_DEFAULT.pos);
+  });
+  setInterval(renderMusic, 1000);
+  window.addEventListener('pagehide', () => { if (ytReady) { M.pos = yt.getCurrentTime(); save(); } });
+}
+
+$('toggleBtn').addEventListener('click', async () => {
+  if (running) {
+    stop();
+    if (M.auto) musicPause();
+  } else {
+    if (M.auto) musicPlay(); // dentro del toque, para que el móvil deje sonar el audio
+    await start(true);
+    if (!running && M.auto) musicPause();
+  }
+});
+bindMusic();
+$('ver').textContent = VERSION;
+bindSettings();
+render();
+renderButton();
+drawSignal();
+setInterval(render, 30000); // cambio de día a medianoche
+if (db.running) start(false); // Android: retoma el conteo al reabrir la app
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
