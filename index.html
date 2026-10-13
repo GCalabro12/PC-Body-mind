@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.8</title>
+<title>Contador de Pasos v1.9</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -221,7 +221,8 @@
   </div>
 
   <div class="card">
-    <h2>🔔 Avisos de voz</h2>
+    <details>
+    <summary>🔔 Avisos de voz</summary>
     <label class="check"><input type="checkbox" id="aVoice"> Sonido + voz que diga «llevas … pasos»</label>
     <div class="row">
       <div>
@@ -252,6 +253,7 @@
       <div><button class="btn-outline" id="aTest">Probar aviso</button></div>
       <div><button class="btn-outline" id="aTestCele">Probar celebración</button></div>
     </div>
+    </details>
   </div>
 
   <div class="card">
@@ -361,7 +363,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.8';
+const VERSION = 'v1.9';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
