@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.7</title>
+<title>Contador de Pasos v1.8</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -51,6 +51,9 @@
   .help { background: #1e293b; border: 1px solid #f87171; border-radius: 0.8rem; padding: 0.9rem 1rem; margin-top: 10px; font-size: 0.85rem; line-height: 1.5; color: #e2e8f0; }
   .help ol { margin: 6px 0 10px; padding-left: 20px; }
   .help b { color: #fff; }
+  .help.warn { border-color: #facc15; }
+  .help button { margin-top: 10px; }
+  .btn-link { display: block; text-align: center; background: #16a34a; color: #fff; text-decoration: none; padding: 0.85rem; border-radius: 0.7rem; font-weight: 700; margin-top: 10px; }
   .help button { font-size: 0.95rem; padding: 0.7rem; }
   .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; margin-right: 6px; animation: pulse 1.2s infinite; vertical-align: middle; }
   @keyframes pulse { 50% { opacity: 0.25; } }
@@ -182,6 +185,13 @@
   <div class="status" id="status">Pulsa para empezar. Lleva el teléfono encima (bolsillo o mano).</div>
   <div class="help hidden" id="permHelp"></div>
 
+  <div class="card mt hidden" id="apkCard">
+    <h2>📲 App Android: cuenta con la pantalla apagada</h2>
+    <p class="note">Desde el navegador solo se cuentan pasos con la app delante. La app Android usa el podómetro del teléfono y cuenta siempre, aunque esté bloqueado o cerrada, y te dice los avisos en voz alta.</p>
+    <a id="apkLink" class="btn-link" href="#">⬇ Descargar Pasos.apk</a>
+    <div class="hint">Ábrelo al terminar la descarga y acepta «instalar apps de origen desconocido» la primera vez.</div>
+  </div>
+
   <div class="card mt">
     <div class="music-head">
       <h2>🎵 Música para caminar</h2>
@@ -281,12 +291,14 @@
         </div>
       </div>
       <div class="hint">Se usan para calcular distancia (largo de zancada) y calorías aproximadas.</div>
+      <div id="sensorBox">
       <label class="check"><input type="checkbox" id="autoStart"> Empezar a contar solo al abrir la app</label>
       <div class="hint">La música no puede arrancar sola: el teléfono exige tocar ▶ al menos una vez.</div>
       <label for="sens">Sensibilidad: <span id="sensVal">5</span></label>
       <input type="range" id="sens" min="1" max="10" step="1">
       <div class="hint">Si cuenta de menos, súbela. Si cuenta pasos estando quieto, bájala. La línea amarilla es el umbral: cada pico que la cruza es un paso.</div>
       <canvas id="signal" width="440" height="80"></canvas>
+      </div>
       <div class="row mt">
         <div><button class="btn-outline" id="addBtn">+100 pasos</button></div>
         <div><button class="btn-outline" id="resetBtn">Reiniciar hoy</button></div>
@@ -323,6 +335,7 @@
     <div class="scr-label">pasos <span id="sGoal">de 8000</span></div>
     <div class="scr-bar"><div id="sGoalBar"></div></div>
     <div class="scr-stats">
+      <div id="sBattBox" class="hidden"><b id="sBatt">--</b>batería móvil</div>
       <div><b id="sKm">0,00</b>km</div>
       <div><b id="sKcal">0</b>kcal</div>
       <div><b id="sMins">0</b>min activos</div>
@@ -348,12 +361,14 @@
 </div>
 
 <script>
-const VERSION = 'v1.7';
+const VERSION = 'v1.8';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
+const NATIVE = !SCREEN && !!window.AndroidPasos; // dentro de la app Android (cuenta con la pantalla apagada)
+const APK_URL = 'https://github.com/GCalabro12/Contador-Pasos-Android/releases/latest/download/Pasos.apk';
 const CAST_PREFIX = 'pasos-gc-';
 const RING_C = 2 * Math.PI * 104;
 const $ = id => document.getElementById(id);
@@ -370,7 +385,7 @@ function load() {
   } catch (e) {}
   return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null };
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative(); }
 function dayKey(d = new Date()) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
@@ -432,23 +447,84 @@ function peak(t) {
 }
 
 function addSteps(n, activeMs) {
-  const d = today(), A = db.alerts, goal = db.settings.goal;
+  const d = today();
   const before = d.steps;
   d.steps += n;
   d.activeMs += activeMs || 0;
   save();
   render();
-  const after = d.steps;
-  const goalHit = before < goal && after >= goal;
-  if (goalHit && navigator.vibrate) navigator.vibrate([150, 80, 150]);
-  if (A.blockOn && Math.floor(after / A.block) > Math.floor(before / A.block)) {
-    const k = Math.floor(after / A.block);
-    celebrate(k * A.block, k, goalHit);
-  } else if (A.voice && Math.floor(after / A.every) > Math.floor(before / A.every)) {
-    announce(Math.floor(after / A.every) * A.every, goalHit);
-  } else if (goalHit) {
-    announce(after, true);
+  reactToSteps(before, d.steps, false);
+}
+
+// ---------- App Android: los pasos los cuenta el podómetro del teléfono ----------
+let nativeLast = null, nativeCfg = '';
+function syncNative() {
+  if (!NATIVE) return;
+  const cfg = JSON.stringify({ goal: db.settings.goal, ...db.alerts });
+  if (cfg === nativeCfg) return;
+  nativeCfg = cfg;
+  try { AndroidPasos.setConfig(cfg); } catch (e) {}
+}
+function nativePoll() {
+  let t;
+  try { t = JSON.parse(AndroidPasos.getToday()); } catch (e) { return; }
+  if (typeof t.steps !== 'number') return;
+  db.days[t.date || dayKey()] = { steps: t.steps, activeMs: t.activeMs || 0 };
+  if (t.steps === nativeLast) return;
+  const before = nativeLast;
+  nativeLast = t.steps;
+  save();
+  render();
+  // con la app delante: cartel de bloque y canción (la voz ya la ha dicho el teléfono)
+  if (before !== null && document.visibilityState === 'visible') reactToSteps(before, t.steps, true);
+}
+function nativeStatus() {
+  let ok = true, sensor = true, batt = true;
+  try { ok = AndroidPasos.permissionOk(); sensor = AndroidPasos.hasSensor(); batt = AndroidPasos.batteryOk(); } catch (e) {}
+  const help = $('permHelp');
+  if (!ok) {
+    setStatus('Falta el permiso de «Actividad física» para contar pasos.', 'err');
+    help.className = 'help';
+    help.innerHTML = `Android necesita tu permiso para leer el podómetro del teléfono.
+      <button class="mt" onclick="AndroidPasos.askPermissions()">Dar permiso</button>
+      <button class="btn-outline mt" onclick="AndroidPasos.openAppSettings()">Abrir ajustes de la app → Permisos → Actividad física</button>`;
+  } else if (!sensor) {
+    setStatus('Este teléfono no tiene podómetro: no puede contar con la pantalla apagada.', 'err');
+    help.className = 'help hidden';
+  } else {
+    setStatus('<span class="dot"></span>Contando siempre, también con la pantalla apagada', 'ok');
+    if (!batt) {
+      help.className = 'help warn';
+      help.innerHTML = `🔋 Para que Android no pare el contador al cabo de un rato, quita el ahorro de batería para Pasos (gasta muy poco).
+        <button class="mt" onclick="AndroidPasos.openBatterySettings()">Quitar ahorro de batería</button>`;
+    } else help.className = 'help hidden';
   }
+}
+function initNative() {
+  running = true;
+  $('toggleBtn').classList.add('hidden');
+  $('sensorBox').classList.add('hidden');
+  $('installBtn').classList.add('hidden');
+  $('apkCard').classList.add('hidden');
+  try { $('ver').textContent = VERSION + ' · app ' + AndroidPasos.version(); } catch (e) {}
+  try { const h = JSON.parse(AndroidPasos.getHistory()); Object.keys(h).forEach(k => { db.days[k] = h[k]; }); } catch (e) {}
+  syncNative();
+  nativePoll();
+  setInterval(nativePoll, 1000);
+  nativeStatus();
+  setInterval(nativeStatus, 10000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { nativeStatus(); nativePoll(); } });
+  window.nativeRefresh = () => { nativeStatus(); nativePoll(); };
+}
+
+// ---------- Batería del móvil (se ve en la pantalla del ordenador) ----------
+let battObj = null;
+function batteryInfo() {
+  if (NATIVE) { try { return { level: AndroidPasos.battery(), charging: AndroidPasos.charging() }; } catch (e) { return null; } }
+  return battObj ? { level: Math.round(battObj.level * 100), charging: battObj.charging } : null;
+}
+if (!SCREEN && !NATIVE && navigator.getBattery) {
+  navigator.getBattery().then(b => { battObj = b; b.addEventListener('levelchange', sendState); b.addEventListener('chargingchange', sendState); }).catch(() => {});
 }
 
 // ---------- Sonidos y voz ----------
@@ -486,6 +562,16 @@ function pickVoice() {
 }
 let ducked = false;
 function speak(text, done) {
+  if (NATIVE) { // en la app Android habla el teléfono (también con la pantalla apagada)
+    if (musicPlaying()) { yt.setVolume(Math.round(M.vol * 0.25)); ducked = true; }
+    try { AndroidPasos.speak(text); } catch (e) {}
+    setTimeout(() => {
+      if (ducked && ytReady && !celYT) yt.setVolume(M.vol);
+      ducked = false;
+      if (done) done();
+    }, 1500 + text.length * 75);
+    return;
+  }
   let finished = false, safety = null;
   const fin = () => {
     if (finished) return;
@@ -512,25 +598,44 @@ function unlockSound() {
   }
 }
 
-function announce(n, goalHit) {
+// silent: la app Android ya ha dado el aviso con sonido y voz; aquí solo se muestra
+function announce(n, goalHit, silent) {
   let text = n % db.alerts.every === 0 ? `Llevas ${n} pasos.` : '';
   if (goalHit) text += ' ¡Has cumplido la meta del día!';
-  playSound();
-  setTimeout(() => speak(text.trim()), 650);
+  if (!silent) {
+    playSound();
+    setTimeout(() => speak(text.trim()), 650);
+  }
   castSend({ t: 'announce', n, goalHit });
 }
 
 // Celebración de bloque: voz + canción en bucle hasta que se pulse parar
 let celebrating = false, celYT = false, celPrev = null, fanfareT = null;
-function celebrate(n, k, goalHit) {
+function celebrate(n, k, goalHit, silent) {
   celebrating = true;
   $('celeTitle').textContent = `¡${fmt(n)} pasos!`;
   $('celeSub').textContent = `Bloque ${k} completado` + (goalHit ? ' · ¡y meta del día cumplida!' : '');
   $('cele').classList.remove('hidden');
   castSend({ t: 'celebrate', n, k, goalHit });
-  playSound();
   const text = `¡Enhorabuena! Ya has alcanzado ${n} pasos. Bloque ${k} completado.` + (goalHit ? ' ¡Y has cumplido la meta del día!' : '');
+  if (silent) { setTimeout(startCelebrationSong, 2200 + text.length * 75); return; } // espera a que acabe la voz del teléfono
+  playSound();
   setTimeout(() => speak(text, startCelebrationSong), 650);
+}
+
+// Qué hacer al pasar de «before» a «after» pasos: avisos, bloques y meta
+function reactToSteps(before, after, silent) {
+  const A = db.alerts, goal = db.settings.goal;
+  const goalHit = before < goal && after >= goal;
+  if (goalHit && navigator.vibrate && !silent) navigator.vibrate([150, 80, 150]);
+  if (A.blockOn && Math.floor(after / A.block) > Math.floor(before / A.block)) {
+    const k = Math.floor(after / A.block);
+    celebrate(k * A.block, k, goalHit, silent);
+  } else if (A.voice && Math.floor(after / A.every) > Math.floor(before / A.every)) {
+    announce(Math.floor(after / A.every) * A.every, goalHit, silent);
+  } else if (goalHit) {
+    announce(after, true, silent);
+  }
 }
 function startCelebrationSong() {
   if (!celebrating) return;
@@ -769,9 +874,11 @@ function bindSettings() {
   $('autoStart').checked = s.autoStart;
   $('autoStart').addEventListener('change', () => { s.autoStart = $('autoStart').checked; save(); });
   $('sens').addEventListener('input', () => { s.sens = Number($('sens').value); $('sensVal').textContent = s.sens; save(); });
-  $('addBtn').addEventListener('click', () => { unlockSound(); addSteps(100, 0); });
+  $('addBtn').addEventListener('click', () => { unlockSound(); if (NATIVE) { AndroidPasos.addSteps(100); nativePoll(); } else addSteps(100, 0); });
   $('resetBtn').addEventListener('click', () => {
-    if (confirm('¿Poner a cero los pasos de hoy?')) { db.days[dayKey()] = { steps: 0, activeMs: 0 }; save(); render(); }
+    if (!confirm('¿Poner a cero los pasos de hoy?')) return;
+    if (NATIVE) { AndroidPasos.resetToday(); nativePoll(); return; }
+    db.days[dayKey()] = { steps: 0, activeMs: 0 }; save(); render();
   });
 }
 
@@ -956,7 +1063,9 @@ function castSend(msg) { if (conn && conn.open) { try { conn.send(msg); } catch 
 function sendState() {
   if (SCREEN || !(conn && conn.open)) return;
   const d = today(), st = dayStats(d);
-  castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos });
+  const b = batteryInfo();
+  castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos,
+    battery: b ? b.level : -1, charging: b ? b.charging : false });
 }
 function bindCast() {
   $('castUrl').textContent = location.origin + location.pathname + '?pantalla';
@@ -1011,6 +1120,12 @@ function scrData(m) {
     $('sGoal').textContent = 'de ' + fmt(m.goal) + (m.running ? '' : ' · ⏸ en pausa');
     $('sGoalBar').style.width = Math.min(100, m.steps / m.goal * 100) + '%';
     $('sKm').textContent = m.km; $('sKcal').textContent = m.kcal; $('sMins').textContent = m.mins;
+    const hasBatt = typeof m.battery === 'number' && m.battery >= 0;
+    $('sBattBox').classList.toggle('hidden', !hasBatt);
+    if (hasBatt) {
+      $('sBatt').textContent = (m.charging ? '⚡' : '') + m.battery + '%';
+      $('sBatt').style.color = m.battery <= 15 ? '#f87171' : m.battery <= 30 ? '#facc15' : '#fff';
+    }
     const b = blockInfo(m.steps, m.block);
     $('sBlockTxt').textContent = `Bloque ${b.num} · ${fmt(b.done)} / ${fmt(m.block)}`;
     $('sBlockBar').style.width = (b.done / m.block * 100) + '%';
@@ -1121,6 +1236,9 @@ function initApp() {
   renderButton();
   drawSignal();
   setInterval(render, 30000); // cambio de día a medianoche
+  $('apkLink').href = APK_URL;
+  if (!NATIVE && /Android/i.test(navigator.userAgent)) $('apkCard').classList.remove('hidden');
+  if (NATIVE) { initNative(); return; }
   if ('speechSynthesis' in window) speechSynthesis.getVoices(); // precarga las voces
   document.addEventListener('pointerdown', () => { if (actx && actx.state === 'suspended') actx.resume(); });
   document.addEventListener('visibilitychange', () => {
