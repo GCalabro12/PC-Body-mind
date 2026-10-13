@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.3</title>
+<title>Contador de Pasos v1.4</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -278,6 +278,8 @@
         </div>
       </div>
       <div class="hint">Se usan para calcular distancia (largo de zancada) y calorías aproximadas.</div>
+      <label class="check"><input type="checkbox" id="autoStart"> Empezar a contar solo al abrir la app</label>
+      <div class="hint">La música no puede arrancar sola: el teléfono exige tocar ▶ al menos una vez.</div>
       <label for="sens">Sensibilidad: <span id="sensVal">5</span></label>
       <input type="range" id="sens" min="1" max="10" step="1">
       <div class="hint">Si cuenta de menos, súbela. Si cuenta pasos estando quieto, bájala. La línea amarilla es el umbral: cada pico que la cruza es un paso.</div>
@@ -342,9 +344,9 @@
 </div>
 
 <script>
-const VERSION = 'v1.3';
+const VERSION = 'v1.4';
 const KEY = 'pasos_app_v1';
-const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5 };
+const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
@@ -617,11 +619,14 @@ async function start(fromGesture) {
   }
   let denied = false;
   if (typeof DeviceMotionEvent.requestPermission === 'function') {
-    if (!fromGesture) return; // el permiso solo se puede pedir tras tocar el botón
-    try {
-      denied = (await DeviceMotionEvent.requestPermission()) !== 'granted';
-    } catch (e) {
-      denied = true;
+    if (!fromGesture) {
+      denied = true; // sin un toque no se puede preguntar: se comprueba si llegan datos igualmente
+    } else {
+      try {
+        denied = (await DeviceMotionEvent.requestPermission()) !== 'granted';
+      } catch (e) {
+        denied = true;
+      }
     }
   }
   Object.assign(det, { s: 0, armed: true, lastPeak: 0, streak: [], confirmed: false, events: 0 });
@@ -632,6 +637,7 @@ async function start(fromGesture) {
     await new Promise(r => setTimeout(r, 1200));
     if (det.events === 0) {
       window.removeEventListener('devicemotion', onMotion);
+      if (!fromGesture) return setStatus('Pulsa para empezar. Lleva el teléfono encima (bolsillo o mano).');
       setStatus('Sin permiso para el sensor de movimiento.', 'err');
       showPermHelp();
       return;
@@ -752,6 +758,8 @@ function bindSettings() {
     if (v >= min && v <= max) { s[id] = v; save(); render(); } else $(id).value = s[id];
   });
   num('goal', 500, 100000); num('height', 100, 230); num('weight', 30, 250);
+  $('autoStart').checked = s.autoStart;
+  $('autoStart').addEventListener('change', () => { s.autoStart = $('autoStart').checked; save(); });
   $('sens').addEventListener('input', () => { s.sens = Number($('sens').value); $('sensVal').textContent = s.sens; save(); });
   $('addBtn').addEventListener('click', () => { unlockSound(); addSteps(100, 0); });
   $('resetBtn').addEventListener('click', () => {
@@ -1110,7 +1118,7 @@ function initApp() {
       if (!running && M.auto) musicPause();
     }
   });
-  if (db.running) start(false); // Android: retoma el conteo al reabrir la app
+  if (db.running || db.settings.autoStart) start(false); // empieza a contar solo al abrir la app
 }
 
 SCREEN ? initScreen() : initApp();
