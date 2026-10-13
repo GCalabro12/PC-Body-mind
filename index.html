@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.2</title>
+<title>Contador de Pasos v1.3</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -342,7 +342,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.2';
+const VERSION = 'v1.3';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5 };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -579,7 +579,14 @@ const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platfo
 
 function showPermHelp() {
   const host = location.host;
-  const steps = IS_IOS ? `
+  const steps = navigator.brave ? `
+    <b>En Brave:</b>
+    <ol>
+      <li>Toca <b>⋮</b> (abajo a la derecha) → <b>Configuración</b>.</li>
+      <li>Entra en <b>Configuración del sitio</b> → <b>Sensores de movimiento</b> y actívalo («Los sitios pueden usar sensores de movimiento»). Si aparece <b>${host}</b> en «Bloqueados», tócalo y pon <b>Permitir</b>.</li>
+      <li>Si aun así no cuenta: toca el <b>león</b> 🦁 junto a la dirección y <b>desactiva los escudos</b> para este sitio.</li>
+      <li>Vuelve aquí y pulsa el botón de abajo.</li>
+    </ol>` : IS_IOS ? `
     <b>En iPhone (Safari):</b>
     <ol>
       <li>Cierra Safari del todo (desliza la app hacia arriba en el selector de apps).</li>
