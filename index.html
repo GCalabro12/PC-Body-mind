@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.4</title>
+<title>Contador de Pasos v1.5</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -344,7 +344,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.4';
+const VERSION = 'v1.5';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -579,6 +579,7 @@ function stopFanfare() { clearTimeout(fanfareT); fanfareT = null; }
 let running = false, wakeLock = null, sensorCheck = null;
 const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+let permInfo = 'sin preguntar';
 function showPermHelp() {
   const host = location.host;
   const steps = navigator.brave ? `
@@ -604,7 +605,8 @@ function showPermHelp() {
     </ol>
     Otra forma: Chrome → <b>⋮ → Ajustes → Configuración de sitios → Sensores de movimiento</b>: actívalo y, si aparece <b>${host}</b> en «Bloqueados», tócalo y pon <b>Permitir</b>.`;
   $('permHelp').innerHTML = `${steps}<p class="note" style="margin:8px 0">Por seguridad, el navegador no deja que una página abra sus ajustes directamente; hay que hacerlo a mano una vez.</p>
-    <button id="permRetry">↻ Ya lo he activado: volver a intentar</button>`;
+    <button id="permRetry">↻ Ya lo he activado: volver a intentar</button>
+    <p class="hint">Detalle técnico (${VERSION}): el navegador responde «${permInfo}» · datos del sensor recibidos: ${det.events}</p>`;
   $('permHelp').classList.remove('hidden');
   $('permRetry').onclick = () => location.reload();
 }
@@ -623,8 +625,10 @@ async function start(fromGesture) {
       denied = true; // sin un toque no se puede preguntar: se comprueba si llegan datos igualmente
     } else {
       try {
-        denied = (await DeviceMotionEvent.requestPermission()) !== 'granted';
+        permInfo = await DeviceMotionEvent.requestPermission();
+        denied = permInfo !== 'granted';
       } catch (e) {
+        permInfo = 'error: ' + e.message;
         denied = true;
       }
     }
