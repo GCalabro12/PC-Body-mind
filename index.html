@@ -8,16 +8,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pasos">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👣</text></svg>">
-<title>Contador de Pasos v1.1</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Contador de Pasos v1.2</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
   .wrap { width: 100%; max-width: 480px; }
-  header { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 12px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 2px 12px; }
   h1 { color: #4ade80; font-size: 1.4rem; margin: 0; }
   .ver { color: #64748b; font-size: 0.75rem; }
-  .date { color: #94a3b8; font-size: 0.85rem; }
+  .date { color: #94a3b8; font-size: 0.85rem; text-align: right; }
+  .install { width: auto; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 99px; }
   .card { background: #1e293b; border-radius: 1rem; padding: 1.2rem; margin-bottom: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.35); }
   .ring-box { position: relative; width: 240px; height: 240px; margin: 0 auto; }
   .ring-box svg { transform: rotate(-90deg); }
@@ -32,6 +35,10 @@
   .stat { background: #0f172a; border-radius: 0.7rem; padding: 10px 6px; text-align: center; }
   .stat b { display: block; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
   .stat span { color: #94a3b8; font-size: 0.75rem; }
+  .block-row { margin-top: 14px; }
+  .block-row .lbl { display: flex; justify-content: space-between; color: #facc15; font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mini-bar { height: 8px; background: #0f172a; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .mini-bar > div { height: 100%; width: 0; background: #facc15; border-radius: 99px; transition: width 0.4s; }
   button { background: #16a34a; color: #fff; border: none; padding: 0.9rem 1.2rem; border-radius: 0.7rem; cursor: pointer; font-weight: 700; width: 100%; font-size: 1.05rem; font-family: inherit; transition: background 0.2s; }
   button:hover { background: #15803d; }
   button.stop { background: #dc2626; }
@@ -41,6 +48,10 @@
   .status { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
   .status.ok { color: #4ade80; }
   .status.err { color: #f87171; }
+  .help { background: #1e293b; border: 1px solid #f87171; border-radius: 0.8rem; padding: 0.9rem 1rem; margin-top: 10px; font-size: 0.85rem; line-height: 1.5; color: #e2e8f0; }
+  .help ol { margin: 6px 0 10px; padding-left: 20px; }
+  .help b { color: #fff; }
+  .help button { font-size: 0.95rem; padding: 0.7rem; }
   .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; margin-right: 6px; animation: pulse 1.2s infinite; vertical-align: middle; }
   @keyframes pulse { 50% { opacity: 0.25; } }
   h2 { color: #4ade80; font-size: 1rem; margin: 0 0 12px; }
@@ -59,7 +70,8 @@
   details summary::after { content: ' ▾'; color: #64748b; }
   details[open] summary::after { content: ' ▴'; }
   label { display: block; color: #94a3b8; font-size: 0.85rem; font-weight: 600; margin: 14px 0 5px; }
-  input[type="number"] { width: 100%; padding: 0.65rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1rem; font-family: inherit; }
+  input[type="number"], input[type="url"], input[type="text"], select { width: 100%; padding: 0.65rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1rem; font-family: inherit; }
+  input[type="url"] { font-size: 0.85rem; }
   input[type="range"] { width: 100%; accent-color: #4ade80; }
   .row { display: flex; gap: 10px; }
   .row > div { flex: 1; }
@@ -81,19 +93,62 @@
   .icon-btn.play:hover { background: #15803d; }
   .vol-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; color: #94a3b8; font-size: 0.9rem; }
   .check { display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.85rem; font-weight: 400; margin: 12px 0 0; cursor: pointer; }
-  .check input { width: 18px; height: 18px; accent-color: #4ade80; }
+  .check input { width: 18px; height: 18px; accent-color: #4ade80; flex: none; }
   .yt-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 0.5rem; overflow: hidden; background: #000; margin-top: 10px; }
   .yt-wrap.collapsed { width: 1px; height: 1px; aspect-ratio: auto; opacity: 0; pointer-events: none; margin: 0; }
   .yt-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-  input[type="url"] { width: 100%; padding: 0.65rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 0.85rem; font-family: inherit; }
   .link-btn { background: none; border: none; color: #4ade80; font-size: 0.85rem; padding: 0; width: auto; font-weight: 600; margin-top: 12px; }
   .link-btn:hover { background: none; text-decoration: underline; }
+  .code-input { text-align: center; letter-spacing: 0.3em; font-size: 1.3rem !important; font-weight: 700; }
+  .url-box { background: #0f172a; border-radius: 0.5rem; padding: 0.6rem; color: #4ade80; font-size: 0.85rem; word-break: break-all; margin: 8px 0; user-select: all; }
+
+  /* Celebración en el móvil */
+  .cele { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+  .cele-box { background: #1e293b; border: 3px solid #facc15; border-radius: 1.4rem; padding: 2rem 1.4rem; text-align: center; max-width: 380px; width: 100%; animation: popIn 0.45s ease; }
+  .cele-emoji { font-size: 4rem; line-height: 1; animation: bounce 0.9s infinite alternate; }
+  .cele-title { font-size: 1.7rem; font-weight: 800; color: #facc15; margin: 12px 0 4px; }
+  .cele-sub { color: #cbd5e1; margin-bottom: 20px; }
+  @keyframes popIn { from { transform: scale(0.6); opacity: 0; } }
+  @keyframes bounce { to { transform: translateY(-10px) scale(1.08); } }
+
+  /* ---------- Modo pantalla (ordenador) ---------- */
+  body.screen { padding: 0; display: block; overflow: hidden; background: #000; }
+  #screen { position: fixed; inset: 0; }
+  .scr-video { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .scr-video iframe { position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.78vh; transform: translate(-50%, -50%); border: 0; }
+  .scr-video.off { visibility: hidden; }
+  .scr-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.45) 42%, rgba(15,23,42,0) 68%); pointer-events: none; }
+  .scr-panel { position: absolute; left: 4vw; bottom: 7vh; width: min(44vw, 680px); }
+  .scr-steps { font-size: clamp(64px, 12vw, 220px); font-weight: 800; line-height: 1; text-shadow: 0 4px 24px rgba(0,0,0,0.6); font-variant-numeric: tabular-nums; }
+  .scr-label { font-size: clamp(18px, 2.2vw, 36px); color: #cbd5e1; margin-top: 0.5vh; }
+  .scr-bar { height: 14px; background: rgba(255,255,255,0.18); border-radius: 99px; overflow: hidden; margin-top: 1.5vh; }
+  .scr-bar > div { height: 100%; width: 0; background: #4ade80; border-radius: 99px; transition: width 0.5s; }
+  .scr-bar.yellow > div { background: #facc15; }
+  .scr-stats { display: flex; gap: 3.5vw; margin-top: 3.5vh; font-size: clamp(14px, 1.6vw, 26px); color: #cbd5e1; }
+  .scr-stats b { display: block; font-size: clamp(26px, 3.4vw, 58px); color: #fff; font-variant-numeric: tabular-nums; }
+  .scr-block { margin-top: 3.5vh; font-size: clamp(16px, 1.9vw, 30px); color: #facc15; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .scr-top { position: absolute; top: 2vh; right: 2vw; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .scr-top button { width: auto; padding: 0.5rem 0.9rem; font-size: 0.9rem; background: rgba(15,23,42,0.75); border: 1px solid #475569; }
+  .scr-top button:hover { background: rgba(51,65,85,0.9); }
+  .scr-conn { color: #cbd5e1; font-size: 0.9rem; background: rgba(15,23,42,0.75); padding: 0.55rem 0.9rem; border-radius: 0.7rem; }
+  .scr-pair { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(15,23,42,0.9); padding: 24px; }
+  .scr-pair h1 { font-size: clamp(28px, 4vw, 56px); }
+  .scr-pair p { color: #cbd5e1; font-size: clamp(16px, 1.8vw, 26px); max-width: 900px; line-height: 1.5; }
+  .scr-code { font-size: clamp(72px, 13vw, 200px); font-weight: 800; letter-spacing: 0.15em; color: #4ade80; font-variant-numeric: tabular-nums; margin: 2vh 0; }
+  .scr-cele { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); background: rgba(15,23,42,0.93); border: 4px solid #facc15; border-radius: 2rem; padding: 4vh 5vw; text-align: center; animation: scrPop 0.5s ease; }
+  .scr-cele .emo { font-size: clamp(60px, 8vw, 140px); line-height: 1; }
+  .scr-cele .big { font-size: clamp(40px, 6.5vw, 120px); font-weight: 800; color: #facc15; }
+  .scr-cele .sub { font-size: clamp(18px, 2.4vw, 40px); color: #e2e8f0; }
+  .scr-toast { position: absolute; right: 4vw; bottom: 7vh; background: rgba(15,23,42,0.9); border-left: 8px solid #4ade80; padding: 2vh 2.5vw; border-radius: 1rem; font-size: clamp(22px, 2.8vw, 48px); font-weight: 800; animation: slideIn 0.4s ease; }
+  @keyframes scrPop { from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; } }
+  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="app">
   <header>
     <h1>👣 Pasos <span class="ver" id="ver"></span></h1>
+    <button class="install hidden" id="installBtn">⬇ Instalar</button>
     <span class="date" id="dateTxt"></span>
   </header>
 
@@ -114,10 +169,15 @@
       <div class="stat"><b id="kcal">0</b><span>kcal</span></div>
       <div class="stat"><b id="mins">0</b><span>min activos</span></div>
     </div>
+    <div class="block-row">
+      <div class="lbl"><span id="blockNum">Bloque 1</span><span id="blockTxt">0 / 2000</span></div>
+      <div class="mini-bar"><div id="blockBar"></div></div>
+    </div>
   </div>
 
   <button id="toggleBtn">▶ Empezar a contar</button>
   <div class="status" id="status">Pulsa para empezar. Lleva el teléfono encima (bolsillo o mano).</div>
+  <div class="help hidden" id="permHelp"></div>
 
   <div class="card mt">
     <div class="music-head">
@@ -145,6 +205,51 @@
       </div>
       <div class="hint">En iPhone el volumen se controla con los botones del teléfono.</div>
     </div>
+  </div>
+
+  <div class="card">
+    <h2>🔔 Avisos de voz</h2>
+    <label class="check"><input type="checkbox" id="aVoice"> Sonido + voz que diga «llevas … pasos»</label>
+    <div class="row">
+      <div>
+        <label for="aEvery">Cada</label>
+        <select id="aEvery">
+          <option value="250">250 pasos</option>
+          <option value="500">500 pasos</option>
+          <option value="1000">1000 pasos</option>
+        </select>
+      </div>
+      <div>
+        <label for="aSound">Sonido</label>
+        <select id="aSound">
+          <option value="campana">🔔 Campanita</option>
+          <option value="bip">📟 Bip-bip</option>
+          <option value="silbato">🎶 Silbido</option>
+          <option value="ninguno">🔇 Ninguno</option>
+        </select>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" id="aBlockOn"> Celebrar cada bloque con voz y canción</label>
+    <label for="aBlock">Tamaño del bloque (pasos)</label>
+    <input type="number" id="aBlock" min="500" max="20000" step="500" inputmode="numeric">
+    <label for="aCelUrl">Canción de celebración (enlace de YouTube, opcional)</label>
+    <input type="url" id="aCelUrl" placeholder="Vacío = fanfarria alegre incluida">
+    <div class="hint">La canción suena en bucle hasta que pulses «Parar la canción y seguir». Después vuelve tu música de caminar donde iba.</div>
+    <div class="row mt">
+      <div><button class="btn-outline" id="aTest">Probar aviso</button></div>
+      <div><button class="btn-outline" id="aTestCele">Probar celebración</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📺 Ver en el ordenador</h2>
+    <p class="note">En el ordenador abre esta dirección. Saldrá un código de 4 números; escríbelo aquí. Verás tus pasos en grande sobre el vídeo de paisajes.</p>
+    <div class="url-box" id="castUrl"></div>
+    <div class="row">
+      <div><input type="text" id="castCode" class="code-input" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Código de la pantalla"></div>
+      <div><button class="btn-outline" id="castBtn">Conectar</button></div>
+    </div>
+    <div class="status" id="castStatus"></div>
   </div>
 
   <div class="card mt">
@@ -194,21 +299,70 @@
   </div>
 </div>
 
+<!-- Celebración de bloque (móvil) -->
+<div class="cele hidden" id="cele">
+  <div class="cele-box">
+    <div class="cele-emoji">🎉</div>
+    <div class="cele-title" id="celeTitle"></div>
+    <div class="cele-sub" id="celeSub"></div>
+    <button id="celeStop">⏸ Parar la canción y seguir</button>
+  </div>
+</div>
+
+<!-- Modo pantalla (ordenador): ?pantalla -->
+<div id="screen" class="hidden">
+  <div class="scr-video" id="scrVideoBox"><div id="scrVideo"></div></div>
+  <div class="scr-shade"></div>
+  <div class="scr-panel">
+    <div class="scr-steps" id="sSteps">0</div>
+    <div class="scr-label">pasos <span id="sGoal">de 8000</span></div>
+    <div class="scr-bar"><div id="sGoalBar"></div></div>
+    <div class="scr-stats">
+      <div><b id="sKm">0,00</b>km</div>
+      <div><b id="sKcal">0</b>kcal</div>
+      <div><b id="sMins">0</b>min activos</div>
+    </div>
+    <div class="scr-block"><span id="sBlockTxt">Bloque 1 · 0 / 2000</span><div class="scr-bar yellow"><div id="sBlockBar"></div></div></div>
+  </div>
+  <div class="scr-top">
+    <span class="scr-conn" id="sConn">Conectando…</span>
+    <button id="sPlay" class="hidden" style="background:#16a34a;border-color:#16a34a">▶ Iniciar vídeo</button>
+    <button id="sSound">🔇 Sonido del vídeo</button>
+    <button id="sVideoBtn">🎬 Ocultar vídeo</button>
+    <button id="sFull">⛶ Pantalla completa</button>
+  </div>
+  <div class="scr-pair" id="sPair">
+    <h1>👣 Pasos en pantalla</h1>
+    <p>En el móvil abre la app de pasos, ve a <b>📺 Ver en el ordenador</b> y escribe este código:</p>
+    <div class="scr-code" id="sCode">····</div>
+    <p style="font-size:16px;color:#94a3b8">Deja esta ventana abierta. El código se mantiene aunque recargues la página.</p>
+  </div>
+  <div class="scr-cele hidden" id="sCele"></div>
+  <div class="scr-toast hidden" id="sToast"></div>
+</div>
+
 <script>
-const VERSION = 'v1.1';
+const VERSION = 'v1.2';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5 };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
+const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
+const SCREEN = new URLSearchParams(location.search).has('pantalla');
+const CAST_PREFIX = 'pasos-gc-';
 const RING_C = 2 * Math.PI * 104;
+const $ = id => document.getElementById(id);
 
 // ---------- Datos ----------
 let db = load();
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && d.days) return { settings: { ...DEFAULTS, ...d.settings }, days: d.days, running: !!d.running, music: { ...MUSIC_DEFAULT, ...d.music } };
+    if (d && d.days) return {
+      settings: { ...DEFAULTS, ...d.settings }, days: d.days, running: !!d.running,
+      music: { ...MUSIC_DEFAULT, ...d.music }, alerts: { ...ALERTS_DEFAULT, ...d.alerts }, cast: d.cast || null
+    };
   } catch (e) {}
-  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT } };
+  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
 function dayKey(d = new Date()) {
@@ -219,7 +373,16 @@ function today() {
   if (!db.days[k]) db.days[k] = { steps: 0, activeMs: 0 };
   return db.days[k];
 }
-const fmt = n => Math.round(n).toLocaleString('es-ES');
+const fmt = n => Math.round(n).toLocaleString('es-ES', { useGrouping: 'always' });
+function dayStats(d) {
+  const s = db.settings;
+  return {
+    km: (d.steps * s.height * 0.415 / 100000).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    kcal: fmt(d.steps * s.weight * 0.00057),
+    mins: fmt(d.activeMs / 60000)
+  };
+}
+const blockInfo = (steps, size) => ({ num: Math.floor(steps / size) + 1, done: steps % size });
 
 // ---------- Detector de pasos ----------
 // Magnitud de aceleración -> se quita la gravedad con una media lenta -> se suaviza ->
@@ -263,41 +426,216 @@ function peak(t) {
 }
 
 function addSteps(n, activeMs) {
-  const d = today();
+  const d = today(), A = db.alerts, goal = db.settings.goal;
   const before = d.steps;
   d.steps += n;
   d.activeMs += activeMs || 0;
-  if (before < db.settings.goal && d.steps >= db.settings.goal && navigator.vibrate) navigator.vibrate([150, 80, 150]);
   save();
   render();
+  const after = d.steps;
+  const goalHit = before < goal && after >= goal;
+  if (goalHit && navigator.vibrate) navigator.vibrate([150, 80, 150]);
+  if (A.blockOn && Math.floor(after / A.block) > Math.floor(before / A.block)) {
+    const k = Math.floor(after / A.block);
+    celebrate(k * A.block, k, goalHit);
+  } else if (A.voice && Math.floor(after / A.every) > Math.floor(before / A.every)) {
+    announce(Math.floor(after / A.every) * A.every, goalHit);
+  } else if (goalHit) {
+    announce(after, true);
+  }
 }
+
+// ---------- Sonidos y voz ----------
+let actx = null;
+function audio() {
+  if (!actx) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    actx = new C();
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function tone(freq, start, dur, type = 'sine', vol = 0.25) {
+  const c = audio(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(vol, start + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  o.connect(g).connect(c.destination);
+  o.start(start); o.stop(start + dur + 0.05);
+}
+const SOUNDS = {
+  campana: t => { tone(1318.5, t, 1.2, 'sine', 0.3); tone(1975.5, t + 0.13, 1.4, 'sine', 0.22); },
+  bip: t => { tone(880, t, 0.12, 'square', 0.1); tone(1175, t + 0.17, 0.18, 'square', 0.1); },
+  silbato: t => { tone(1568, t, 0.16, 'triangle', 0.3); tone(2093, t + 0.18, 0.16, 'triangle', 0.3); tone(2637, t + 0.36, 0.35, 'triangle', 0.3); }
+};
+function playSound() { const c = audio(); if (c && SOUNDS[db.alerts.sound]) SOUNDS[db.alerts.sound](c.currentTime + 0.02); }
+
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => v.lang === 'es-ES') || vs.find(v => v.lang.startsWith('es')) || null;
+}
+let ducked = false;
+function speak(text, done) {
+  let finished = false, safety = null;
+  const fin = () => {
+    if (finished) return;
+    finished = true; clearTimeout(safety);
+    if (ducked && ytReady && !celYT) yt.setVolume(M.vol);
+    ducked = false;
+    if (done) done();
+  };
+  if (!('speechSynthesis' in window)) return fin();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  const v = pickVoice(); if (v) u.voice = v;
+  if (musicPlaying()) { yt.setVolume(Math.round(M.vol * 0.25)); ducked = true; } // baja la música mientras habla
+  u.onend = fin; u.onerror = fin;
+  safety = setTimeout(fin, 9000);
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+let speechUnlocked = false;
+function unlockSound() {
+  audio();
+  if (!speechUnlocked && 'speechSynthesis' in window) { // iPhone: la voz solo funciona si se activa tras un toque
+    const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); speechUnlocked = true;
+  }
+}
+
+function announce(n, goalHit) {
+  let text = n % db.alerts.every === 0 ? `Llevas ${n} pasos.` : '';
+  if (goalHit) text += ' ¡Has cumplido la meta del día!';
+  playSound();
+  setTimeout(() => speak(text.trim()), 650);
+  castSend({ t: 'announce', n, goalHit });
+}
+
+// Celebración de bloque: voz + canción en bucle hasta que se pulse parar
+let celebrating = false, celYT = false, celPrev = null, fanfareT = null;
+function celebrate(n, k, goalHit) {
+  celebrating = true;
+  $('celeTitle').textContent = `¡${fmt(n)} pasos!`;
+  $('celeSub').textContent = `Bloque ${k} completado` + (goalHit ? ' · ¡y meta del día cumplida!' : '');
+  $('cele').classList.remove('hidden');
+  castSend({ t: 'celebrate', n, k, goalHit });
+  playSound();
+  const text = `¡Enhorabuena! Ya has alcanzado ${n} pasos. Bloque ${k} completado.` + (goalHit ? ' ¡Y has cumplido la meta del día!' : '');
+  setTimeout(() => speak(text, startCelebrationSong), 650);
+}
+function startCelebrationSong() {
+  if (!celebrating) return;
+  const cel = db.alerts.celUrl && parseYouTube(db.alerts.celUrl);
+  celPrev = { id: M.id, pos: ytReady ? yt.getCurrentTime() : M.pos, playing: musicPlaying() };
+  if (cel && ytReady) {
+    celYT = true;
+    yt.setVolume(M.vol);
+    yt.loadVideoById({ videoId: cel.id, startSeconds: cel.pos });
+  } else {
+    if (celPrev.playing) yt.pauseVideo();
+    startFanfare();
+  }
+}
+function stopCelebration() {
+  celebrating = false;
+  $('cele').classList.add('hidden');
+  stopFanfare();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (celYT && celPrev) {
+    celYT = false;
+    const opts = { videoId: celPrev.id, startSeconds: celPrev.pos };
+    if (celPrev.playing) yt.loadVideoById(opts); else yt.cueVideoById(opts);
+  } else if (celPrev && celPrev.playing) {
+    musicPlay();
+  }
+  celPrev = null;
+  castSend({ t: 'celebrate-end' });
+}
+
+// Fanfarria alegre generada con el sintetizador (no necesita internet)
+const NOTE = n => { const m = n.match(/^([A-G])(#?)(\d)$/); const st = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] ? 1 : 0); return 440 * Math.pow(2, (st + 12 * (Number(m[3]) + 1) - 69) / 12); };
+const MELODY = 'C5:1 E5:1 G5:1 C6:3 G5:1 C6:1 A5:1 C6:1 A5:1 F5:3 A5:2 G5:1 B5:1 D6:1 G5:2 B5:1 D6:2 E6:2 D6:1 C6:1 G5:1 E5:1 C5:2'.split(' ').map(x => x.split(':'));
+const BASS = ['C3', 'F3', 'G3', 'C3'];
+const BEAT = 0.14;
+function startFanfare() {
+  stopFanfare();
+  const c = audio(); if (!c) return;
+  const loop = () => {
+    let t = c.currentTime + 0.05;
+    BASS.forEach((b, i) => { tone(NOTE(b), t + i * 8 * BEAT, 4 * BEAT, 'triangle', 0.18); tone(NOTE(b), t + (i * 8 + 4) * BEAT, 4 * BEAT, 'triangle', 0.15); });
+    MELODY.forEach(([n, len]) => { tone(NOTE(n), t, Number(len) * BEAT * 0.95, 'square', 0.07); tone(NOTE(n), t, Number(len) * BEAT * 0.95, 'triangle', 0.16); t += Number(len) * BEAT; });
+    fanfareT = setTimeout(loop, 32 * BEAT * 1000 + 350);
+  };
+  loop();
+}
+function stopFanfare() { clearTimeout(fanfareT); fanfareT = null; }
 
 // ---------- Inicio / pausa ----------
 let running = false, wakeLock = null, sensorCheck = null;
+const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+function showPermHelp() {
+  const host = location.host;
+  const steps = IS_IOS ? `
+    <b>En iPhone (Safari):</b>
+    <ol>
+      <li>Cierra Safari del todo (desliza la app hacia arriba en el selector de apps).</li>
+      <li>Vuelve a abrir la app de Pasos y pulsa <b>Empezar a contar</b>.</li>
+      <li>Cuando pregunte por «movimiento y orientación», elige <b>Permitir</b>.</li>
+    </ol>
+    Si ya no pregunta: <b>Ajustes del iPhone → Apps → Safari → Avanzado → Datos de sitios web</b>, busca <b>github.io</b> y bórralo (ojo: se borran los pasos guardados en este teléfono).` : `
+    <b>En Android (Chrome):</b>
+    <ol>
+      <li>Abre <b>${host}</b> en Chrome y toca el icono que hay a la izquierda de la dirección (⚙ o 🔒).</li>
+      <li>Entra en <b>Permisos</b> (o «Configuración del sitio») → <b>Sensores de movimiento</b> → <b>Permitir</b>.</li>
+      <li>Vuelve aquí y pulsa el botón de abajo.</li>
+    </ol>
+    Otra forma: Chrome → <b>⋮ → Ajustes → Configuración de sitios → Sensores de movimiento</b>: actívalo y, si aparece <b>${host}</b> en «Bloqueados», tócalo y pon <b>Permitir</b>.`;
+  $('permHelp').innerHTML = `${steps}<p class="note" style="margin:8px 0">Por seguridad, el navegador no deja que una página abra sus ajustes directamente; hay que hacerlo a mano una vez.</p>
+    <button id="permRetry">↻ Ya lo he activado: volver a intentar</button>`;
+  $('permHelp').classList.remove('hidden');
+  $('permRetry').onclick = () => location.reload();
+}
 
 async function start(fromGesture) {
+  $('permHelp').classList.add('hidden');
   if (typeof DeviceMotionEvent === 'undefined') {
     return setStatus('Este dispositivo no tiene sensor de movimiento.', 'err');
   }
   if (!window.isSecureContext) {
     return setStatus('Abre la app desde una dirección https:// para poder usar el sensor.', 'err');
   }
+  let denied = false;
   if (typeof DeviceMotionEvent.requestPermission === 'function') {
-    if (!fromGesture) return; // iPhone: el permiso solo se puede pedir tras tocar el botón
+    if (!fromGesture) return; // el permiso solo se puede pedir tras tocar el botón
     try {
-      const r = await DeviceMotionEvent.requestPermission();
-      if (r !== 'granted') return setStatus('Sin permiso para el sensor de movimiento. Actívalo en Ajustes del navegador.', 'err');
+      denied = (await DeviceMotionEvent.requestPermission()) !== 'granted';
     } catch (e) {
-      return setStatus('No se pudo pedir permiso al sensor: ' + e.message, 'err');
+      denied = true;
     }
   }
   Object.assign(det, { s: 0, armed: true, lastPeak: 0, streak: [], confirmed: false, events: 0 });
   window.addEventListener('devicemotion', onMotion);
+  if (denied) {
+    // Algunos navegadores dicen «denegado» pero envían datos igual: se comprueba antes de rendirse
+    setStatus('Comprobando el sensor…');
+    await new Promise(r => setTimeout(r, 1200));
+    if (det.events === 0) {
+      window.removeEventListener('devicemotion', onMotion);
+      setStatus('Sin permiso para el sensor de movimiento.', 'err');
+      showPermHelp();
+      return;
+    }
+  }
   running = true;
   db.running = true; save();
   requestWake();
   renderButton();
   setStatus('<span class="dot"></span>Contando… mantén la app abierta', 'ok');
+  sendState();
   clearTimeout(sensorCheck);
   sensorCheck = setTimeout(() => {
     if (running && det.events === 0) setStatus('No llegan datos del sensor. ¿Estás en un ordenador? Ábrela en el teléfono.', 'err');
@@ -311,6 +649,7 @@ function stop() {
   releaseWake();
   renderButton();
   setStatus('En pausa. Lo contado hoy está guardado.');
+  sendState();
 }
 
 async function requestWake() {
@@ -321,16 +660,8 @@ async function requestWake() {
   } catch (e) {}
 }
 function releaseWake() { try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null; }
-document.addEventListener('visibilitychange', () => {
-  if (running && document.visibilityState === 'visible') {
-    requestWake();
-    det.lastPeak = 0; det.streak = []; det.confirmed = false;
-    render();
-  }
-});
 
 // ---------- Interfaz ----------
-const $ = id => document.getElementById(id);
 function setStatus(html, cls = '') { $('status').innerHTML = html; $('status').className = 'status ' + cls; }
 function renderButton() {
   $('toggleBtn').textContent = running ? '⏸ Pausar' : '▶ Empezar a contar';
@@ -338,7 +669,7 @@ function renderButton() {
 }
 
 function render() {
-  const s = db.settings, d = today();
+  const s = db.settings, d = today(), st = dayStats(d);
   const pct = d.steps / s.goal;
   $('steps').textContent = fmt(d.steps);
   $('goalTxt').textContent = 'de ' + fmt(s.goal) + ' pasos';
@@ -347,13 +678,16 @@ function render() {
   ring.style.strokeDasharray = RING_C;
   ring.style.strokeDashoffset = RING_C * (1 - Math.min(pct, 1));
   ring.classList.toggle('done', pct >= 1);
-  const km = d.steps * s.height * 0.415 / 100000;
-  $('km').textContent = km.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  $('kcal').textContent = fmt(d.steps * s.weight * 0.00057);
-  $('mins').textContent = fmt(d.activeMs / 60000);
-  const now = new Date();
-  $('dateTxt').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('km').textContent = st.km;
+  $('kcal').textContent = st.kcal;
+  $('mins').textContent = st.mins;
+  const b = blockInfo(d.steps, db.alerts.block);
+  $('blockNum').textContent = 'Bloque ' + b.num;
+  $('blockTxt').textContent = fmt(b.done) + ' / ' + fmt(db.alerts.block);
+  $('blockBar').style.width = (b.done / db.alerts.block * 100) + '%';
+  $('dateTxt').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
   renderChart();
+  sendState();
 }
 
 function renderChart() {
@@ -381,9 +715,9 @@ function renderChart() {
 }
 
 // Gráfico de la señal en vivo (solo con Ajustes abierto)
-const cv = $('signal'), ctx = cv.getContext('2d');
 function drawSignal() {
   if ($('settings').open) {
+    const cv = $('signal'), ctx = cv.getContext('2d');
     const w = cv.width, h = cv.height, range = 6;
     const y = v => h / 2 - (v / range) * (h / 2);
     ctx.clearRect(0, 0, w, h);
@@ -412,10 +746,32 @@ function bindSettings() {
   });
   num('goal', 500, 100000); num('height', 100, 230); num('weight', 30, 250);
   $('sens').addEventListener('input', () => { s.sens = Number($('sens').value); $('sensVal').textContent = s.sens; save(); });
-  $('addBtn').addEventListener('click', () => addSteps(100, 0));
+  $('addBtn').addEventListener('click', () => { unlockSound(); addSteps(100, 0); });
   $('resetBtn').addEventListener('click', () => {
     if (confirm('¿Poner a cero los pasos de hoy?')) { db.days[dayKey()] = { steps: 0, activeMs: 0 }; save(); render(); }
   });
+}
+
+function bindAlerts() {
+  const A = db.alerts;
+  $('aVoice').checked = A.voice; $('aEvery').value = A.every; $('aSound').value = A.sound;
+  $('aBlockOn').checked = A.blockOn; $('aBlock').value = A.block; $('aCelUrl').value = A.celUrl;
+  $('aVoice').addEventListener('change', () => { A.voice = $('aVoice').checked; save(); });
+  $('aEvery').addEventListener('change', () => { A.every = Number($('aEvery').value); save(); });
+  $('aSound').addEventListener('change', () => { A.sound = $('aSound').value; save(); unlockSound(); playSound(); });
+  $('aBlockOn').addEventListener('change', () => { A.blockOn = $('aBlockOn').checked; save(); });
+  $('aBlock').addEventListener('change', () => {
+    const v = Math.round(Number($('aBlock').value));
+    if (v >= 500 && v <= 20000) { A.block = v; save(); render(); } else $('aBlock').value = A.block;
+  });
+  $('aCelUrl').addEventListener('change', () => {
+    const v = $('aCelUrl').value.trim();
+    if (v && !parseYouTube(v)) { alert('No reconozco ese enlace de YouTube.'); $('aCelUrl').value = A.celUrl; return; }
+    A.celUrl = v; save();
+  });
+  $('aTest').addEventListener('click', () => { unlockSound(); playSound(); setTimeout(() => speak(`Llevas ${A.every} pasos.`), 650); });
+  $('aTestCele').addEventListener('click', () => { unlockSound(); celebrate(A.block, 1, false); });
+  $('celeStop').addEventListener('click', stopCelebration);
 }
 
 // ---------- Música de fondo (YouTube en bucle) ----------
@@ -427,7 +783,7 @@ const ytTime = s => {
   return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
 };
 
-window.onYouTubeIframeAPIReady = () => {
+function createMainPlayer() {
   yt = new YT.Player('ytPlayer', {
     videoId: M.id,
     playerVars: { start: Math.floor(M.pos), playsinline: 1, rel: 0, modestbranding: 1 },
@@ -450,12 +806,12 @@ window.onYouTubeIframeAPIReady = () => {
       }
     }
   });
-};
+}
 
 function setMusicTitle() {
   const t = ytReady && yt.getVideoData && yt.getVideoData().title;
   $('musicTitle').className = 'music-title';
-  $('musicTitle').textContent = t || 'Música de YouTube';
+  $('musicTitle').textContent = (celYT ? '🎉 ' : '') + (t || 'Música de YouTube');
 }
 const musicPlaying = () => ytReady && [YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(yt.getPlayerState());
 function musicPlay() { wantPlay = true; if (ytReady) yt.playVideo(); else $('musicTitle').textContent = 'Cargando música… sonará en un momento'; }
@@ -469,7 +825,7 @@ function renderMusic() {
   const cur = yt.getCurrentTime(), dur = yt.getDuration();
   $('musicTime').textContent = dur ? ytTime(cur) + ' / ' + ytTime(dur) : '--:--';
   if (!seeking && dur) { $('mSeek').max = Math.floor(dur); $('mSeek').value = Math.floor(cur); }
-  if (playing && Date.now() - lastSave > 5000) { M.pos = cur; lastSave = Date.now(); save(); }
+  if (playing && !celYT && Date.now() - lastSave > 5000) { M.pos = cur; lastSave = Date.now(); save(); }
 }
 
 function parseYouTube(url) {
@@ -485,10 +841,10 @@ function parseYouTube(url) {
 }
 function setMusic(id, pos) {
   M.id = id; M.pos = pos; save();
+  sendState();
   if (!ytReady) return;
-  const opts = { videoId: id, startSeconds: pos };
   wantPlay = true;
-  yt.loadVideoById(opts);
+  yt.loadVideoById({ videoId: id, startSeconds: pos });
 }
 
 function bindMusic() {
@@ -503,9 +859,9 @@ function bindMusic() {
   $('mVol').addEventListener('input', () => { M.vol = Number($('mVol').value); if (ytReady) { yt.setVolume(M.vol); yt.unMute(); } save(); });
   $('mAuto').addEventListener('change', () => { M.auto = $('mAuto').checked; save(); });
   $('mShow').addEventListener('click', () => {
-    const open = $('ytWrap').classList.toggle('collapsed');
-    $('mLinkBox').classList.toggle('hidden', open);
-    $('mShow').textContent = open ? 'Ver vídeo / cambiar música' : 'Ocultar vídeo';
+    const closed = $('ytWrap').classList.toggle('collapsed');
+    $('mLinkBox').classList.toggle('hidden', closed);
+    $('mShow').textContent = closed ? 'Ver vídeo / cambiar música' : 'Ocultar vídeo';
   });
   $('mUse').addEventListener('click', () => {
     const p = parseYouTube($('mUrl').value.trim());
@@ -517,27 +873,240 @@ function bindMusic() {
     setMusic(MUSIC_DEFAULT.id, MUSIC_DEFAULT.pos);
   });
   setInterval(renderMusic, 1000);
-  window.addEventListener('pagehide', () => { if (ytReady) { M.pos = yt.getCurrentTime(); save(); } });
+  window.addEventListener('pagehide', () => { if (ytReady && !celYT) { M.pos = yt.getCurrentTime(); save(); } });
 }
 
-$('toggleBtn').addEventListener('click', async () => {
-  if (running) {
-    stop();
-    if (M.auto) musicPause();
-  } else {
-    if (M.auto) musicPlay(); // dentro del toque, para que el móvil deje sonar el audio
-    await start(true);
-    if (!running && M.auto) musicPause();
+// ---------- Conexión móvil → ordenador (WebRTC con PeerJS) ----------
+function loadPeer() {
+  if (window.Peer) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload = res;
+    s.onerror = () => rej(new Error('No se pudo cargar la conexión. Revisa internet.'));
+    document.head.appendChild(s);
+  });
+}
+
+let peer = null, conn = null, castOn = false, castRetry = null;
+function castStatus(t, cls = '') { $('castStatus').textContent = t; $('castStatus').className = 'status ' + cls; }
+function castLater() { clearTimeout(castRetry); if (castOn) castRetry = setTimeout(castConnect, 5000); }
+async function castConnect() {
+  const code = db.cast && db.cast.code;
+  if (!code) return;
+  castOn = true; clearTimeout(castRetry);
+  $('castBtn').textContent = 'Desconectar';
+  if (!(conn && conn.open)) castStatus('Conectando con la pantalla ' + code + '…');
+  try { await loadPeer(); } catch (e) { castStatus(e.message, 'err'); return castLater(); }
+  if (!castOn) return;
+  if (!peer || peer.destroyed) {
+    peer = new Peer();
+    peer.on('error', e => {
+      if (!castOn) return;
+      castStatus(e.type === 'peer-unavailable'
+        ? 'No encuentro la pantalla ' + code + '. ¿Está abierta en el ordenador? Reintentando…'
+        : 'Problema de conexión (' + e.type + '). Reintentando…', 'err');
+      castLater();
+    });
+  } else if (peer.disconnected) {
+    peer.reconnect();
   }
+  const go = () => {
+    if (!castOn) return;
+    try { conn && conn.close(); } catch (e) {}
+    conn = peer.connect(CAST_PREFIX + code, { reliable: true });
+    conn.on('open', () => { castStatus('✔ Conectado a la pantalla ' + code, 'ok'); sendState(); });
+    conn.on('close', () => { if (castOn) { castStatus('Se perdió la conexión. Reintentando…'); castLater(); } });
+  };
+  peer.open ? go() : peer.once('open', go);
+}
+function castStop() {
+  castOn = false; clearTimeout(castRetry);
+  try { conn && conn.close(); } catch (e) {}
+  try { peer && peer.destroy(); } catch (e) {}
+  peer = conn = null;
+  db.cast = null; save();
+  $('castBtn').textContent = 'Conectar';
+  castStatus('');
+}
+function castSend(msg) { if (conn && conn.open) { try { conn.send(msg); } catch (e) {} } }
+function sendState() {
+  if (SCREEN || !(conn && conn.open)) return;
+  const d = today(), st = dayStats(d);
+  castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos });
+}
+function bindCast() {
+  $('castUrl').textContent = location.origin + location.pathname + '?pantalla';
+  if (db.cast) $('castCode').value = db.cast.code;
+  $('castBtn').addEventListener('click', () => {
+    if (castOn) return castStop();
+    const code = $('castCode').value.replace(/\D/g, '');
+    if (code.length !== 4) return castStatus('Escribe el código de 4 números que sale en el ordenador.', 'err');
+    db.cast = { code }; save();
+    castConnect();
+  });
+  setInterval(sendState, 10000);
+  if (db.cast) castConnect();
+}
+
+// ---------- Modo pantalla (ordenador) ----------
+let scrYT = null, scrYTReady = false, scrVideoId = MUSIC_DEFAULT.id, scrTries = 0, scrPeer = null, celeT = null, toastT = null;
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function scrCode() {
+  let c = lsGet('pasos_pantalla_code');
+  if (!/^\d{4}$/.test(c || '')) { c = String(1000 + Math.floor(Math.random() * 9000)); lsSet('pasos_pantalla_code', c); }
+  return c;
+}
+function scrConn(t) { $('sConn').textContent = t; }
+function scrStart() {
+  const code = scrCode();
+  $('sCode').textContent = code;
+  loadPeer().then(() => {
+    const p = scrPeer = new Peer(CAST_PREFIX + code);
+    p.on('open', () => { scrTries = 0; scrConn('Esperando al móvil · código ' + code); });
+    p.on('connection', c => {
+      c.on('open', () => { $('sPair').classList.add('hidden'); scrConn('📱 Móvil conectado · código ' + code); });
+      c.on('data', scrData);
+      c.on('close', () => scrConn('📱 Móvil desconectado · código ' + code));
+    });
+    p.on('disconnected', () => { if (!p.destroyed) p.reconnect(); });
+    p.on('error', e => {
+      if (e.type === 'peer-unavailable') return;
+      p.destroy();
+      if (e.type === 'unavailable-id' && ++scrTries >= 5) { lsSet('pasos_pantalla_code', ''); scrTries = 0; } // el código está ocupado: se crea otro
+      scrConn('Reconectando…');
+      setTimeout(scrStart, 3000);
+    });
+  }).catch(e => { scrConn(e.message); setTimeout(scrStart, 5000); });
+}
+function scrData(m) {
+  if (!m || typeof m !== 'object') return;
+  if (m.t === 'state') {
+    $('sPair').classList.add('hidden');
+    $('sSteps').textContent = fmt(m.steps);
+    $('sGoal').textContent = 'de ' + fmt(m.goal) + (m.running ? '' : ' · ⏸ en pausa');
+    $('sGoalBar').style.width = Math.min(100, m.steps / m.goal * 100) + '%';
+    $('sKm').textContent = m.km; $('sKcal').textContent = m.kcal; $('sMins').textContent = m.mins;
+    const b = blockInfo(m.steps, m.block);
+    $('sBlockTxt').textContent = `Bloque ${b.num} · ${fmt(b.done)} / ${fmt(m.block)}`;
+    $('sBlockBar').style.width = (b.done / m.block * 100) + '%';
+    if (m.video && m.video !== scrVideoId) {
+      scrVideoId = m.video;
+      if (scrYTReady) scrYT.loadVideoById({ videoId: m.video, startSeconds: m.pos || 0 });
+    }
+  } else if (m.t === 'announce') {
+    clearTimeout(toastT);
+    $('sToast').textContent = m.goalHit ? '🏆 ¡Meta del día cumplida!' : `👣 Llevas ${fmt(m.n)} pasos`;
+    $('sToast').classList.remove('hidden');
+    toastT = setTimeout(() => $('sToast').classList.add('hidden'), 6000);
+  } else if (m.t === 'celebrate') {
+    clearTimeout(celeT);
+    $('sCele').innerHTML = `<div class="emo">🎉</div><div class="big">¡${fmt(m.n)} pasos!</div><div class="sub">Bloque ${m.k} completado${m.goalHit ? ' · ¡meta del día cumplida!' : ''}</div>`;
+    $('sCele').classList.remove('hidden');
+    celeT = setTimeout(() => $('sCele').classList.add('hidden'), 20000);
+  } else if (m.t === 'celebrate-end') {
+    clearTimeout(celeT);
+    $('sCele').classList.add('hidden');
+  }
+}
+function createScreenPlayer() {
+  scrYT = new YT.Player('scrVideo', {
+    videoId: scrVideoId,
+    playerVars: { autoplay: 1, mute: 1, controls: 0, start: MUSIC_DEFAULT.pos, playsinline: 1, rel: 0, modestbranding: 1, disablekb: 1 },
+    events: {
+      onReady: () => {
+        scrYTReady = true; scrYT.mute(); scrYT.playVideo();
+        setTimeout(scrCheckPlaying, 2500); // si el navegador bloquea el arranque solo, se ofrece el botón
+      },
+      onStateChange: e => {
+        if (e.data === YT.PlayerState.ENDED) { scrYT.seekTo(0, true); scrYT.playVideo(); }
+        scrCheckPlaying();
+      }
+    }
+  });
+}
+function scrCheckPlaying() {
+  const playing = scrYTReady && [YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(scrYT.getPlayerState());
+  $('sPlay').classList.toggle('hidden', playing || $('scrVideoBox').classList.contains('off'));
+}
+function initScreen() {
+  document.body.classList.add('screen');
+  $('app').classList.add('hidden');
+  $('screen').classList.remove('hidden');
+  document.title = 'Pasos en pantalla';
+  $('sPlay').addEventListener('click', () => scrYTReady && scrYT.playVideo());
+  document.addEventListener('pointerdown', () => {
+    if (scrYTReady && !$('scrVideoBox').classList.contains('off') && scrYT.getPlayerState() !== YT.PlayerState.PLAYING) scrYT.playVideo();
+  });
+  $('sSound').addEventListener('click', () => {
+    if (!scrYTReady) return;
+    if (scrYT.isMuted()) { scrYT.unMute(); scrYT.setVolume(80); scrYT.playVideo(); $('sSound').textContent = '🔊 Sonido del vídeo'; }
+    else { scrYT.mute(); $('sSound').textContent = '🔇 Sonido del vídeo'; }
+  });
+  $('sVideoBtn').addEventListener('click', () => {
+    const off = $('scrVideoBox').classList.toggle('off');
+    $('sVideoBtn').textContent = off ? '🎬 Mostrar vídeo' : '🎬 Ocultar vídeo';
+    if (scrYTReady) off ? scrYT.pauseVideo() : scrYT.playVideo();
+    scrCheckPlaying();
+  });
+  $('sFull').addEventListener('click', () => {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {});
+  });
+  scrStart();
+}
+
+// ---------- Instalar como app ----------
+let installEvt = null;
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!standalone && !SCREEN) $('installBtn').classList.remove('hidden'); });
+addEventListener('appinstalled', () => $('installBtn').classList.add('hidden'));
+$('installBtn').addEventListener('click', async () => {
+  if (!installEvt) return;
+  installEvt.prompt();
+  await installEvt.userChoice;
+  installEvt = null;
+  $('installBtn').classList.add('hidden');
 });
-bindMusic();
-$('ver').textContent = VERSION;
-bindSettings();
-render();
-renderButton();
-drawSignal();
-setInterval(render, 30000); // cambio de día a medianoche
-if (db.running) start(false); // Android: retoma el conteo al reabrir la app
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+
+// ---------- Arranque ----------
+window.onYouTubeIframeAPIReady = () => SCREEN ? createScreenPlayer() : createMainPlayer();
+
+function initApp() {
+  $('ver').textContent = VERSION;
+  bindSettings();
+  bindAlerts();
+  bindMusic();
+  bindCast();
+  render();
+  renderButton();
+  drawSignal();
+  setInterval(render, 30000); // cambio de día a medianoche
+  if ('speechSynthesis' in window) speechSynthesis.getVoices(); // precarga las voces
+  document.addEventListener('pointerdown', () => { if (actx && actx.state === 'suspended') actx.resume(); });
+  document.addEventListener('visibilitychange', () => {
+    if (running && document.visibilityState === 'visible') {
+      requestWake();
+      det.lastPeak = 0; det.streak = []; det.confirmed = false;
+      render();
+    }
+  });
+  $('toggleBtn').addEventListener('click', async () => {
+    unlockSound();
+    if (running) {
+      stop();
+      if (M.auto) musicPause();
+    } else {
+      if (M.auto) musicPlay(); // dentro del toque, para que el móvil deje sonar el audio
+      await start(true);
+      if (!running && M.auto) musicPause();
+    }
+  });
+  if (db.running) start(false); // Android: retoma el conteo al reabrir la app
+}
+
+SCREEN ? initScreen() : initApp();
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
 </body>
