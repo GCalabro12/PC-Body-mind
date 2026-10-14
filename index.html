@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.44</title>
+<title>PC & Body-mind v1.45</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -194,6 +194,10 @@
   .scr-toast, .scr-cele { pointer-events: none; }
   /* Sonido y vídeo a los lados de los pasos */
   .scr-side { display: none; }
+  .scr-eye-batt.charging .batt-v { color: #4ade80; animation: chargeGlow 2s ease-in-out infinite; }
+  .scr-eye-batt.charging .batt-v::after { content: "⚡"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1; filter: drop-shadow(0 0 2px #0f172a); }
+  .scr-eye-batt.charging b { color: #4ade80; }
+  @keyframes chargeGlow { 50% { box-shadow: 0 0 12px 3px rgba(74,222,128,0.55); } }
   .scr-pasos .scr-side { display: flex; position: absolute; top: 50%; transform: translateY(-50%); flex-direction: column; align-items: center; gap: 6px; z-index: 2; }
   .scr-pasos .scr-side.left { left: 12px; top: 12px; bottom: 30px; transform: none; }
   .scr-pasos .scr-side.right { right: 10px; top: calc(50% + 6px); }
@@ -227,7 +231,7 @@
   .scr-plan button { width: auto; padding: 4px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; }
   /* App instalada sin barra de título: franja superior para arrastrar la ventana y margen para no tapar los botones */
   .scr-drag { position: fixed; top: 0; left: env(titlebar-area-x, 0px); width: env(titlebar-area-width, 0px); height: env(titlebar-area-height, 0px); -webkit-app-region: drag; app-region: drag; z-index: 90; background: rgba(15,23,42,0.55); }
-  .scr-panel, .scr-top, .scr-menu-btn { margin-top: env(titlebar-area-height, 0px); }
+  .scr-panel { margin-top: env(titlebar-area-height, 0px); }
   .scr-menu-btn { position: absolute; top: 6px; left: 6px; z-index: 7; width: 28px; height: 28px; min-width: 28px; padding: 0; border-radius: 50%; background: rgba(15,23,42,0.8); border: 1px solid #475569; color: #cbd5e1; font-size: 15px; line-height: 1; opacity: 0.6; display: flex; align-items: center; justify-content: center; }
   .scr-menu-btn:hover, #screen.menu-open .scr-menu-btn { opacity: 1; background: #334155; }
   /* Ventana estrecha: lo más importante arriba (tarea), luego la vista, los pasos y abajo los datos secundarios */
@@ -257,7 +261,7 @@
     .scr-fold { display: flex; align-items: center; justify-content: center; position: absolute; top: 4px; right: 6px; width: 26px; height: 22px; min-width: 26px; padding: 0; border-radius: 8px; background: rgba(15,23,42,0.75); border: 1px solid #475569; color: #cbd5e1; font-size: 13px; line-height: 1; z-index: 3; }
     .scr-fold:hover { background: #334155; }
     .scr-eye > .scr-fold { top: 2px; right: 2px; }
-    .scr-stats > .scr-fold { top: auto; bottom: 2px; right: 0; }
+    .scr-stats > .scr-fold { top: 4px; right: 6px; }
     /* plegados: una sola línea */
     .scr-task.folded .scr-task-act { display: none; }
     .scr-task.folded { padding: 0.5vh 34px 0.6vh 3vw; }
@@ -270,8 +274,11 @@
     .scr-pasos.folded { flex-direction: row; align-items: baseline; justify-content: center; gap: 8px; padding: 0.4vh 34px 0.6vh 3vw; }
     .scr-pasos.folded .scr-steps { font-size: clamp(18px, 7vw, 30px) !important; }
     .scr-pasos.folded .scr-label { margin: 0; }
-    .scr-stats.folded > div:not(.scr-fold) { display: none; }
-    .scr-stats.folded { min-height: 24px; }
+    .scr-stats .us { display: none; }
+    .scr-stats.folded { padding-top: 0.5vh; padding-bottom: 0.5vh; gap: 16px; }
+    .scr-stats.folded b { display: inline; margin-right: 4px; font-size: 15px; }
+    .scr-stats.folded .u { display: none; }
+    .scr-stats.folded .us { display: inline; }
     .scr-block { margin: 0; font-size: clamp(10px, 3.6vw, 16px); }
     .scr-task { min-height: 15vh; display: flex; flex-direction: column; justify-content: center; }
     .scr-task-act { font-size: clamp(18px, 9vw, 42px) !important; }
@@ -294,10 +301,13 @@
     .scr-pausi-txt b { color: #F8FAFC; }
     .scr-pausi.folded .scr-pausi-txt { display: none; }
     .scr-pausi.folded { justify-content: center; }
-    .scr-stats { order: 5; margin-top: auto; justify-content: center; gap: 5vw; font-size: clamp(9px, 2.8vw, 12px); opacity: 0.75; }
-    .scr-stats b { font-size: clamp(12px, 4.4vw, 18px); }
-    .scr-top { display: none; top: 40px; left: 6px; right: auto; max-width: calc(100vw - 12px); z-index: 6; background: rgba(2,6,23,0.94); border: 1px solid #334155; border-radius: 12px; padding: 8px; }
-    #screen.menu-open .scr-top { display: flex; }
+    .scr-stats { order: 5; margin: 0; justify-content: space-around; gap: 3vw; font-size: clamp(10px, 3vw, 13px); border: 2px solid rgba(148,163,184,0.4); border-radius: 16px; padding: 0.8vh 36px 0.8vh 12px; background: rgba(15,23,42,0.6); }
+    .scr-stats b { font-size: clamp(14px, 5vw, 22px); }
+    .scr-ctrl { order: 7; border: 2px solid rgba(148,163,184,0.4); border-radius: 16px; padding: 0.8vh 36px 0.8vh 10px; background: rgba(15,23,42,0.6); }
+    .scr-ctrl .scr-top { position: static; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; max-width: none; margin: 0; }
+    .scr-ctrl.folded .scr-top { display: none; }
+    .scr-ctrl.folded::before { content: "⚙ Sonido, vídeo, pantalla completa y ventana flotante"; display: block; text-align: center; color: #94a3b8; font-size: 12px; padding: 2px 0; }
+    .pip #sFull { display: none; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
   }
   .scr-toast { position: absolute; right: 1.5vw; bottom: 3vh; background: rgba(15,23,42,0.9); border-right: 8px solid #4ade80; padding: 1.5vh 2vw; border-radius: 1rem; font-size: clamp(16px, min(3.5vw, 5vh), 48px); font-weight: 800; animation: slideIn 0.4s ease; }
@@ -417,7 +427,7 @@
   .b-blk { flex: none; width: 118px; min-height: 112px; scroll-snap-align: center; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; background: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 10px; font-size: 0.8rem; font-weight: 400; color: #cbd5e1; position: relative; }
   .b-blk:hover { background: #16213a; }
   .b-blk-time { font-weight: 800; font-size: 1.05rem; color: #F8FAFC; font-variant-numeric: tabular-nums; }
-  .b-blk-end { color: #94A3B8; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+  .b-blk-end { color: #F8FAFC; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
   .b-blk-acts { margin-top: 6px; font-size: 0.72rem; line-height: 1.3; color: #CBD5E1; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
   .b-blk-empty { margin-top: 6px; font-size: 0.72rem; color: #475569; }
   .b-blk.past { opacity: 0.45; }
@@ -947,9 +957,9 @@
     <div class="scr-stats" data-box="datos">
       <button class="scr-fold" data-fold="datos" aria-label="Plegar o desplegar">▴</button>
       <div id="sBattBox" class="hidden"><b class="batt-row"><span class="batt"><span id="sBattFill"></span></span><span id="sBatt">--</span></b>batería móvil</div>
-      <div><b id="sKm">0,00</b>km</div>
-      <div><b id="sKcal">0</b>kcal</div>
-      <div><b id="sMins">0</b>min activos</div>
+      <div><b id="sKm">0,00</b><span class="u">kilómetros</span><span class="us">km</span></div>
+      <div><b id="sKcal">0</b><span class="u">kilocalorías</span><span class="us">kcal</span></div>
+      <div><b id="sMins">0</b><span class="u">minutos activos</span><span class="us">min</span></div>
     </div>
     <div class="scr-salud hidden" id="sSalud" data-box="salud">
       <button class="scr-fold" data-fold="salud" aria-label="Plegar o desplegar">▴</button>
@@ -992,16 +1002,18 @@
         <button class="scr-btn ghost hidden" data-cmd="vistaStart" id="sEyeNow">Pausa ahora</button>
       </div>
     </div>
-  </div>
-  <button class="scr-menu-btn" id="sMenuBtn" aria-label="Opciones de la pantalla" title="Opciones">⚙</button>
-  <div class="scr-top">
-    <span class="scr-conn" id="sConn">Conectando…</span>
-    <button id="sPlay" class="hidden" style="background:#16a34a;border-color:#16a34a"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Iniciar vídeo</button>
-    <button id="sSound">🔇 Sonido del vídeo</button>
-    <div class="scr-vol"><span>🔈</span><input type="range" id="sVol" min="0" max="100" step="1" aria-label="Volumen del vídeo"><span id="sVolVal">60</span></div>
-    <button id="sVideoBtn">🎬 Ocultar vídeo</button>
-    <button id="sFull">⛶ Pantalla completa</button>
-    <button id="sPip" class="hidden">🗗 Ventana flotante</button>
+    <div class="scr-ctrl" data-box="controles">
+      <button class="scr-fold" data-fold="controles" aria-label="Plegar o desplegar">▴</button>
+          <div class="scr-top">
+        <span class="scr-conn" id="sConn">Conectando…</span>
+        <button id="sPlay" class="hidden" style="background:#16a34a;border-color:#16a34a"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Iniciar vídeo</button>
+        <button id="sSound">🔇 Sonido del vídeo</button>
+        <div class="scr-vol"><span>🔈</span><input type="range" id="sVol" min="0" max="100" step="1" aria-label="Volumen del vídeo"><span id="sVolVal">60</span></div>
+        <button id="sVideoBtn">🎬 Ocultar vídeo</button>
+        <button id="sFull">⛶ Pantalla completa</button>
+        <button id="sPip" class="hidden">🗗 Ventana flotante</button>
+      </div>
+    </div>
   </div>
   <div class="scr-pair" id="sPair">
     <h1>🖥️ Sincronizar PC y móvil</h1>
@@ -1014,7 +1026,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.44';
+const VERSION = 'v1.45';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1850,14 +1862,15 @@ function scrFoldInit() {
   try { st = JSON.parse(localStorage.getItem('pcbm_pliegues') || '{}'); } catch (e) {}
   const panel = document.querySelector('.scr-panel');
   const apply = () => panel.querySelectorAll('[data-box]').forEach(b => {
-    const f = !!st[b.dataset.box];
+    const f = b.dataset.box in st ? !!st[b.dataset.box] : b.dataset.box === 'controles';
     b.classList.toggle('folded', f);
     const btn = b.querySelector(':scope > .scr-fold');
     if (btn) { btn.textContent = f ? '▾' : '▴'; btn.setAttribute('aria-label', f ? 'Desplegar' : 'Plegar'); }
   });
   panel.addEventListener('click', e => {
     const btn = e.target.closest('.scr-fold'); if (!btn) return;
-    st[btn.dataset.fold] = !st[btn.dataset.fold];
+    const bx = btn.closest('[data-box]');
+    st[btn.dataset.fold] = bx ? !bx.classList.contains('folded') : !st[btn.dataset.fold];
     try { localStorage.setItem('pcbm_pliegues', JSON.stringify(st)); } catch (er) {}
     apply();
   });
@@ -1930,7 +1943,7 @@ function scrEyeTick() {
   $('sEyeRing').style.strokeDasharray = C;
   $('sEyeRing').style.strokeDashoffset = C * (1 - Math.min(1, frac));
 }
-const BATT_LOW = 10;
+const BATT_LOW = 20;
 let scrBattWarned = false, phoneBattWarned = false;
 function battLowMsg(n) { return 'Atención: al móvil le queda un ' + n + ' por ciento de batería. Ponlo a cargar.'; }
 let scrPhoneVer = '', scrUpdAsked = 0, scrCodeNow = '';
@@ -1960,6 +1973,7 @@ function scrData(m) {
     }
     const low = hasBatt && !m.charging && m.battery <= BATT_LOW;
     $('sEyeBatt').classList.toggle('batt-low', low);
+    $('sEyeBatt').classList.toggle('charging', hasBatt && !!m.charging);
     $('sBattBox').classList.toggle('batt-low', low);
     if (low && !scrBattWarned) { scrBattWarned = true; speak(battLowMsg(m.battery)); }
     if (hasBatt && (m.charging || m.battery > BATT_LOW + 2)) scrBattWarned = false;
@@ -2038,7 +2052,7 @@ async function openPip() {
   window.__pip = w;
   document.querySelectorAll('style').forEach(st => w.document.head.appendChild(st.cloneNode(true)));
   w.document.title = 'PC & Body-mind';
-  w.document.body.className = 'screen';
+  w.document.body.className = 'screen pip';
   const panel = document.querySelector('.scr-panel'), toast = $('sToast'), cele = $('sCele');
   const home = panel.parentNode, next = panel.nextSibling;
   const box = w.document.createElement('div');
@@ -2113,8 +2127,6 @@ function initScreen() {
   setInterval(scrEyeTick, 500);
   scrFoldInit();
   // ⚙: abre y cierra los controles; se cierran al tocar fuera
-  $('sMenuBtn').addEventListener('click', e => { e.stopPropagation(); $('screen').classList.toggle('menu-open'); });
-  $('screen').addEventListener('click', e => { if (!e.target.closest('.scr-top, #sMenuBtn')) $('screen').classList.remove('menu-open'); });
   // escribir una tarea para el bloque de ahora desde el PC
   const planClose = () => { $('sPlan').classList.add('hidden'); $('sPlanIn').value = ''; $('sTaskAdd').classList.remove('hidden'); };
   $('sTaskAdd').addEventListener('click', e => {
@@ -2593,7 +2605,7 @@ function renderBloques(scroll) {
     const acts = bActs(i);
     const cls = ['b-blk', i === cur ? 'now' : '', (bDay < 0 || (today && b.end <= m)) ? 'past' : '', i === bSel ? 'sel' : ''].join(' ');
     const body = acts.length ? `<span class="b-blk-acts">${acts.map(a => `<span class="${a.d ? 'done' : ''}">• ${escapeHtml(a.t)}</span>`).join('<br>')}</span>` : '<span class="b-blk-empty">Sin planificar</span>';
-    return `<button class="${cls}" data-i="${i}"><span class="b-blk-time">${hm(b.start)}</span><span class="b-blk-end">a ${hm(b.end)}</span>${body}${i === cur ? '<span class="b-now-tag">AHORA</span>' : ''}</button>`;
+    return `<button class="${cls}" data-i="${i}"><span class="b-blk-time">${hm(b.start)}</span><span class="b-blk-end">a ${hm(b.end)}</span>${body}</button>`;
   }).join('');
   // bloque elegido, en grande
   const b = BLOCKS[bSel], acts = bActs(bSel);
