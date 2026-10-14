@@ -7,11 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pasos">
+<meta name="apple-mobile-web-app-title" content="PC&Body-mind">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Contador de Pasos v1.11</title>
+<title>PC & Body-mind v1.12</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -153,11 +153,128 @@
   .scr-toast { position: absolute; right: 1.5vw; bottom: 3vh; background: rgba(15,23,42,0.9); border-right: 8px solid #4ade80; padding: 1.5vh 2vw; border-radius: 1rem; font-size: clamp(16px, min(3.5vw, 5vh), 48px); font-weight: 800; animation: slideIn 0.4s ease; }
   @keyframes scrPop { from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; } }
   @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } }
+
+  /* ---------- Bienvenida, inicio y navegación ---------- */
+  .logo svg { display: block; width: 100%; height: 100%; }
+  .splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .splash-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, #1e293b 0%, #0f172a 70%); transition: opacity 0.7s ease; }
+  .splash.fly .splash-bg { opacity: 0; }
+  .splash .logo { position: relative; width: 170px; height: 170px; animation: logoIn 1s cubic-bezier(.2,.8,.2,1) both, glow 2.4s 1s ease-in-out infinite; }
+  .splash-name { position: relative; font-size: 1.9rem; font-weight: 800; margin-top: 22px; animation: fadeUp 0.8s 0.35s both; transition: opacity 0.4s; }
+  .splash-by { position: relative; color: #94a3b8; font-size: 0.85rem; margin-top: 6px; animation: fadeUp 0.8s 0.6s both; transition: opacity 0.4s; }
+  .splash.text-out .splash-name, .splash.text-out .splash-by { opacity: 0; }
+  @keyframes logoIn { from { transform: scale(0.4) rotate(-25deg); opacity: 0; } }
+  @keyframes glow { 50% { filter: drop-shadow(0 0 24px rgba(74,222,128,0.55)); } }
+  @keyframes fadeUp { from { transform: translateY(16px); opacity: 0; } }
+  @keyframes float { 50% { transform: translateY(-7px); } }
+  .home { display: flex; flex-direction: column; align-items: center; padding-top: 3vh; }
+  .home .logo { width: 120px; height: 120px; animation: float 4s ease-in-out infinite; }
+  .home-title { font-size: 1.7rem; font-weight: 800; margin: 14px 0 4px; animation: fadeUp 0.6s both; }
+  .home-sub { color: #94a3b8; font-size: 0.85rem; margin-bottom: 26px; animation: fadeUp 0.6s 0.05s both; }
+  .home-btns { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+  .home-btn { display: flex; align-items: center; gap: 16px; text-align: left; background: #1e293b; border: 1px solid #334155; padding: 1rem 1.1rem; border-radius: 1.1rem; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.35); animation: fadeUp 0.6s both; }
+  .home-btn:hover { background: #273449; }
+  .home-btn:nth-child(1) { animation-delay: 0.15s; }
+  .home-btn:nth-child(2) { animation-delay: 0.3s; }
+  .home-btn:nth-child(3) { animation-delay: 0.45s; }
+  .home-btn .ico { font-size: 1.8rem; width: 54px; height: 54px; border-radius: 15px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ico.vista { background: rgba(56,189,248,0.16); }
+  .ico.bloques { background: rgba(250,204,21,0.16); }
+  .ico.pasos { background: rgba(74,222,128,0.16); }
+  .home-btn b { display: block; color: #f8fafc; }
+  .home-btn small { display: block; color: #94a3b8; font-weight: 400; font-size: 0.82rem; margin-top: 3px; }
+  .home.pre .logo { visibility: hidden; }
+  .home.pre .home-title, .home.pre .home-sub, .home.pre .home-btn { animation: none; opacity: 0; }
+  .home-ver { color: #475569; font-size: 0.75rem; margin-top: 24px; }
+  .back { width: auto; background: transparent; border: 1px solid #475569; color: #cbd5e1; padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 99px; flex: none; }
+  .back:hover { background: #334155; }
+
+  /* ---------- Descansos de la vista ---------- */
+  .sky { color: #38bdf8 !important; }
+  .btn-sky { background: #0284c7; }
+  .btn-sky:hover { background: #0369a1; }
+  .break-overlay { position: fixed; inset: 0; z-index: 60; background: linear-gradient(165deg, #0c4a6e 0%, #0f172a 75%); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  .break-eye { font-size: 3rem; animation: float 3s ease-in-out infinite; }
+  .break-msg { font-size: 1.45rem; font-weight: 800; margin: 14px 0 22px; max-width: 360px; line-height: 1.3; }
+  .break-hint { color: #bae6fd; margin-top: 20px; font-size: 0.95rem; }
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
+<!-- Bienvenida: logo a pantalla completa que luego sube al inicio -->
+<div class="splash hidden" id="splash">
+  <div class="splash-bg"></div>
+  <div class="logo" id="splashLogo" data-logo></div>
+  <div class="splash-name">PC &amp; Body-mind</div>
+  <div class="splash-by">by Práctica Integral</div>
+</div>
+
+<!-- Inicio: logo arriba y los tres botones -->
+<div class="wrap view hidden" id="home">
+  <div class="home">
+    <div class="logo" id="homeLogo" data-logo></div>
+    <div class="home-title">PC &amp; Body-mind</div>
+    <div class="home-sub">Cuida tu vista, tu tiempo y tu cuerpo</div>
+    <div class="home-btns">
+      <button class="home-btn" data-go="vista"><span class="ico vista">👁</span><span><b>Descansos de la vista</b><small id="homeVista">Regla 20-20-20</small></span></button>
+      <button class="home-btn" data-go="bloques"><span class="ico bloques">⏱</span><span><b>Bloques de tiempo</b><small>Próximamente</small></span></button>
+      <button class="home-btn" data-go="pasos"><span class="ico pasos">👣</span><span><b>Pasos</b><small id="homeSteps">0 pasos hoy</small></span></button>
+    </div>
+    <div class="home-ver" id="homeVer"></div>
+  </div>
+</div>
+
+<!-- Descansos de la vista -->
+<div class="wrap view hidden" id="vista">
   <header>
+    <button class="back" data-back>← Inicio</button>
+    <h1 class="sky">👁 Vista</h1>
+    <span></span>
+  </header>
+  <div class="card" style="text-align:center">
+    <div class="ring-box">
+      <svg width="240" height="240" viewBox="0 0 240 240">
+        <circle class="ring-bg" cx="120" cy="120" r="104" fill="none" stroke-width="16"/>
+        <circle class="ring-fg" id="vRing" style="stroke:#38bdf8" cx="120" cy="120" r="104" fill="none" stroke-width="16" stroke-linecap="round"/>
+      </svg>
+      <div class="ring-center">
+        <div class="steps" id="vCount">20:00</div>
+        <div class="goal-txt" id="vCountLbl">hasta la próxima pausa</div>
+      </div>
+    </div>
+    <button class="btn-sky mt" id="vToggle">▶ Empezar</button>
+    <div class="status" id="vStatus">Regla 20-20-20: cada 20 minutos, 20 segundos mirando a 6 metros.</div>
+  </div>
+  <div class="card">
+    <details open>
+    <summary>⏲ Programar los cronómetros</summary>
+    <div class="row">
+      <div><label for="vEvery">Pausa cada (minutos)</label><input type="number" id="vEvery" min="1" max="180" inputmode="numeric"></div>
+      <div><label for="vDur">Duración (segundos)</label><input type="number" id="vDur" min="5" max="600" inputmode="numeric"></div>
+    </div>
+    <label for="vDist">Mirar a una distancia de (metros)</label>
+    <input type="number" id="vDist" min="1" max="50" inputmode="numeric">
+    <div class="hint">Regla 20-20-20 de la Academia Americana de Oftalmología: cada 20 minutos, 20 segundos mirando a 20 pies (unos 6 metros).</div>
+    <button class="btn-outline mt" id="vTest">Probar una pausa ahora</button>
+    </details>
+  </div>
+</div>
+
+<!-- Bloques de tiempo (se explicará más adelante) -->
+<div class="wrap view hidden" id="bloques">
+  <header>
+    <button class="back" data-back>← Inicio</button>
+    <h1 style="color:#facc15">⏱ Bloques de tiempo</h1>
+    <span></span>
+  </header>
+  <div class="card" style="text-align:center">
+    <div style="font-size:3rem">⏱</div>
+    <p class="note">Próximamente. Aquí irán los bloques de tiempo.</p>
+  </div>
+</div>
+
+<div class="wrap view hidden" id="app">
+  <header>
+    <button class="back" data-back>← Inicio</button>
     <h1>👣 Pasos <span class="ver" id="ver"></span></h1>
     <button class="install hidden" id="installBtn">⬇ Instalar</button>
     <span class="date" id="dateTxt"></span>
@@ -327,6 +444,32 @@
   </div>
 </div>
 
+<!-- Aviso: toca pausa de vista -->
+<div class="cele hidden" id="vAlert">
+  <div class="cele-box" style="border-color:#38bdf8">
+    <div class="cele-emoji">👁</div>
+    <div class="cele-title sky">Pausa de vista</div>
+    <div class="cele-sub" id="vAlertSub">Llevas 20 minutos mirando la pantalla</div>
+    <button class="btn-sky" id="vStartBreak">▶ Comenzar pausa de vista</button>
+    <button class="btn-outline mt" id="vSnooze">Posponer 5 minutos</button>
+  </div>
+</div>
+
+<!-- Pausa de vista en marcha -->
+<div class="break-overlay hidden" id="vBreak">
+  <div class="break-eye">👁</div>
+  <div class="break-msg" id="vBreakMsg">Mira al menos a 6 metros de distancia</div>
+  <div class="ring-box">
+    <svg width="240" height="240" viewBox="0 0 240 240">
+      <circle class="ring-bg" cx="120" cy="120" r="104" fill="none" stroke-width="16"/>
+      <circle class="ring-fg" id="vBreakRing" style="stroke:#38bdf8" cx="120" cy="120" r="104" fill="none" stroke-width="16" stroke-linecap="round"/>
+    </svg>
+    <div class="ring-center"><div class="steps" id="vBreakCount" style="font-size:4.5rem">20</div><div class="goal-txt">segundos</div></div>
+  </div>
+  <div class="break-hint">Parpadea despacio y relaja los hombros</div>
+  <button class="btn-outline mt" id="vEnd" style="width:auto">Terminar</button>
+</div>
+
 <!-- Celebración de bloque (móvil) -->
 <div class="cele hidden" id="cele">
   <div class="cele-box">
@@ -372,10 +515,11 @@
 </div>
 
 <script>
-const VERSION = 'v1.11';
+const VERSION = 'v1.12';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
+const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, active: false, nextAt: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
 const NATIVE = !SCREEN && !!window.AndroidPasos; // dentro de la app Android (cuenta con la pantalla apagada)
@@ -391,10 +535,11 @@ function load() {
     const d = JSON.parse(localStorage.getItem(KEY));
     if (d && d.days) return {
       settings: { ...DEFAULTS, ...d.settings }, days: d.days, running: !!d.running,
-      music: { ...MUSIC_DEFAULT, ...d.music }, alerts: { ...ALERTS_DEFAULT, ...d.alerts }, cast: d.cast || null
+      music: { ...MUSIC_DEFAULT, ...d.music }, alerts: { ...ALERTS_DEFAULT, ...d.alerts }, cast: d.cast || null,
+      vista: { ...VISTA_DEFAULT, ...d.vista }
     };
   } catch (e) {}
-  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null };
+  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT } };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative(); }
 function dayKey(d = new Date()) {
@@ -548,14 +693,14 @@ function audio() {
   if (actx.state === 'suspended') actx.resume();
   return actx;
 }
-function tone(freq, start, dur, type = 'sine', vol = 0.25) {
+function tone(freq, start, dur, type = 'sine', vol = 0.25, dest = null) {
   const c = audio(); if (!c) return;
   const o = c.createOscillator(), g = c.createGain();
   o.type = type; o.frequency.value = freq;
   g.gain.setValueAtTime(0.0001, start);
   g.gain.exponentialRampToValueAtTime(vol, start + 0.012);
   g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-  o.connect(g).connect(c.destination);
+  o.connect(g).connect(dest || c.destination);
   o.start(start); o.stop(start + dur + 0.05);
 }
 const SOUNDS = {
@@ -1244,11 +1389,214 @@ $('installBtn').addEventListener('click', async () => {
 });
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
 
+// ---------- Logo provisional (se cambiará por el de Claude Design) ----------
+const LOGO_SVG = `<svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="lgPcbm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset="0.5" stop-color="#4ade80"/><stop offset="1" stop-color="#facc15"/></linearGradient></defs><circle cx="60" cy="60" r="52" fill="#1e293b" stroke="url(#lgPcbm)" stroke-width="7"/><path d="M24 60 Q60 27 96 60 Q60 93 24 60 Z" fill="none" stroke="#f8fafc" stroke-width="5" stroke-linejoin="round"/><circle cx="60" cy="60" r="13" fill="url(#lgPcbm)"/><circle cx="64.5" cy="55.5" r="4.2" fill="#0f172a"/></svg>`;
+
+// ---------- Navegación: inicio y secciones ----------
+const VIEWS = { '': 'home', vista: 'vista', bloques: 'bloques', pasos: 'app' };
+let fromHome = false;
+function showView() {
+  const id = VIEWS[location.hash.replace('#', '')] || 'home';
+  ['home', 'vista', 'bloques', 'app'].forEach(v => $(v).classList.toggle('hidden', v !== id));
+  if (id === 'home') { fromHome = false; renderHome(); }
+  if (id === 'app') render();
+  window.scrollTo(0, 0);
+}
+function goBack() {
+  if (fromHome) { fromHome = false; history.back(); return; }
+  history.replaceState(null, '', location.pathname + location.search);
+  showView();
+}
+function renderHome() {
+  const V = db.vista;
+  $('homeVista').textContent = V.active
+    ? 'Próxima pausa en ' + Math.max(1, Math.ceil((V.nextAt - Date.now()) / 60000)) + ' min'
+    : 'Regla 20-20-20 · sin activar';
+  $('homeSteps').textContent = fmt(today().steps) + ' pasos hoy';
+}
+
+// Bienvenida: logo grande → se queda solo el logo → sube a su sitio en el inicio → aparecen los botones
+function runSplash() {
+  const sp = $('splash'), home = $('home');
+  sp.classList.remove('hidden');
+  home.classList.add('pre');
+  setTimeout(() => sp.classList.add('text-out'), 1700);
+  setTimeout(() => {
+    const logo = $('splashLogo');
+    const a = logo.getBoundingClientRect(), b = $('homeLogo').getBoundingClientRect();
+    const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+    logo.style.animation = 'none';
+    logo.style.transition = 'transform 0.85s cubic-bezier(.65,0,.25,1)';
+    logo.style.transform = `translate(${dx}px, ${dy}px) scale(${b.width / a.width})`;
+    sp.classList.add('fly');
+  }, 2250);
+  setTimeout(() => { sp.classList.add('hidden'); home.classList.remove('pre'); }, 3150);
+}
+
+// ---------- Descansos de la vista (regla 20-20-20) ----------
+let vAlertSpeak = null, vAlerting = false, vBreakEnd = 0, vBreakT = null, vReminder = null, vMusicWasPlaying = false;
+const mmss = ms => { const t = Math.ceil(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+function chime() {
+  const c = audio(); if (!c) return;
+  const t = c.currentTime + 0.02;
+  ['E5', 'G5', 'C6'].forEach((n, i) => tone(NOTE(n), t + i * 0.28, 1.4, 'sine', 0.22));
+}
+// Música relajante suave para la pausa (acordes largos + campanitas)
+let relax = null;
+function softTone(freq, start, dur, vol, dest) {
+  const c = audio(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.linearRampToValueAtTime(vol, start + 1.2);
+  g.gain.linearRampToValueAtTime(0.0001, start + dur);
+  o.connect(g).connect(dest);
+  o.start(start); o.stop(start + dur + 0.1);
+}
+function startRelax() {
+  const c = audio(); if (!c) return;
+  stopRelax();
+  const master = c.createGain(); master.gain.value = 1; master.connect(c.destination);
+  const chords = [['C4', 'E4', 'G4', 'B4'], ['A3', 'C4', 'E4', 'G4'], ['F3', 'A3', 'C4', 'E4'], ['G3', 'B3', 'D4', 'E4']];
+  const bells = ['E5', 'G5', 'A5', 'C6', 'D6', 'E6'];
+  let i = 0;
+  const pad = () => { const t = c.currentTime + 0.05; chords[i++ % chords.length].forEach(n => softTone(NOTE(n), t, 4.3, 0.04, master)); };
+  const bell = () => { if (Math.random() < 0.65) tone(NOTE(bells[Math.floor(Math.random() * bells.length)]), c.currentTime + 0.02, 2.4, 'sine', 0.05, master); };
+  pad(); bell();
+  relax = { master, a: setInterval(pad, 4000), b: setInterval(bell, 850) };
+}
+function stopRelax() {
+  if (!relax) return;
+  clearInterval(relax.a); clearInterval(relax.b);
+  const m = relax.master;
+  try { m.gain.setTargetAtTime(0, audio().currentTime, 0.35); } catch (e) {}
+  setTimeout(() => { try { m.disconnect(); } catch (e) {} }, 2500);
+  relax = null;
+}
+function vistaNotify() {
+  if (!('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
+  try {
+    const n = new Notification('👁 Pausa de vista', { body: `Mira al menos a ${db.vista.dist} metros durante ${db.vista.dur} segundos`, icon: 'icon-192.png', tag: 'vista', requireInteraction: true });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch (e) {}
+}
+function vistaStart() {
+  const V = db.vista;
+  unlockSound();
+  V.active = true; V.nextAt = Date.now() + V.every * 60000; save();
+  if ('Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
+  vistaTick();
+}
+function vistaStop() { db.vista.active = false; save(); vistaTick(); }
+function vistaAlert() {
+  vAlerting = true;
+  $('vAlertSub').textContent = `Llevas ${db.vista.every} minutos mirando la pantalla`;
+  $('vAlert').classList.remove('hidden');
+  chime();
+  vAlertSpeak = setTimeout(() => speak('Pausa de vista.'), 1000);
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  vistaNotify();
+  let n = 0;
+  clearInterval(vReminder);
+  vReminder = setInterval(() => { if (++n > 3) clearInterval(vReminder); else chime(); }, 60000); // recuerda si no se atiende
+}
+function vistaBreak() {
+  const V = db.vista;
+  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false;
+  $('vAlert').classList.add('hidden');
+  unlockSound();
+  vBreakEnd = Date.now() + V.dur * 1000;
+  $('vBreakMsg').textContent = `Mira al menos a ${V.dist} metros de distancia`;
+  $('vBreak').classList.remove('hidden');
+  vMusicWasPlaying = musicPlaying();
+  if (vMusicWasPlaying) yt.pauseVideo();
+  speak(`Mira al menos a ${V.dist} metros de distancia durante ${V.dur} segundos.`);
+  startRelax();
+  clearInterval(vBreakT);
+  vBreakT = setInterval(vistaBreakTick, 200);
+  vistaBreakTick();
+}
+function vistaBreakTick() {
+  const total = db.vista.dur * 1000, left = Math.max(0, vBreakEnd - Date.now());
+  $('vBreakCount').textContent = Math.ceil(left / 1000);
+  $('vBreakRing').style.strokeDasharray = RING_C;
+  $('vBreakRing').style.strokeDashoffset = RING_C * (1 - left / total);
+  if (left <= 0) vistaBreakEnd(true);
+}
+function vistaBreakEnd(done) {
+  clearInterval(vBreakT); vBreakEnd = 0;
+  stopRelax();
+  $('vBreak').classList.add('hidden');
+  if (done) { chime(); setTimeout(() => speak('Muy bien. Puedes volver a la pantalla.'), 800); }
+  if (vMusicWasPlaying) musicPlay();
+  vMusicWasPlaying = false;
+  const V = db.vista;
+  if (V.active) { V.nextAt = Date.now() + V.every * 60000; save(); }
+  vistaTick();
+}
+function vistaSnooze() {
+  clearInterval(vReminder); vAlerting = false;
+  $('vAlert').classList.add('hidden');
+  db.vista.nextAt = Date.now() + 5 * 60000; save();
+  vistaTick();
+}
+function vistaTick() {
+  const V = db.vista, now = Date.now();
+  if (V.active && !vAlerting && !vBreakEnd && now >= V.nextAt) vistaAlert();
+  const total = V.every * 60000;
+  const left = V.active ? Math.max(0, V.nextAt - now) : total;
+  $('vCount').textContent = mmss(left);
+  $('vCountLbl').textContent = V.active ? 'hasta la próxima pausa' : 'cada ' + V.every + ' minutos';
+  $('vRing').style.strokeDasharray = RING_C;
+  $('vRing').style.strokeDashoffset = RING_C * (1 - left / total);
+  $('vToggle').textContent = V.active ? '⏸ Detener' : '▶ Empezar';
+  $('vToggle').className = (V.active ? 'stop' : 'btn-sky') + ' mt';
+  $('vStatus').textContent = V.active
+    ? `Te aviso cada ${V.every} minutos para mirar a ${V.dist} metros durante ${V.dur} segundos.`
+    : `Regla 20-20-20: cada ${V.every} minutos, ${V.dur} segundos mirando a ${V.dist} metros.`;
+  if (!$('home').classList.contains('hidden')) renderHome();
+}
+function bindVista() {
+  const V = db.vista;
+  // si la app estuvo cerrada mucho rato, se empieza de nuevo en vez de avisar nada más abrir
+  if (V.active && Date.now() - V.nextAt > 10 * 60000) { V.nextAt = Date.now() + V.every * 60000; save(); }
+  $('vEvery').value = V.every; $('vDur').value = V.dur; $('vDist').value = V.dist;
+  const num = (id, key, min, max) => $(id).addEventListener('change', () => {
+    const v = Math.round(Number($(id).value));
+    if (v >= min && v <= max) {
+      V[key] = v;
+      if (key === 'every' && V.active) V.nextAt = Date.now() + v * 60000;
+      save(); vistaTick();
+    } else $(id).value = V[key];
+  });
+  num('vEvery', 'every', 1, 180); num('vDur', 'dur', 5, 600); num('vDist', 'dist', 1, 50);
+  $('vToggle').addEventListener('click', () => db.vista.active ? vistaStop() : vistaStart());
+  $('vTest').addEventListener('click', vistaBreak);
+  $('vStartBreak').addEventListener('click', vistaBreak);
+  $('vSnooze').addEventListener('click', vistaSnooze);
+  $('vEnd').addEventListener('click', () => vistaBreakEnd(false));
+  setInterval(vistaTick, 1000);
+  vistaTick();
+}
+
+function initShell() {
+  // cada copia del logo con su propio degradado (si no, al ocultar la bienvenida el del inicio se queda sin color)
+  document.querySelectorAll('[data-logo]').forEach((el, i) => { el.innerHTML = LOGO_SVG.replace(/lgPcbm/g, 'lgPcbm' + i); });
+  $('homeVer').textContent = VERSION;
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { fromHome = true; location.hash = b.dataset.go; }));
+  document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', goBack));
+  addEventListener('hashchange', showView);
+  bindVista();
+  showView();
+  if (!location.hash) runSplash();
+}
+
 // ---------- Arranque ----------
 window.onYouTubeIframeAPIReady = () => SCREEN ? createScreenPlayer() : createMainPlayer();
 
 function initApp() {
   $('ver').textContent = VERSION;
+  initShell();
   bindSettings();
   bindAlerts();
   bindMusic();
