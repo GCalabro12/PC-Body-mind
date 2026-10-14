@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.38</title>
+<title>PC & Body-mind v1.39</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -191,11 +191,26 @@
   .scr-eye.alert .eye-center { animation: eyeFade 1.2s infinite; }
   @keyframes eyePulse { 50% { opacity: 0.55; transform: scale(1.04); } }
   @keyframes eyeFade { 50% { opacity: 0.55; } }
+  /* Ventana grande: la misma columna, a la derecha, dejando ver el vídeo */
+  @media (min-width: 981px) and (min-height: 641px) and (min-aspect-ratio: 4/5) {
+    #screen .scr-shade { background: linear-gradient(270deg, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.6) 35%, rgba(15,23,42,0) 65%); }
+    #screen .scr-panel { left: auto; right: 1.5vw; width: min(560px, 40vw); padding: 2.5vh 0 2vh; overflow-y: auto; }
+    #screen .scr-task { padding-left: 20px; padding-right: 20px; }
+    #screen .scr-pasos { padding-left: 16px; padding-right: 16px; }
+    #screen .scr-salud { padding-left: 18px; }
+    #screen .scr-task-range { font-size: 14px; padding: 0 22px; }
+    #screen .scr-panel { width: min(560px, max(40vw, 440px)); }
+  }
+  /* Planificar la tarea desde el PC */
+  .scr-plan { display: flex; gap: 6px; margin-top: 6px; }
+  .scr-plan.hidden { display: none; }
+  .scr-plan input { flex: 1; min-width: 0; padding: 6px 10px; border-radius: 10px; border: 1px solid #CA8A04; background: rgba(15,23,42,0.9); color: #F8FAFC; font-size: 15px; -webkit-user-select: text; user-select: text; }
+  .scr-plan button { width: auto; padding: 4px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; }
   /* App instalada sin barra de título: franja superior para arrastrar la ventana y margen para no tapar los botones */
   .scr-drag { position: fixed; top: 0; left: env(titlebar-area-x, 0px); width: env(titlebar-area-width, 0px); height: env(titlebar-area-height, 0px); -webkit-app-region: drag; app-region: drag; z-index: 90; background: rgba(15,23,42,0.55); }
   .scr-panel, .scr-top { margin-top: env(titlebar-area-height, 0px); }
   /* Ventana estrecha: lo más importante arriba (tarea), luego la vista, los pasos y abajo los datos secundarios */
-  @media (max-aspect-ratio: 4/5), (max-width: 980px), (max-height: 640px) {
+  @media all {
     .scr-shade { background: rgba(15,23,42,0.74); }
     .scr-panel { top: 0; right: 0; bottom: 0; left: 0; width: auto; padding: 3vh 5vw 2vh; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 1.2vh; }
     .scr-task { order: 1; margin: 0; text-align: center; border: 2px solid rgba(250,204,21,0.6); border-radius: 16px; padding: 0.9vh 3vw 1.1vh; background: rgba(15,23,42,0.6); }
@@ -921,7 +936,12 @@
       <button class="scr-fold" data-fold="tarea" aria-label="Plegar o desplegar">▴</button>
       <div class="scr-task-range" id="sTaskRange"></div>
       <div class="scr-task-act" id="sTaskAct"></div>
-      <div class="scr-act"><button class="scr-btn sun hidden" data-cmd="taskDone" id="sTaskDone">✓ Hecha</button></div>
+      <div class="scr-act"><button class="scr-btn sun hidden" data-cmd="taskDone" id="sTaskDone">✓ Hecha</button><button class="scr-btn ghost hidden" id="sTaskAdd">＋ Añadir tarea</button></div>
+      <form class="scr-plan hidden" id="sPlan" autocomplete="off">
+        <input id="sPlanIn" maxlength="140" placeholder="¿Qué vas a hacer en este bloque?" aria-label="Nueva tarea para este bloque">
+        <button type="submit" class="sun" style="background:#CA8A04;border:0;color:#fff">Guardar</button>
+        <button type="button" id="sPlanX" style="background:transparent;border:1px solid #475569;color:#cbd5e1" aria-label="Cancelar">✕</button>
+      </form>
     </div>
     <div class="scr-eye hidden" id="sEye" data-box="vista">
       <button class="scr-fold" data-fold="vista" aria-label="Plegar o desplegar">▴</button>
@@ -964,7 +984,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.38';
+const VERSION = 'v1.39';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1685,6 +1705,19 @@ function castCommand(m) {
   const S = db.salud;
   switch (m.c) {
     case 'update': checkUpdate(); return;
+    case 'addTask': {
+      const text = String(m.text || '').trim().slice(0, 200), c = curBlock();
+      if (!text || c < 0) break;
+      const k = dayKey(), days = db.bloques.days;
+      if (!days[k]) days[k] = {};
+      if (!days[k][c]) days[k][c] = [];
+      const acts = normActs(days[k][c]);
+      if (acts.length >= BLOCK_MAX) break;
+      acts.push({ t: text, d: false });
+      save();
+      if (!$('bloques').classList.contains('hidden')) renderBloques();
+      break;
+    }
     case 'vistaStart': if (!vBreakEnd) vistaBreak(); break;
     case 'vistaEnd': if (vBreakEnd) vistaBreakEnd(false); break;
     case 'vistaSnooze': if (vAlerting) vistaSnooze(); break;
@@ -1762,7 +1795,7 @@ function scrStart() {
     const p = scrPeer = new Peer(CAST_PREFIX + code);
     p.on('open', () => { scrTries = 0; scrConn('Esperando al móvil · código ' + code); });
     p.on('connection', c => {
-      c.on('open', () => { scrLink = c; $('sPair').classList.add('hidden'); scrConn('📱 Móvil conectado · código ' + code); });
+      c.on('open', () => { scrLink = c; scrCodeNow = code; $('sPair').classList.add('hidden'); scrConn('📱 Móvil conectado · código ' + code); });
       c.on('data', scrData);
       c.on('close', () => scrConn('📱 Móvil desconectado · código ' + code));
     });
@@ -1865,11 +1898,12 @@ function scrEyeTick() {
 const BATT_LOW = 10;
 let scrBattWarned = false, phoneBattWarned = false;
 function battLowMsg(n) { return 'Atención: al móvil le queda un ' + n + ' por ciento de batería. Ponlo a cargar.'; }
-let scrPhoneVer = '', scrUpdAsked = 0;
+let scrPhoneVer = '', scrUpdAsked = 0, scrCodeNow = '';
 function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'state') {
     scrPhoneVer = m.ver || 'antigua';
+    if (scrCodeNow) scrConn('📱 Móvil conectado · código ' + scrCodeNow + ' · móvil ' + (m.ver || 'versión antigua ⚠️'));
     if (m.ver && m.ver !== VERSION && scrLink && scrLink.open && Date.now() - scrUpdAsked > 60000) {
       scrUpdAsked = Date.now(); scrLink.send({ t: 'cmd', c: 'update' });
     }
@@ -1899,6 +1933,7 @@ function scrData(m) {
       $('sTaskRange').textContent = `⏱ Bloque ${m.bloque.range} · quedan ${m.bloque.left} min` + (m.bloque.total ? ` · ${m.bloque.done}/${m.bloque.total}` : '');
       $('sTaskAct').textContent = m.bloque.act;
       $('sTaskDone').classList.toggle('hidden', !(m.bloque.total > m.bloque.done));
+      $('sTaskAdd').classList.toggle('hidden', m.bloque.total >= 3 || !$('sPlan').classList.contains('hidden'));
     }
     if (m.salud) { scrSalud = { ...m.salud, at: Date.now() }; }
     $('sSalud').classList.toggle('hidden', !m.salud);
@@ -2029,6 +2064,24 @@ function initScreen() {
   }
   setInterval(scrEyeTick, 500);
   scrFoldInit();
+  // escribir una tarea para el bloque de ahora desde el PC
+  const planClose = () => { $('sPlan').classList.add('hidden'); $('sPlanIn').value = ''; $('sTaskAdd').classList.remove('hidden'); };
+  $('sTaskAdd').addEventListener('click', e => {
+    e.stopPropagation();
+    $('sPlan').classList.remove('hidden'); $('sTaskAdd').classList.add('hidden');
+    $('sPlanIn').focus();
+  });
+  $('sPlanX').addEventListener('click', planClose);
+  $('sPlanIn').addEventListener('keydown', e => { if (e.key === 'Escape') planClose(); });
+  $('sPlan').addEventListener('submit', e => {
+    e.preventDefault();
+    const text = $('sPlanIn').value.trim();
+    if (!text) { $('sPlanIn').focus(); return; }
+    if (!scrLink || !scrLink.open) { scrCmd('addTask'); return; }
+    scrLink.send({ t: 'cmd', c: 'addTask', text });
+    $('sTaskAct').textContent = text;
+    planClose();
+  });
   // botones que mandan órdenes al móvil (funcionan también en la ventana flotante)
   const panel = document.querySelector('.scr-panel');
   panel.addEventListener('click', e => {
