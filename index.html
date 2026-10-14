@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.17</title>
+<title>PC & Body-mind v1.18</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -180,6 +180,8 @@
   .splash-name { position: relative; font-size: 2rem; font-weight: 800; letter-spacing: -0.4px; margin-top: 24px; animation: pcbm-text-in 500ms var(--ease-out) 1000ms both, pcbm-text-out 400ms var(--ease-in) 1700ms forwards; }
   .splash-name b, .home-title b { color: #FACC15; }
   .seal { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.3px; color: #94A3B8; border: 1px solid #334155; border-radius: 999px; padding: 6px 12px; }
+  a.seal { text-decoration: none; transition: color 0.2s, border-color 0.2s; }
+  a.seal:hover { color: #F8FAFC; border-color: #4ADE80; }
   .seal::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; }
   .splash .seal { position: relative; margin-top: 14px; animation: pcbm-text-in 500ms var(--ease-out) 1200ms both, pcbm-text-out 400ms var(--ease-in) 1700ms forwards; }
   .home { position: relative; display: flex; flex-direction: column; align-items: center; min-height: calc(100vh - 60px); }
@@ -261,14 +263,14 @@
   <div class="home">
     <div class="logo" id="homeLogo" data-logo></div>
     <h1 class="home-title">PC <b>&amp;</b> Body-mind</h1>
-    <p class="home-sub">Cuida tu vista, tu tiempo y tu cuerpo</p>
+    <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
     <div class="home-btns">
       <button class="home-btn vista" data-go="vista"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Descansos de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3>Bloques de tiempo</h3><span class="pill">Próximamente</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">busca el punto más lejano de la habitación y míralo un momento.</span></p></div>
-    <div class="seal-wrap"><span class="seal">by Práctica Integral</span></div>
+    <div class="seal-wrap"><a class="seal" href="https://practicaintegral.club" target="_blank" rel="noopener">by Práctica Integral</a></div>
   </div>
 </div>
 
@@ -591,7 +593,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.17';
+const VERSION = 'v1.18';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
