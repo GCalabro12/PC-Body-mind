@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.27</title>
+<title>PC & Body-mind v1.28</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -165,13 +165,13 @@
   #screen::before { content: ""; position: fixed; top: 0; left: 0; width: env(titlebar-area-width, 0px); height: env(titlebar-area-height, 0px); -webkit-app-region: drag; app-region: drag; z-index: 5; }
   .scr-panel, .scr-top { margin-top: env(titlebar-area-height, 0px); }
   /* Ventana estrecha: lo más importante arriba (tarea), luego la vista, los pasos y abajo los datos secundarios */
-  @media (max-aspect-ratio: 4/5), (max-width: 560px) {
+  @media (max-aspect-ratio: 4/5), (max-width: 980px), (max-height: 640px) {
     .scr-shade { background: rgba(15,23,42,0.74); }
     .scr-panel { top: 0; right: 0; bottom: 0; left: 0; width: auto; padding: 3vh 5vw 2vh; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 1.2vh; }
     .scr-task { order: 1; margin: 0; text-align: center; }
     .scr-task-act { font-size: clamp(16px, 8vw, 36px); }
     .scr-task-range { font-size: clamp(10px, 3.6vw, 16px); }
-    .scr-eye { order: 2; margin: 0 auto; width: min(80vw, 30vh); }
+    .scr-eye { order: 2; margin: 0 auto; width: min(80vw, 30vh, 320px); }
     .scr-eye-time { font-size: clamp(16px, min(9vw, 5vh), 40px); }
     .scr-steps { order: 3; font-size: clamp(34px, min(21vw, 12vh), 150px); }
     .scr-label { order: 4; font-size: clamp(11px, 4vw, 18px); }
@@ -844,7 +844,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.27';
+const VERSION = 'v1.28';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
