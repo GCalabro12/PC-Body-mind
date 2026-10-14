@@ -8,10 +8,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PC&Body-mind">
-<link rel="manifest" href="manifest.json">
+<script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.24</title>
+<title>PC & Body-mind v1.25</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -161,6 +161,28 @@
   .scr-eye.alert #sEyeLid { stroke: #facc15; }
   .scr-eye.alert { animation: eyePulse 1.2s infinite; }
   @keyframes eyePulse { 50% { opacity: 0.55; transform: scale(1.04); } }
+  /* App instalada sin barra de título: franja superior para arrastrar la ventana y margen para no tapar los botones */
+  #screen::before { content: ""; position: fixed; top: 0; left: 0; width: env(titlebar-area-width, 0px); height: env(titlebar-area-height, 0px); -webkit-app-region: drag; app-region: drag; z-index: 5; }
+  .scr-panel, .scr-top { margin-top: env(titlebar-area-height, 0px); }
+  /* Ventana estrecha: lo más importante arriba (tarea), luego la vista, los pasos y abajo los datos secundarios */
+  @media (max-aspect-ratio: 4/5), (max-width: 560px) {
+    .scr-shade { background: rgba(15,23,42,0.74); }
+    .scr-panel { top: 0; right: 0; bottom: 0; left: 0; width: auto; padding: 3vh 5vw 2vh; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 1.2vh; }
+    .scr-task { order: 1; margin: 0; text-align: center; }
+    .scr-task-act { font-size: clamp(16px, 8vw, 36px); }
+    .scr-task-range { font-size: clamp(10px, 3.6vw, 16px); }
+    .scr-eye { order: 2; margin: 0 auto; width: min(80vw, 30vh); }
+    .scr-eye-time { font-size: clamp(16px, min(9vw, 5vh), 40px); }
+    .scr-steps { order: 3; font-size: clamp(34px, min(21vw, 12vh), 150px); }
+    .scr-label { order: 4; font-size: clamp(11px, 4vw, 18px); }
+    .scr-panel > .scr-bar { order: 5; }
+    .scr-block { order: 6; margin: 0; font-size: clamp(10px, 3.6vw, 16px); }
+    .scr-stats { order: 7; margin-top: auto; justify-content: center; gap: 5vw; font-size: clamp(9px, 2.8vw, 12px); opacity: 0.75; }
+    .scr-stats b { font-size: clamp(12px, 4.4vw, 18px); }
+    .scr-top { top: auto; bottom: 1vh; left: 2vw; right: 2vw; max-width: none; flex-direction: row; flex-wrap: wrap; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+    #screen:hover .scr-top { opacity: 1; }
+    .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
+  }
   .scr-toast { position: absolute; right: 1.5vw; bottom: 3vh; background: rgba(15,23,42,0.9); border-right: 8px solid #4ade80; padding: 1.5vh 2vw; border-radius: 1rem; font-size: clamp(16px, min(3.5vw, 5vh), 48px); font-weight: 800; animation: slideIn 0.4s ease; }
   @keyframes scrPop { from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; } }
   @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } }
@@ -199,6 +221,7 @@
   .home-btn:nth-child(1) { animation-delay: 0.2s; }
   .home-btn:nth-child(2) { animation-delay: 0.3s; }
   .home-btn:nth-child(3) { animation-delay: 0.4s; }
+  .home-btn:nth-child(4) { animation-delay: 0.5s; }
   .home-btn .ico { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; }
   .home-btn .ico svg { width: 34px; height: 34px; }
   .home-btn h3 { font-size: 17px; line-height: 22px; font-weight: 700; margin: 0; }
@@ -234,6 +257,25 @@
   .ver-badge { position: fixed; top: 6px; right: 10px; z-index: 40; color: #64748b; font-size: 0.72rem; font-variant-numeric: tabular-nums; pointer-events: none; }
   body.has-badge { padding-top: 26px; }
   .cele-art svg { width: 120px; height: 132px; display: block; margin: 0 auto; }
+
+  /* ---------- Agua y movimiento ---------- */
+  .teal { color: #2DD4BF !important; }
+  .btn-teal { background: #0D9488; }
+  .btn-teal:hover { background: #0F766E; }
+  .home-btn.agua .ico { background: rgba(45,212,191,0.14); }
+  .home-btn.agua .st { color: #2DD4BF; }
+  .home-btn.agua:hover { border-color: rgba(45,212,191,0.45); }
+  .h-count { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+  .h-count > div { text-align: center; font-size: 1.1rem; color: #cbd5e1; }
+  .h-count b { font-size: 2.6rem; color: #F8FAFC; font-variant-numeric: tabular-nums; }
+  .h-count small { display: block; color: #94A3B8; font-size: 0.8rem; }
+  .h-btn { width: 52px; height: 52px; min-width: 52px; flex: 0 0 52px; padding: 0; border-radius: 50%; font-size: 1.6rem; line-height: 1; background: #134E4A; color: #5EEAD4; }
+  .h-btn:hover { background: #115E59; }
+  .h-glasses { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px 0 4px; }
+  .h-glasses span { width: 18px; height: 24px; border: 2px solid #2DD4BF; border-top-width: 0; border-radius: 2px 2px 6px 6px; position: relative; overflow: hidden; }
+  .h-glasses span.full::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 75%; background: #2DD4BF; }
+  .h-next { text-align: center; color: #94A3B8; font-size: 0.85rem; margin: 8px 0 2px; }
+  .h-tip { text-align: center; color: #CBD5E1; font-size: 0.9rem; margin-top: 10px; font-style: italic; }
 
   /* ---------- Bloques de tiempo ---------- */
   .sun { color: #FACC15 !important; }
@@ -349,6 +391,7 @@
       <button class="home-btn vista" data-go="vista"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Descansos de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3>Bloques de tiempo</h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn agua" data-go="agua"><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">busca el punto más lejano de la habitación y míralo un momento.</span></p></div>
@@ -397,6 +440,44 @@
     <button class="btn-outline mt" id="vTest">Probar una pausa ahora</button>
     </details>
   </div>
+</div>
+
+<!-- Agua y movimiento: avisos programables -->
+<div class="wrap view hidden" id="agua">
+  <header>
+    <button class="back" data-back>← Inicio</button>
+    <h1 class="teal">💧 Agua y movimiento</h1>
+    <span></span>
+  </header>
+  <div class="card">
+    <h2 class="teal">💧 Agua</h2>
+    <div class="h-count">
+      <button class="h-btn" id="hAguaMinus" aria-label="Quitar un vaso">−</button>
+      <div><b id="hAguaN">0</b> / <span id="hAguaGoalTxt">8</span><small>vasos hoy</small></div>
+      <button class="h-btn" id="hAguaPlus" aria-label="Añadir un vaso">+</button>
+    </div>
+    <div class="h-glasses" id="hAguaGlasses"></div>
+    <div class="h-next" id="hAguaNext"></div>
+    <label class="check"><input type="checkbox" id="hAguaOn"> Avisarme para beber agua</label>
+    <div class="row">
+      <div><label for="hAguaMin">Cada (minutos)</label><input type="number" id="hAguaMin" min="10" max="240" inputmode="numeric"></div>
+      <div><label for="hAguaGoal">Meta (vasos al día)</label><input type="number" id="hAguaGoal" min="1" max="20" inputmode="numeric"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2 class="teal">🤸 Movimiento</h2>
+    <div class="h-count">
+      <button class="h-btn" id="hMovMinus" aria-label="Quitar una pausa activa">−</button>
+      <div><b id="hMovN">0</b><small>pausas activas hoy</small></div>
+      <button class="h-btn" id="hMovPlus" aria-label="Me he movido">+</button>
+    </div>
+    <div class="h-tip" id="hMovTip"></div>
+    <div class="h-next" id="hMovNext"></div>
+    <label class="check"><input type="checkbox" id="hMovOn"> Avisarme para levantarme y moverme</label>
+    <label for="hMovMin">Cada (minutos)</label>
+    <input type="number" id="hMovMin" min="10" max="240" inputmode="numeric">
+  </div>
+  <p class="hint" style="text-align:center">Los avisos suenan solo entre las 5:30 y las 22:00, con la app abierta.</p>
 </div>
 
 <!-- Sincronizar el móvil con la pantalla del PC -->
@@ -652,6 +733,17 @@
   </div>
 </div>
 
+<!-- Aviso: agua / movimiento -->
+<div class="cele hidden" id="hAlert">
+  <div class="cele-box" style="border-color:#2DD4BF">
+    <div class="cele-art"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg></div>
+    <div class="cele-title teal" id="hAlertTitle">💧 Hora de beber agua</div>
+    <div class="cele-sub" id="hAlertSub"></div>
+    <button class="btn-teal" id="hAlertDone">✓ Hecho</button>
+    <button class="btn-outline mt" id="hAlertSnooze">Posponer 10 minutos</button>
+  </div>
+</div>
+
 <!-- Aviso: hora de dormir -->
 <div class="cele hidden" id="bSleep">
   <div class="cele-box" style="border-color:#818CF8">
@@ -746,10 +838,11 @@
 </div>
 
 <script>
-const VERSION = 'v1.24';
+const VERSION = 'v1.25';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
+const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
@@ -768,10 +861,10 @@ function load() {
     if (d && d.days) return {
       settings: { ...DEFAULTS, ...d.settings }, days: d.days, running: !!d.running,
       music: { ...MUSIC_DEFAULT, ...d.music }, alerts: { ...ALERTS_DEFAULT, ...d.alerts }, cast: d.cast || null,
-      vista: { ...VISTA_DEFAULT, ...d.vista }, bloques: { ...BLOQUES_DEFAULT, ...d.bloques }
+      vista: { ...VISTA_DEFAULT, ...d.vista }, bloques: { ...BLOQUES_DEFAULT, ...d.bloques }, salud: { ...SALUD_DEFAULT, ...d.salud }
     };
   } catch (e) {}
-  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT }, bloques: { ...BLOQUES_DEFAULT, days: {} } };
+  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT }, bloques: { ...BLOQUES_DEFAULT, days: {} }, salud: { ...SALUD_DEFAULT, days: {} } };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative(); }
 function dayKey(d = new Date()) {
@@ -1675,11 +1768,12 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.se
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><g transform="translate(256 256) scale(0.84) translate(-256 -262)"><g fill="none" stroke="#38BDF8" stroke-width="30" stroke-linecap="round"><rect x="84" y="150" width="344" height="236" rx="60"/><path d="M256 386 L256 420 M204 424 L308 424"/></g><circle cx="256" cy="148" r="56" fill="#0F172A"/><circle cx="256" cy="148" r="68" fill="#FACC15" opacity=".14"/><g fill="none" stroke="#4ADE80" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"><path d="M178 200 L256 252 L334 200"/><path d="M256 252 L256 298"/><path d="M222 352 L256 298 L290 352"/></g><circle cx="256" cy="148" r="40" fill="#FACC15"/></g></svg>`;
 
 // ---------- Navegación: inicio y secciones ----------
-const VIEWS = { '': 'home', vista: 'vista', bloques: 'bloques', pasos: 'app', pc: 'pc' };
+const VIEWS = { '': 'home', vista: 'vista', bloques: 'bloques', pasos: 'app', pc: 'pc', agua: 'agua' };
 let fromHome = false;
 function showView() {
   const id = VIEWS[location.hash.replace('#', '')] || 'home';
-  ['home', 'vista', 'bloques', 'app', 'pc'].forEach(v => $(v).classList.toggle('hidden', v !== id));
+  ['home', 'vista', 'bloques', 'app', 'pc', 'agua'].forEach(v => $(v).classList.toggle('hidden', v !== id));
+  if (id === 'agua') renderSalud();
   if (id === 'home') { fromHome = false; renderHome(); $('pausiTip').textContent = PAUSI_TIPS[Math.floor(Math.random() * PAUSI_TIPS.length)]; }
   if (id === 'app') render();
   if (id === 'bloques') { bloquesReset(); renderBloques(true); }
@@ -1691,13 +1785,14 @@ function goBack() {
   showView();
 }
 const PAUSI_TIPS = [
-  'busca el punto más lejano de la habitación y míralo un momento.',
-  'parpadea despacio diez veces: tus ojos lo agradecen.',
-  'levántate y estira los brazos hacia el techo.',
-  'relaja los hombros y respira hondo tres veces.',
   'un vaso de agua también es una pausa.',
+  'ten una botella de agua a la vista: beberás más sin darte cuenta.',
+  'bebe un vaso de agua al empezar cada bloque.',
+  'levántate y estira los brazos hacia el techo.',
   'camina un poco: cada paso cuenta.',
-  'aleja la pantalla hasta un brazo de distancia.'
+  'gira los hombros hacia atrás diez veces y suelta la tensión.',
+  'haz diez sentadillas suaves y vuelve con más energía.',
+  'sube y baja unas escaleras: tu cuerpo te lo agradecerá.'
 ];
 function renderHome() {
   const V = db.vista;
@@ -1707,6 +1802,8 @@ function renderHome() {
     : 'Regla 20-20-20 · sin activar';
   $('homeVistaBar').style.width = V.active ? Math.min(100, (1 - left / (V.every * 60000)) * 100) + '%' : '0';
   $('homeSteps').textContent = fmt(today().steps) + ' pasos hoy';
+  const hs = saludToday();
+  $('homeAgua').textContent = `${hs.agua}/${db.salud.aguaGoal} vasos · ${hs.mov} ${hs.mov === 1 ? 'pausa activa' : 'pausas activas'}`;
   $('homeBloques').textContent = bloquesHome();
 }
 
@@ -1862,6 +1959,102 @@ function vistaTick() {
     : `Regla 20-20-20: cada ${V.every} minutos, ${V.dur} segundos mirando a ${V.dist} metros.`;
   if (!$('home').classList.contains('hidden')) renderHome();
 }
+// ---------- Agua y movimiento ----------
+const MOV_TIPS = [
+  'Levántate y estira los brazos hacia el techo.',
+  'Da una vuelta por la casa o la oficina.',
+  'Haz diez sentadillas suaves.',
+  'Gira los hombros hacia atrás diez veces.',
+  'Sube y baja unas escaleras un par de minutos.',
+  'Camina mientras haces una llamada.',
+  'Ponte de puntillas veinte veces.'
+];
+let hAlertKind = null;
+function saludToday() {
+  const k = dayKey(), days = db.salud.days;
+  if (!days[k]) days[k] = { agua: 0, mov: 0 };
+  return days[k];
+}
+const inHours = () => { const m = nowMin(); return m >= 330 && m < 1320; };
+function saludFix() {
+  // si el próximo aviso no tiene sentido (primera vez, o la app estuvo cerrada mucho rato), se cuenta desde ahora
+  const S = db.salud, now = Date.now();
+  if (!S.aguaNext || S.aguaNext > now + S.aguaMin * 60000 || now - S.aguaNext > 30 * 60000) S.aguaNext = now + S.aguaMin * 60000;
+  if (!S.movNext || S.movNext > now + S.movMin * 60000 || now - S.movNext > 30 * 60000) S.movNext = now + S.movMin * 60000;
+}
+function renderSalud() {
+  const S = db.salud, t = saludToday(), now = Date.now();
+  $('hAguaN').textContent = t.agua;
+  $('hAguaGoalTxt').textContent = S.aguaGoal;
+  $('hAguaGlasses').innerHTML = Array.from({ length: Math.max(S.aguaGoal, t.agua) }, (_, i) => `<span class="${i < t.agua ? 'full' : ''}"></span>`).join('');
+  $('hMovN').textContent = t.mov;
+  const nx = (on, at) => !on ? 'Avisos desactivados' : !inHours() ? 'Fuera de horario (5:30 – 22:00)' : 'Próximo aviso en ' + Math.max(1, Math.ceil((at - now) / 60000)) + ' min';
+  $('hAguaNext').textContent = nx(S.aguaOn, S.aguaNext);
+  $('hMovNext').textContent = nx(S.movOn, S.movNext);
+}
+function saludAlert(kind) {
+  hAlertKind = kind;
+  const S = db.salud;
+  const agua = kind === 'agua';
+  const tip = agua ? 'Bebe un vaso de agua. Tu cuerpo y tu mente lo agradecerán.' : MOV_TIPS[Math.floor(Math.random() * MOV_TIPS.length)];
+  $('hAlertTitle').textContent = agua ? '💧 Hora de beber agua' : '🤸 Hora de moverte';
+  $('hAlertSub').textContent = tip;
+  $('hAlert').classList.remove('hidden');
+  chime();
+  setTimeout(() => speak(agua ? 'Es hora de beber un vaso de agua.' : 'Es hora de moverte. ' + tip), 1000);
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    try { new Notification(agua ? '💧 Hora de beber agua' : '🤸 Hora de moverte', { body: tip, icon: 'icon-192.png', tag: 'salud-' + kind }); } catch (e) {}
+  }
+  // mientras está el aviso abierto, el siguiente se cuenta desde ahora
+  if (agua) S.aguaNext = Date.now() + S.aguaMin * 60000; else S.movNext = Date.now() + S.movMin * 60000;
+  save();
+}
+function saludAnswer(done) {
+  const S = db.salud, kind = hAlertKind;
+  $('hAlert').classList.add('hidden');
+  hAlertKind = null;
+  if (!kind) return;
+  if (done) { saludToday()[kind] += 1; }
+  else if (kind === 'agua') S.aguaNext = Date.now() + 10 * 60000;
+  else S.movNext = Date.now() + 10 * 60000;
+  save();
+  renderSalud();
+  if (!$('home').classList.contains('hidden')) renderHome();
+}
+function saludTick() {
+  const S = db.salud, now = Date.now();
+  if (!hAlertKind && inHours()) {
+    if (S.aguaOn && now >= S.aguaNext) saludAlert('agua');
+    else if (S.movOn && now >= S.movNext) saludAlert('mov');
+  }
+  if (!$('agua').classList.contains('hidden')) renderSalud();
+}
+function bindSalud() {
+  const S = db.salud;
+  saludFix(); save();
+  $('hAguaOn').checked = S.aguaOn; $('hMovOn').checked = S.movOn;
+  $('hAguaMin').value = S.aguaMin; $('hMovMin').value = S.movMin; $('hAguaGoal').value = S.aguaGoal;
+  $('hMovTip').textContent = '💡 ' + MOV_TIPS[Math.floor(Math.random() * MOV_TIPS.length)];
+  const askNotif = () => { if ('Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} } };
+  $('hAguaOn').addEventListener('change', () => { S.aguaOn = $('hAguaOn').checked; S.aguaNext = Date.now() + S.aguaMin * 60000; save(); renderSalud(); unlockSound(); askNotif(); });
+  $('hMovOn').addEventListener('change', () => { S.movOn = $('hMovOn').checked; S.movNext = Date.now() + S.movMin * 60000; save(); renderSalud(); unlockSound(); askNotif(); });
+  const num = (id, key, min, max, nextKey) => $(id).addEventListener('change', () => {
+    const v = Math.round(Number($(id).value));
+    if (v >= min && v <= max) { S[key] = v; if (nextKey) S[nextKey] = Date.now() + v * 60000; save(); renderSalud(); }
+    else $(id).value = S[key];
+  });
+  num('hAguaMin', 'aguaMin', 10, 240, 'aguaNext'); num('hMovMin', 'movMin', 10, 240, 'movNext'); num('hAguaGoal', 'aguaGoal', 1, 20);
+  const add = (kind, n) => { const t = saludToday(); t[kind] = Math.max(0, t[kind] + n); save(); renderSalud(); };
+  $('hAguaPlus').addEventListener('click', () => { add('agua', 1); S.aguaNext = Date.now() + S.aguaMin * 60000; save(); renderSalud(); });
+  $('hAguaMinus').addEventListener('click', () => add('agua', -1));
+  $('hMovPlus').addEventListener('click', () => { add('mov', 1); S.movNext = Date.now() + S.movMin * 60000; save(); renderSalud(); });
+  $('hMovMinus').addEventListener('click', () => add('mov', -1));
+  $('hAlertDone').addEventListener('click', () => saludAnswer(true));
+  $('hAlertSnooze').addEventListener('click', () => saludAnswer(false));
+  setInterval(saludTick, 20000);
+}
+
 function bindVista() {
   const V = db.vista;
   // si la app estuvo cerrada mucho rato, se empieza de nuevo en vez de avisar nada más abrir
@@ -2211,6 +2404,7 @@ function initShell() {
   addEventListener('hashchange', showView);
   bindVista();
   bindBloques();
+  bindSalud();
   showView();
   if (!location.hash) runSplash();
 }
