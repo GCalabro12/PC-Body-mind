@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.32</title>
+<title>PC & Body-mind v1.33</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -155,6 +155,11 @@
   .scr-cele .big { font-size: clamp(40px, 6.5vw, 120px); font-weight: 800; color: #facc15; }
   .scr-cele .sub { font-size: clamp(18px, 2.4vw, 40px); color: #e2e8f0; }
   .scr-task { margin-top: 2.2vh; text-align: right; }
+  .scr-fold { display: none; }
+  .batt-row { display: inline-flex; align-items: center; gap: 0.3em; }
+  .batt { display: inline-block; position: relative; margin-right: 0.3em; width: 1.45em; height: 0.78em; border: 0.11em solid currentColor; border-radius: 0.16em; flex: none; }
+  .batt::after { content: ""; position: absolute; right: -0.24em; top: 26%; width: 0.13em; height: 48%; background: currentColor; border-radius: 0 0.08em 0.08em 0; }
+  #sBattFill { position: absolute; left: 0.07em; top: 0.07em; bottom: 0.07em; width: 0; max-width: calc(100% - 0.14em); border-radius: 0.06em; background: #4ade80; transition: width 0.5s; }
   .scr-task-range { color: #FACC15; font-weight: 800; font-size: clamp(11px, min(2.2vw, 3.2vh), 26px); font-variant-numeric: tabular-nums; }
   .scr-task-act { color: #F8FAFC; font-weight: 800; font-size: clamp(14px, min(3vw, 4.4vh), 38px); line-height: 1.2; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
   .scr-eye { position: relative; width: clamp(150px, min(30vw, 38vh), 320px); margin: 2.5vh 0 0 auto; }
@@ -171,16 +176,36 @@
   @media (max-aspect-ratio: 4/5), (max-width: 980px), (max-height: 640px) {
     .scr-shade { background: rgba(15,23,42,0.74); }
     .scr-panel { top: 0; right: 0; bottom: 0; left: 0; width: auto; padding: 3vh 5vw 2vh; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 1.2vh; }
-    .scr-task { order: 1; margin: 0; text-align: center; }
+    .scr-task { order: 1; margin: 0; text-align: center; border: 2px solid rgba(250,204,21,0.6); border-radius: 16px; padding: 0.9vh 3vw 1.1vh; background: rgba(15,23,42,0.6); }
     .scr-task-act { font-size: clamp(16px, 8vw, 36px); }
     .scr-task-range { font-size: clamp(10px, 3.6vw, 16px); }
     .scr-eye { order: 2; margin: 0 auto; width: min(80vw, 30vh, 320px); }
     .scr-eye-time { font-size: clamp(16px, min(9vw, 5vh), 40px); }
-    .scr-steps { order: 3; font-size: clamp(34px, min(21vw, 12vh), 150px); }
-    .scr-label { order: 4; font-size: clamp(11px, 4vw, 18px); }
-    .scr-panel > .scr-bar { order: 5; }
-    .scr-block { order: 6; margin: 0; font-size: clamp(10px, 3.6vw, 16px); }
-    .scr-stats { order: 7; margin-top: auto; justify-content: center; gap: 5vw; font-size: clamp(9px, 2.8vw, 12px); opacity: 0.75; }
+    .scr-pasos { order: 3; border: 2px solid rgba(74,222,128,0.55); border-radius: 16px; padding: 0.6vh 4vw 1.2vh; background: rgba(15,23,42,0.6); display: flex; flex-direction: column; gap: 0.5vh; }
+    .scr-steps { font-size: clamp(34px, min(21vw, 12vh), 150px); }
+    .scr-label { font-size: clamp(11px, 4vw, 18px); margin-top: -0.6vh; }
+    #sGoal, .scr-pasos > .scr-bar { display: none; }
+    [data-box] { position: relative; }
+    .scr-fold { display: flex; align-items: center; justify-content: center; position: absolute; top: 4px; right: 6px; width: 26px; height: 22px; min-width: 26px; padding: 0; border-radius: 8px; background: rgba(15,23,42,0.75); border: 1px solid #475569; color: #cbd5e1; font-size: 13px; line-height: 1; z-index: 3; }
+    .scr-fold:hover { background: #334155; }
+    .scr-eye > .scr-fold { top: 2px; right: 2px; }
+    .scr-stats > .scr-fold { top: auto; bottom: 2px; right: 0; }
+    /* plegados: una sola línea */
+    .scr-task.folded .scr-task-act { display: none; }
+    .scr-task.folded { padding: 0.5vh 34px 0.6vh 3vw; }
+    .scr-eye.folded { width: 100%; }
+    .scr-eye.folded svg, .scr-eye.folded .scr-eye-lbl { display: none; }
+    .scr-eye.folded .eye-center { position: static; flex-direction: row; justify-content: center; gap: 8px; padding: 0.4vh 0; }
+    .scr-eye.folded .eye-center::before { content: "👁 pausa de vista en"; font-size: clamp(11px, 3.6vw, 15px); color: #bae6fd; }
+    .scr-eye.folded .scr-eye-time { font-size: clamp(14px, 5vw, 22px); }
+    .scr-pasos.folded .scr-block { display: none; }
+    .scr-pasos.folded { flex-direction: row; align-items: baseline; justify-content: center; gap: 8px; padding: 0.4vh 34px 0.6vh 3vw; }
+    .scr-pasos.folded .scr-steps { font-size: clamp(18px, 7vw, 30px); }
+    .scr-pasos.folded .scr-label { margin: 0; }
+    .scr-stats.folded > div:not(.scr-fold) { display: none; }
+    .scr-stats.folded { min-height: 24px; }
+    .scr-block { margin: 0; font-size: clamp(10px, 3.6vw, 16px); }
+    .scr-stats { order: 4; margin-top: auto; justify-content: center; gap: 5vw; font-size: clamp(9px, 2.8vw, 12px); opacity: 0.75; }
     .scr-stats b { font-size: clamp(12px, 4.4vw, 18px); }
     .scr-top { top: auto; bottom: 1vh; left: 2vw; right: 2vw; max-width: none; flex-direction: row; flex-wrap: wrap; justify-content: center; opacity: 0; transition: opacity 0.3s; }
     #screen:hover .scr-top { opacity: 1; }
@@ -815,21 +840,27 @@
   <div class="scr-video" id="scrVideoBox"><div id="scrVideo"></div></div>
   <div class="scr-shade"></div>
   <div class="scr-panel">
-    <div class="scr-steps" id="sSteps">0</div>
-    <div class="scr-label">pasos <span id="sGoal">de 8000</span></div>
-    <div class="scr-bar"><div id="sGoalBar"></div></div>
-    <div class="scr-stats">
-      <div id="sBattBox" class="hidden"><b id="sBatt">--</b>batería móvil</div>
+    <div class="scr-pasos" data-box="pasos">
+      <button class="scr-fold" data-fold="pasos" aria-label="Plegar o desplegar">▴</button>
+      <div class="scr-steps" id="sSteps">0</div>
+      <div class="scr-label">pasos <span id="sGoal">de 8000</span></div>
+      <div class="scr-bar"><div id="sGoalBar"></div></div>
+      <div class="scr-block"><span id="sBlockTxt">Bloque 1 · 0 / 2000</span><div class="scr-bar yellow"><div id="sBlockBar"></div></div></div>
+    </div>
+    <div class="scr-stats" data-box="datos">
+      <button class="scr-fold" data-fold="datos" aria-label="Plegar o desplegar">▴</button>
+      <div id="sBattBox" class="hidden"><b class="batt-row"><span class="batt"><span id="sBattFill"></span></span><span id="sBatt">--</span></b>batería móvil</div>
       <div><b id="sKm">0,00</b>km</div>
       <div><b id="sKcal">0</b>kcal</div>
       <div><b id="sMins">0</b>min activos</div>
     </div>
-    <div class="scr-block"><span id="sBlockTxt">Bloque 1 · 0 / 2000</span><div class="scr-bar yellow"><div id="sBlockBar"></div></div></div>
-    <div class="scr-task hidden" id="sTask">
+    <div class="scr-task hidden" id="sTask" data-box="tarea">
+      <button class="scr-fold" data-fold="tarea" aria-label="Plegar o desplegar">▴</button>
       <div class="scr-task-range" id="sTaskRange"></div>
       <div class="scr-task-act" id="sTaskAct"></div>
     </div>
-    <div class="scr-eye hidden" id="sEye">
+    <div class="scr-eye hidden" id="sEye" data-box="vista">
+      <button class="scr-fold" data-fold="vista" aria-label="Plegar o desplegar">▴</button>
       <svg viewBox="0 0 340 220" aria-hidden="true">
         <defs><radialGradient id="eyeWhiteS" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#0b1220"/></radialGradient></defs>
         <path id="sEyeLid" d="M14 110 C90 -30 250 -30 326 110 C250 250 90 250 14 110 Z" fill="url(#eyeWhiteS)" fill-opacity="0.85" stroke="#38bdf8" stroke-width="6" stroke-linejoin="round"/>
@@ -862,7 +893,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.32';
+const VERSION = 'v1.33';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1641,6 +1672,24 @@ function scrStart() {
   }).catch(e => { scrConn(e.message); setTimeout(scrStart, 5000); });
 }
 let scrVista = null;
+function scrFoldInit() {
+  let st = {};
+  try { st = JSON.parse(localStorage.getItem('pcbm_pliegues') || '{}'); } catch (e) {}
+  const panel = document.querySelector('.scr-panel');
+  const apply = () => panel.querySelectorAll('[data-box]').forEach(b => {
+    const f = !!st[b.dataset.box];
+    b.classList.toggle('folded', f);
+    const btn = b.querySelector(':scope > .scr-fold');
+    if (btn) { btn.textContent = f ? '▾' : '▴'; btn.setAttribute('aria-label', f ? 'Desplegar' : 'Plegar'); }
+  });
+  panel.addEventListener('click', e => {
+    const btn = e.target.closest('.scr-fold'); if (!btn) return;
+    st[btn.dataset.fold] = !st[btn.dataset.fold];
+    try { localStorage.setItem('pcbm_pliegues', JSON.stringify(st)); } catch (er) {}
+    apply();
+  });
+  apply();
+}
 function scrEyeTick() {
   const v = scrVista;
   $('sEye').classList.toggle('hidden', !v || !v.active);
@@ -1674,7 +1723,8 @@ function scrData(m) {
     $('sBattBox').classList.toggle('hidden', !hasBatt);
     if (hasBatt) {
       $('sBatt').textContent = (m.charging ? '⚡' : '') + m.battery + '%';
-      $('sBatt').style.color = m.battery <= 15 ? '#f87171' : m.battery <= 30 ? '#facc15' : '#fff';
+      $('sBattFill').style.width = Math.max(6, Math.min(100, m.battery)) + '%';
+      $('sBattFill').style.background = m.battery <= 15 ? '#f87171' : m.battery <= 30 ? '#facc15' : '#4ade80';
     }
     $('sTask').classList.toggle('hidden', !m.bloque);
     if (m.bloque) {
@@ -1807,6 +1857,7 @@ function initScreen() {
     $('sPip').addEventListener('click', openPip);
   }
   setInterval(scrEyeTick, 500);
+  scrFoldInit();
   scrStart();
 }
 
