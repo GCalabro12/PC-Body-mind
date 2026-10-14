@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.54</title>
+<title>PC & Body-mind v1.55</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -194,6 +194,12 @@
   .scr-toast, .scr-cele { pointer-events: none; }
   /* Sonido y vídeo a los lados de los pasos */
   .scr-side { display: none; }
+  .scr-grip { position: absolute; left: 3px; bottom: 3px; width: 14px; height: 22px; display: flex; align-items: center; justify-content: center; color: #64748B; cursor: grab; touch-action: none; z-index: 4; opacity: 0.75; }
+  .scr-grip svg { width: 9px; height: 15px; fill: currentColor; }
+  .scr-grip:hover { color: #E2E8F0; opacity: 1; }
+  .scr-panel > [data-box].dragging { outline: 2px dashed #94A3B8; outline-offset: 2px; }
+  .scr-panel > [data-box].dragging .scr-grip { cursor: grabbing; color: #F8FAFC; }
+  .scr-pausi { padding-left: 18px !important; }
   /* Casilla para marcar la tarea como hecha, igual que en el móvil */
   .scr-chk { display: inline-flex; vertical-align: middle; position: relative; top: -0.06em; width: 0.72em; height: 0.72em; min-width: 22px; min-height: 22px; margin: 0 0.28em 0 0; padding: 0; border: 3px solid #FACC15; border-radius: 0.16em; background: rgba(15,23,42,0.6); cursor: pointer; align-items: center; justify-content: center; color: #fff; font-size: 1em; font-weight: 900; line-height: 1; }
   .scr-chk::after { font-size: 0.55em; }
@@ -318,6 +324,8 @@
     .pip #sFull { display: none; }
     /* sonido, volumen y vídeo ya están junto a los pasos: aquí no se repiten */
     .scr-ctrl #sSound, .scr-ctrl .scr-vol, .scr-ctrl #sVideoBtn { display: none; }
+    .scr-ctrl #sFull { order: 1; } .scr-ctrl #sPip { order: 2; } .scr-ctrl #sPlay { order: 3; }
+    .scr-ctrl .scr-conn { order: 4; flex-basis: 100%; text-align: center; background: transparent; padding: 2px 0 0; }
     .pip .scr-ctrl.folded::before { content: "🗗 Ventana flotante · conexión y cerrar ventana"; color: #7DD3FC; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
   }
@@ -1046,7 +1054,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.54';
+const VERSION = 'v1.55';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1873,9 +1881,9 @@ function scrStart() {
     const p = scrPeer = new Peer(CAST_PREFIX + code);
     p.on('open', () => { scrTries = 0; scrConn('Esperando al móvil · código ' + code); });
     p.on('connection', c => {
-      c.on('open', () => { scrLink = c; scrCodeNow = code; $('sPair').classList.add('hidden'); scrConn('📱 Móvil conectado · código ' + code); });
+      c.on('open', () => { scrLink = c; scrCodeNow = code; $('sPair').classList.add('hidden'); scrConn('Conexión: ' + code); });
       c.on('data', scrData);
-      c.on('close', () => scrConn('📱 Móvil desconectado · código ' + code));
+      c.on('close', () => scrConn('Móvil desconectado · conexión ' + code));
     });
     p.on('disconnected', () => { if (!p.destroyed) p.reconnect(); });
     p.on('error', e => {
@@ -1888,6 +1896,53 @@ function scrStart() {
   }).catch(e => { scrConn(e.message); setTimeout(scrStart, 5000); });
 }
 let scrVista = null;
+// Recuadros de la pantalla: se reordenan arrastrando el asa de 8 puntos (abajo a la izquierda)
+const SCR_ORDER_DEFAULT = ['tarea', 'vista', 'pasos', 'salud', 'datos', 'pausi', 'controles'];
+function scrOrderInit() {
+  const panel = document.querySelector('.scr-panel');
+  const boxes = () => [...panel.children].filter(b => b.dataset && b.dataset.box);
+  let ord = [];
+  try { ord = JSON.parse(localStorage.getItem('pcbm_orden') || '[]'); } catch (e) {}
+  const full = () => {
+    const known = boxes().map(b => b.dataset.box);
+    const list = ord.filter(k => known.includes(k));
+    SCR_ORDER_DEFAULT.forEach((k, i) => { if (known.includes(k) && !list.includes(k)) list.splice(Math.min(i, list.length), 0, k); });
+    known.forEach(k => { if (!list.includes(k)) list.push(k); });
+    return list;
+  };
+  const apply = () => { ord = full(); boxes().forEach(b => { b.style.order = ord.indexOf(b.dataset.box) + 1; }); };
+  const GRIP = '<svg viewBox="0 0 10 16" aria-hidden="true"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg>';
+  boxes().forEach(b => {
+    const g = document.createElement('span');
+    g.className = 'scr-grip'; g.title = 'Arrastra para mover este recuadro'; g.innerHTML = GRIP;
+    b.appendChild(g);
+  });
+  apply();
+  let drag = null;
+  panel.addEventListener('pointerdown', e => {
+    const g = e.target.closest('.scr-grip'); if (!g) return;
+    e.preventDefault(); e.stopPropagation();
+    drag = g.parentElement; drag.classList.add('dragging');
+    try { g.setPointerCapture(e.pointerId); } catch (er) {}
+  });
+  panel.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const others = boxes().filter(b => b !== drag && b.offsetParent !== null).sort((a, b) => ord.indexOf(a.dataset.box) - ord.indexOf(b.dataset.box));
+    let before = null;
+    for (const b of others) { const r = b.getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { before = b; break; } }
+    const k = drag.dataset.box, next = ord.filter(x => x !== k);
+    const at = before ? next.indexOf(before.dataset.box) : next.length;
+    next.splice(at, 0, k);
+    if (next.join() !== ord.join()) { ord = next; apply(); }
+  });
+  const end = () => {
+    if (!drag) return;
+    drag.classList.remove('dragging'); drag = null;
+    try { localStorage.setItem('pcbm_orden', JSON.stringify(ord)); } catch (e) {}
+  };
+  panel.addEventListener('pointerup', end);
+  panel.addEventListener('pointercancel', end);
+}
 function scrFoldInit() {
   let st = {};
   try { st = JSON.parse(localStorage.getItem('pcbm_pliegues') || '{}'); } catch (e) {}
@@ -1982,7 +2037,7 @@ function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'state') {
     scrPhoneVer = m.ver || 'antigua';
-    if (scrCodeNow) scrConn('📱 Móvil conectado · código ' + scrCodeNow + ' · móvil ' + (m.ver || 'versión antigua ⚠️'));
+    if (scrCodeNow) scrConn('Conexión: ' + scrCodeNow + ' · ' + (m.ver || 'versión antigua ⚠️'));
     if (m.ver && m.ver !== VERSION && scrLink && scrLink.open && Date.now() - scrUpdAsked > 60000) {
       scrUpdAsked = Date.now(); scrLink.send({ t: 'cmd', c: 'update' });
       clearTimeout(toastT);
@@ -2161,6 +2216,7 @@ function initScreen() {
   }
   setInterval(scrEyeTick, 500);
   scrFoldInit();
+  scrOrderInit();
   // ⚙: abre y cierra los controles; se cierran al tocar fuera
   // escribir una tarea para el bloque de ahora desde el PC
   const planClose = () => { $('sPlan').classList.add('hidden'); $('sPlanIn').value = ''; $('sTaskAdd').classList.remove('hidden'); };
