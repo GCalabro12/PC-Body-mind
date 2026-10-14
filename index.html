@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.35</title>
+<title>PC & Body-mind v1.36</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -156,6 +156,16 @@
   .scr-cele .sub { font-size: clamp(18px, 2.4vw, 40px); color: #e2e8f0; }
   .scr-task { margin-top: 2.2vh; text-align: right; }
   .scr-fold { display: none; }
+  .scr-act { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+  .scr-act:empty { display: none; }
+  .scr-btn { width: auto; padding: 3px 10px; font-size: 12px; font-weight: 700; border-radius: 99px; background: rgba(15,23,42,0.85); border: 1px solid #475569; color: #e2e8f0; line-height: 1.4; }
+  .scr-btn:hover { filter: brightness(1.2); }
+  .scr-btn.sky { background: #0284c7; border-color: #0284c7; color: #fff; }
+  .scr-btn.sun { background: #CA8A04; border-color: #CA8A04; color: #fff; }
+  .scr-btn.teal { background: #0D9488; border-color: #0D9488; color: #fff; padding: 1px 8px; margin-left: 6px; }
+  .scr-btn.ghost { background: transparent; color: #94a3b8; }
+  .scr-btn.sent { background: #16a34a !important; border-color: #16a34a !important; }
+  .scr-eye svg { cursor: pointer; }
   .scr-eye-batt { display: none; }
   .scr-salud { margin-top: 2vh; text-align: right; color: #CBD5E1; font-size: clamp(12px, 1.6vw, 22px); }
   .scr-salud b { color: #F8FAFC; margin: 0 0.25em; font-variant-numeric: tabular-nums; }
@@ -227,6 +237,9 @@
     .scr-salud-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
     .scr-salud b { margin: 0; font-size: 1.35em; }
     .scr-salud .nx { margin-left: auto; }
+    .scr-eye-act { margin-top: 2px; }
+    .scr-eye.folded .scr-eye-act { display: none; }
+    .scr-task.folded .scr-act, .scr-salud.folded .scr-btn { display: none; }
     .scr-salud.folded { flex-direction: row; justify-content: center; gap: 16px; }
     .scr-salud.folded .lbl, .scr-salud.folded .nx { display: none; }
     .scr-pausi { order: 6; display: flex; align-items: center; gap: 8px; border: 1px dashed #334155; border-radius: 16px; padding: 0.6vh 36px 0.6vh 6px; background: rgba(15,23,42,0.55); text-align: left; }
@@ -889,8 +902,8 @@
     </div>
     <div class="scr-salud hidden" id="sSalud" data-box="salud">
       <button class="scr-fold" data-fold="salud" aria-label="Plegar o desplegar">▴</button>
-      <div class="scr-salud-row"><span class="ic2">💧</span><b id="sAgua">0/8</b><span class="lbl">vasos</span><span class="nx" id="sAguaNx"></span></div>
-      <div class="scr-salud-row"><span class="ic2">🤸</span><b id="sMov">0</b><span class="lbl" id="sMovLbl">pausas activas</span><span class="nx" id="sMovNx"></span></div>
+      <div class="scr-salud-row"><span class="ic2">💧</span><b id="sAgua">0/8</b><span class="lbl">vasos</span><span class="nx" id="sAguaNx"></span><button class="scr-btn teal" data-cmd="agua" aria-label="He bebido un vaso">+1</button></div>
+      <div class="scr-salud-row"><span class="ic2">🤸</span><b id="sMov">0</b><span class="lbl" id="sMovLbl">pausas activas</span><span class="nx" id="sMovNx"></span><button class="scr-btn teal" data-cmd="mov" aria-label="Me he movido">+1</button></div>
     </div>
     <div class="scr-pausi" id="sPausi" data-box="pausi">
       <button class="scr-fold" data-fold="pausi" aria-label="Plegar o desplegar">▴</button>
@@ -901,6 +914,7 @@
       <button class="scr-fold" data-fold="tarea" aria-label="Plegar o desplegar">▴</button>
       <div class="scr-task-range" id="sTaskRange"></div>
       <div class="scr-task-act" id="sTaskAct"></div>
+      <div class="scr-act"><button class="scr-btn sun hidden" data-cmd="taskDone" id="sTaskDone">✓ Hecha</button></div>
     </div>
     <div class="scr-eye hidden" id="sEye" data-box="vista">
       <button class="scr-fold" data-fold="vista" aria-label="Plegar o desplegar">▴</button>
@@ -914,6 +928,12 @@
       <div class="eye-center">
         <div class="scr-eye-time" id="sEyeTime">20:00</div>
         <div class="scr-eye-lbl" id="sEyeLbl">pausa de vista</div>
+      </div>
+      <div class="scr-act scr-eye-act">
+        <button class="scr-btn sky hidden" data-cmd="vistaStart" id="sEyeStart">▶ Empezar pausa</button>
+        <button class="scr-btn hidden" data-cmd="vistaSnooze" id="sEyeSnooze">Posponer</button>
+        <button class="scr-btn hidden" data-cmd="vistaEnd" id="sEyeEnd">■ Terminar</button>
+        <button class="scr-btn ghost hidden" data-cmd="vistaStart" id="sEyeNow">Pausa ahora</button>
       </div>
     </div>
   </div>
@@ -937,7 +957,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.35';
+const VERSION = 'v1.36';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1638,6 +1658,7 @@ async function castConnect() {
     try { conn && conn.close(); } catch (e) {}
     conn = peer.connect(CAST_PREFIX + code, { reliable: true });
     conn.on('open', () => { castStatus('✔ Conectado a la pantalla ' + code, 'ok'); sendState(); });
+    conn.on('data', castCommand);
     conn.on('close', () => { if (castOn) { castStatus('Se perdió la conexión. Reintentando…'); castLater(); } });
   };
   peer.open ? go() : peer.once('open', go);
@@ -1650,6 +1671,33 @@ function castStop() {
   db.cast = null; save();
   $('castBtn').textContent = 'Conectar';
   castStatus('');
+}
+// Órdenes que llegan desde la pantalla del PC
+function castCommand(m) {
+  if (!m || m.t !== 'cmd') return;
+  const S = db.salud;
+  switch (m.c) {
+    case 'vistaStart': if (!vBreakEnd) vistaBreak(); break;
+    case 'vistaEnd': if (vBreakEnd) vistaBreakEnd(false); break;
+    case 'vistaSnooze': if (vAlerting) vistaSnooze(); break;
+    case 'agua':
+    case 'mov':
+      if (hAlertKind === m.c) saludAnswer(true);
+      else {
+        saludToday()[m.c] += 1;
+        if (m.c === 'agua') S.aguaNext = Date.now() + S.aguaMin * 60000; else S.movNext = Date.now() + S.movMin * 60000;
+        save(); renderSalud();
+      }
+      break;
+    case 'taskDone': {
+      const c = curBlock(); if (c < 0) break;
+      const next = dayActs(dayKey(), c).find(a => !a.d);
+      if (next) { next.d = true; save(); if (!$('bloques').classList.contains('hidden')) renderBloques(); }
+      break;
+    }
+  }
+  if (!$('home').classList.contains('hidden')) renderHome();
+  setTimeout(sendState, 80);
 }
 function castSend(msg) { if (conn && conn.open) { try { conn.send(msg); } catch (e) {} } }
 function sendState() {
@@ -1706,7 +1754,7 @@ function scrStart() {
     const p = scrPeer = new Peer(CAST_PREFIX + code);
     p.on('open', () => { scrTries = 0; scrConn('Esperando al móvil · código ' + code); });
     p.on('connection', c => {
-      c.on('open', () => { $('sPair').classList.add('hidden'); scrConn('📱 Móvil conectado · código ' + code); });
+      c.on('open', () => { scrLink = c; $('sPair').classList.add('hidden'); scrConn('📱 Móvil conectado · código ' + code); });
       c.on('data', scrData);
       c.on('close', () => scrConn('📱 Móvil desconectado · código ' + code));
     });
@@ -1757,6 +1805,19 @@ function scrPausiNext(talk) {
   scrPausiAt = Date.now();
   if (talk) { const b = $('sPausi'); b.classList.remove('talk'); void b.offsetWidth; b.classList.add('talk'); }
 }
+let scrLink = null;
+// Manda una orden al móvil (empezar pausa, +1 vaso…) y marca el botón un momento
+function scrCmd(cmd, btn) {
+  if (!scrLink || !scrLink.open) {
+    clearTimeout(toastT);
+    $('sToast').textContent = 'El móvil no está conectado';
+    $('sToast').classList.remove('hidden');
+    toastT = setTimeout(() => $('sToast').classList.add('hidden'), 4000);
+    return;
+  }
+  scrLink.send({ t: 'cmd', c: cmd });
+  if (btn) { btn.classList.add('sent'); setTimeout(() => btn.classList.remove('sent'), 1200); }
+}
 function scrEyeTick() {
   scrSaludTick();
   if (Date.now() - scrPausiAt > 5 * 60000) scrPausiNext(false); // Pausi cambia de consejo cada 5 minutos
@@ -1777,6 +1838,11 @@ function scrEyeTick() {
     time = mmss(left); lbl = 'próxima pausa de vista'; frac = left / (v.every * 60000);
   }
   $('sEye').classList.toggle('alert', !!v.alerting && !(v.breakLeft > 0));
+  const inBreak = v.breakLeft > 0 && (v.breakLeft - since) > 0;
+  $('sEyeStart').classList.toggle('hidden', !(v.alerting && !inBreak));
+  $('sEyeSnooze').classList.toggle('hidden', !(v.alerting && !inBreak));
+  $('sEyeEnd').classList.toggle('hidden', !inBreak);
+  $('sEyeNow').classList.toggle('hidden', !!(v.alerting || inBreak));
   $('sEyeTime').textContent = time;
   $('sEyeLbl').textContent = lbl;
   $('sEyeRing').style.strokeDasharray = C;
@@ -1805,6 +1871,7 @@ function scrData(m) {
     if (m.bloque) {
       $('sTaskRange').textContent = `⏱ Bloque ${m.bloque.range} · quedan ${m.bloque.left} min` + (m.bloque.total ? ` · ${m.bloque.done}/${m.bloque.total}` : '');
       $('sTaskAct').textContent = m.bloque.act;
+      $('sTaskDone').classList.toggle('hidden', !(m.bloque.total > m.bloque.done));
     }
     if (m.salud) { scrSalud = { ...m.salud, at: Date.now() }; }
     $('sSalud').classList.toggle('hidden', !m.salud);
@@ -1935,6 +2002,14 @@ function initScreen() {
   }
   setInterval(scrEyeTick, 500);
   scrFoldInit();
+  // botones que mandan órdenes al móvil (funcionan también en la ventana flotante)
+  const panel = document.querySelector('.scr-panel');
+  panel.addEventListener('click', e => {
+    const b = e.target.closest('[data-cmd]');
+    if (b) { scrCmd(b.dataset.cmd, b); return; }
+    // tocar el ojo cuando toca la pausa = empezar la pausa
+    if (e.target.closest('#sEye svg') && scrVista && scrVista.alerting) scrCmd('vistaStart');
+  });
   // Pausi: mismo dibujo que en el inicio; al hacer clic suena la banda sonora y cambia de consejo
   const pausiSvg = document.querySelector('.tip svg');
   if (pausiSvg) $('sPausiBtn').appendChild(pausiSvg.cloneNode(true));
