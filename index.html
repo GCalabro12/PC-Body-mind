@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.19</title>
+<title>PC & Body-mind v1.20</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -400,7 +400,8 @@
     <button class="btn-outline mt hidden" id="bNow">↺ Volver al bloque actual</button>
   </div>
   <div class="card">
-    <label class="check" style="margin:0"><input type="checkbox" id="bSleepOn"> A las 22:00, recordarme apagar el ordenador e ir a dormir</label>
+    <label class="check" style="margin:0"><input type="checkbox" id="bStartVoice"> Avisar con voz al empezar cada bloque</label>
+    <label class="check"><input type="checkbox" id="bSleepOn"> A las 22:00, recordarme apagar el ordenador e ir a dormir</label>
   </div>
 </div>
 
@@ -677,11 +678,11 @@
 </div>
 
 <script>
-const VERSION = 'v1.19';
+const VERSION = 'v1.20';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
-const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '' };
+const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
@@ -1915,9 +1916,22 @@ function sleepCheck() {
     try { new Notification('🌙 Hora de descansar', { body: 'Son las 22:00: apaga el ordenador y vete a dormir.', icon: 'icon-192.png', tag: 'dormir' }); } catch (e) {}
   }
 }
+// Al empezar un bloque: campanita + voz con lo planificado
+function blockStartVoice(c) {
+  if (!db.bloques.startVoice || c < 0) return;
+  const b = BLOCKS[c], k = dayKey(), acts = (db.bloques.days[k] && db.bloques.days[k][c]) || [];
+  const text = `Empieza el bloque de ${hm(b.start)} a ${hm(b.end)}. ` +
+    (acts.length ? (acts.length === 1 ? 'Tienes planeado: ' : 'Tienes planeadas estas actividades: ') + acts.join('. ') + '.' : 'Todavía no has planificado este bloque.');
+  chime();
+  setTimeout(() => speak(text), 1000);
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    try { new Notification(`⏱ Bloque ${hm(b.start)} – ${hm(b.end)}`, { body: acts.length ? acts.join(' · ') : 'Sin planificar todavía', icon: 'icon-192.png', tag: 'bloque' }); } catch (e) {}
+  }
+}
 function bloquesTick() {
   const c = curBlock();
   if (c !== bLastCur) {
+    if (c >= 0) blockStartVoice(c);
     // si estabas mirando el bloque que acaba de terminar, pasa solo al siguiente
     if (bDay === 0 && c >= 0 && bSel === bLastCur) { bSel = c; bMode = bActs(c).length ? 'idle' : 'edit'; }
     bLastCur = c;
@@ -1950,6 +1964,11 @@ function bindBloques() {
   $('bMoreYes').addEventListener('click', () => { bMode = 'edit'; renderBloques(); $('bText').focus(); });
   $('bMoreNo').addEventListener('click', () => { bMode = 'idle'; renderBloques(); });
   $('bAdd').addEventListener('click', () => { bMode = 'edit'; renderBloques(); $('bText').focus(); });
+  $('bStartVoice').checked = db.bloques.startVoice;
+  $('bStartVoice').addEventListener('change', () => {
+    db.bloques.startVoice = $('bStartVoice').checked; save();
+    if (db.bloques.startVoice && 'Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
+  });
   $('bSleepOn').checked = db.bloques.sleepOn;
   $('bSleepOn').addEventListener('change', () => { db.bloques.sleepOn = $('bSleepOn').checked; save(); });
   $('bSleepOk').addEventListener('click', () => $('bSleep').classList.add('hidden'));
