@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.13</title>
+<title>PC & Body-mind v1.14</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -261,8 +261,10 @@
       <div><label for="vEvery">Pausa cada (minutos)</label><input type="number" id="vEvery" min="1" max="180" inputmode="numeric"></div>
       <div><label for="vDur">Duración (segundos)</label><input type="number" id="vDur" min="5" max="600" inputmode="numeric"></div>
     </div>
-    <label for="vDist">Mirar a una distancia de (metros)</label>
-    <input type="number" id="vDist" min="1" max="50" inputmode="numeric">
+    <div class="row">
+      <div><label for="vDist">Mirar a (metros)</label><input type="number" id="vDist" min="1" max="50" inputmode="numeric"></div>
+      <div><label for="vRemind">Si no la haces, recordar cada (minutos)</label><input type="number" id="vRemind" min="1" max="30" inputmode="numeric"></div>
+    </div>
     <div class="hint">Regla 20-20-20 de la Academia Americana de Oftalmología: cada 20 minutos, 20 segundos mirando a 20 pies (unos 6 metros).</div>
     <button class="btn-outline mt" id="vTest">Probar una pausa ahora</button>
     </details>
@@ -525,11 +527,11 @@
 </div>
 
 <script>
-const VERSION = 'v1.13';
+const VERSION = 'v1.14';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
-const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, active: false, nextAt: 0 };
+const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
 const NATIVE = !SCREEN && !!window.AndroidPasos; // dentro de la app Android (cuenta con la pantalla apagada)
@@ -1483,10 +1485,10 @@ function stopRelax() {
   setTimeout(() => { try { m.disconnect(); } catch (e) {} }, 2500);
   relax = null;
 }
-function vistaNotify() {
+function vistaNotify(pending) {
   if (!('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
   try {
-    const n = new Notification('👁 Pausa de vista', { body: `Mira al menos a ${db.vista.dist} metros durante ${db.vista.dur} segundos`, icon: 'icon-192.png', tag: 'vista', requireInteraction: true });
+    const n = new Notification(pending ? '👁 Tienes pendiente mirar a lo lejos' : '👁 Pausa de vista', { body: `Mira al menos a ${db.vista.dist} metros durante ${db.vista.dur} segundos`, icon: 'icon-192.png', tag: 'vista', renotify: true, requireInteraction: true });
     n.onclick = () => { window.focus(); n.close(); };
   } catch (e) {}
 }
@@ -1506,9 +1508,15 @@ function vistaAlert() {
   vAlertSpeak = setTimeout(() => speak('Pausa de vista.'), 1000);
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   vistaNotify();
-  let n = 0;
+  // si no se hace la pausa, se recuerda cada X minutos hasta que se haga o se posponga
   clearInterval(vReminder);
-  vReminder = setInterval(() => { if (++n > 3) clearInterval(vReminder); else chime(); }, 60000); // recuerda si no se atiende
+  vReminder = setInterval(() => {
+    chime();
+    clearTimeout(vAlertSpeak);
+    vAlertSpeak = setTimeout(() => speak('Tienes pendiente mirar a lo lejos.'), 1000);
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    vistaNotify(true);
+  }, db.vista.remind * 60000);
 }
 function vistaBreak() {
   const V = db.vista;
@@ -1545,7 +1553,7 @@ function vistaBreakEnd(done) {
   vistaTick();
 }
 function vistaSnooze() {
-  clearInterval(vReminder); vAlerting = false;
+  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false;
   $('vAlert').classList.add('hidden');
   db.vista.nextAt = Date.now() + 5 * 60000; save();
   vistaTick();
@@ -1571,7 +1579,7 @@ function bindVista() {
   const V = db.vista;
   // si la app estuvo cerrada mucho rato, se empieza de nuevo en vez de avisar nada más abrir
   if (V.active && Date.now() - V.nextAt > 10 * 60000) { V.nextAt = Date.now() + V.every * 60000; save(); }
-  $('vEvery').value = V.every; $('vDur').value = V.dur; $('vDist').value = V.dist;
+  $('vEvery').value = V.every; $('vDur').value = V.dur; $('vDist').value = V.dist; $('vRemind').value = V.remind;
   const num = (id, key, min, max) => $(id).addEventListener('change', () => {
     const v = Math.round(Number($(id).value));
     if (v >= min && v <= max) {
@@ -1580,7 +1588,7 @@ function bindVista() {
       save(); vistaTick();
     } else $(id).value = V[key];
   });
-  num('vEvery', 'every', 1, 180); num('vDur', 'dur', 5, 600); num('vDist', 'dist', 1, 50);
+  num('vEvery', 'every', 1, 180); num('vDur', 'dur', 5, 600); num('vDist', 'dist', 1, 50); num('vRemind', 'remind', 1, 30);
   $('vToggle').addEventListener('click', () => db.vista.active ? vistaStop() : vistaStart());
   $('vTest').addEventListener('click', vistaBreak);
   $('vStartBreak').addEventListener('click', vistaBreak);
