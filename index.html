@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.40</title>
+<title>PC & Body-mind v1.41</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -381,6 +381,7 @@
   .h-btn:hover { background: #115E59; }
   .h-glasses { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px 0 4px; }
   .h-glasses span { width: 18px; height: 24px; border: 2px solid #2DD4BF; border-top-width: 0; border-radius: 2px 2px 6px 6px; position: relative; overflow: hidden; }
+  .h-glasses span.half::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38%; background: #2DD4BF; }
   .h-glasses span.full::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 75%; background: #2DD4BF; }
   .h-next { text-align: center; color: #94A3B8; font-size: 0.85rem; margin: 8px 0 2px; }
   .h-tip { text-align: center; color: #CBD5E1; font-size: 0.9rem; margin-top: 10px; font-style: italic; }
@@ -503,7 +504,7 @@
       <button class="home-btn agua" data-go="agua"><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
-    <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">un vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
+    <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
     <div class="seal-wrap"><a class="seal" href="https://practicaintegral.club" target="_blank" rel="noopener">by Práctica Integral</a></div>
   </div>
 </div>
@@ -561,9 +562,9 @@
   <div class="card">
     <h2 class="teal">💧 Agua</h2>
     <div class="h-count">
-      <button class="h-btn" id="hAguaMinus" aria-label="Quitar un vaso">−</button>
+      <button class="h-btn" id="hAguaMinus" aria-label="Quitar medio vaso">−</button>
       <div><b id="hAguaN">0</b> / <span id="hAguaGoalTxt">8</span><small>vasos hoy</small></div>
-      <button class="h-btn" id="hAguaPlus" aria-label="Añadir un vaso">+</button>
+      <button class="h-btn" id="hAguaPlus" aria-label="Añadir medio vaso">+</button>
     </div>
     <div class="h-glasses" id="hAguaGlasses"></div>
     <div class="h-next" id="hAguaNext"></div>
@@ -924,7 +925,7 @@
     </div>
     <div class="scr-salud hidden" id="sSalud" data-box="salud">
       <button class="scr-fold" data-fold="salud" aria-label="Plegar o desplegar">▴</button>
-      <div class="scr-salud-row"><span class="ic2">💧</span><b id="sAgua">0/8</b><span class="lbl">vasos</span><span class="nx" id="sAguaNx"></span><button class="scr-btn teal" data-cmd="agua" aria-label="He bebido un vaso">+1</button></div>
+      <div class="scr-salud-row"><span class="ic2">💧</span><b id="sAgua">0/8</b><span class="lbl">vasos</span><span class="nx" id="sAguaNx"></span><button class="scr-btn teal" data-cmd="agua" aria-label="He bebido medio vaso">+½</button></div>
       <div class="scr-salud-row"><span class="ic2">🤸</span><b id="sMov">0</b><span class="lbl" id="sMovLbl">pausas activas</span><span class="nx" id="sMovNx"></span><button class="scr-btn teal" data-cmd="mov" aria-label="Me he movido">+1</button></div>
     </div>
     <div class="scr-pausi" id="sPausi" data-box="pausi">
@@ -984,11 +985,13 @@
 </div>
 
 <script>
-const VERSION = 'v1.40';
+const VERSION = 'v1.41';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
 const PAUSI_DEFAULT = { voiceOn: true, every: 30, next: 0 };
+const AGUA_STEP = 0.5; // cada aviso sugiere medio vaso
+const fmtVasos = n => String(n).replace('.', ',');
 const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
@@ -1728,7 +1731,7 @@ function castCommand(m) {
     case 'mov':
       if (hAlertKind === m.c) saludAnswer(true);
       else {
-        saludToday()[m.c] += 1;
+        saludToday()[m.c] += m.c === 'agua' ? AGUA_STEP : 1;
         if (m.c === 'agua') S.aguaNext = Date.now() + S.aguaMin * 60000; else S.movNext = Date.now() + S.movMin * 60000;
         save(); renderSalud();
       }
@@ -1836,7 +1839,7 @@ function scrSaludTick() {
   const v = scrSalud; if (!v) return;
   const since = Date.now() - v.at;
   const nx = (on, left) => !on ? 'sin aviso' : 'aviso en ' + Math.max(1, Math.ceil((left - since) / 60000)) + ' min';
-  $('sAgua').textContent = v.agua + '/' + v.goal;
+  $('sAgua').textContent = fmtVasos(v.agua) + '/' + v.goal;
   $('sAguaNx').textContent = nx(v.aguaOn, v.aguaLeft);
   $('sMov').textContent = v.mov;
   $('sMovLbl').textContent = v.mov === 1 ? 'pausa activa' : 'pausas activas';
@@ -2136,9 +2139,9 @@ function goBack() {
   showView();
 }
 const PAUSI_TIPS = [
-  'un vaso de agua también es una pausa.',
+  'medio vaso de agua también es una pausa.',
   'ten una botella de agua a la vista: beberás más sin darte cuenta.',
-  'bebe un vaso de agua al empezar cada bloque.',
+  'bebe medio vaso de agua al empezar cada bloque.',
   'levántate y estira los brazos hacia el techo.',
   'camina un poco: cada paso cuenta.',
   'gira los hombros hacia atrás diez veces y suelta la tensión.',
@@ -2154,7 +2157,7 @@ function renderHome() {
   $('homeVistaBar').style.width = V.active ? Math.min(100, (1 - left / (V.every * 60000)) * 100) + '%' : '0';
   $('homeSteps').textContent = fmt(today().steps) + ' pasos hoy';
   const hs = saludToday();
-  $('homeAgua').textContent = `${hs.agua}/${db.salud.aguaGoal} vasos · ${hs.mov} ${hs.mov === 1 ? 'pausa activa' : 'pausas activas'}`;
+  $('homeAgua').textContent = `${fmtVasos(hs.agua)}/${db.salud.aguaGoal} vasos · ${hs.mov} ${hs.mov === 1 ? 'pausa activa' : 'pausas activas'}`;
   $('homeBloques').textContent = bloquesHome();
 }
 
@@ -2358,9 +2361,9 @@ function saludFix() {
 }
 function renderSalud() {
   const S = db.salud, t = saludToday(), now = Date.now();
-  $('hAguaN').textContent = t.agua;
+  $('hAguaN').textContent = fmtVasos(t.agua);
   $('hAguaGoalTxt').textContent = S.aguaGoal;
-  $('hAguaGlasses').innerHTML = Array.from({ length: Math.max(S.aguaGoal, t.agua) }, (_, i) => `<span class="${i < t.agua ? 'full' : ''}"></span>`).join('');
+  $('hAguaGlasses').innerHTML = Array.from({ length: Math.max(S.aguaGoal, Math.ceil(t.agua)) }, (_, i) => `<span class="${i + 1 <= t.agua ? 'full' : i < t.agua ? 'half' : ''}"></span>`).join('');
   $('hMovN').textContent = t.mov;
   const nx = (on, at) => !on ? 'Avisos desactivados' : !inHours() ? 'Fuera de horario (5:30 – 22:00)' : 'Próximo aviso en ' + Math.max(1, Math.ceil((at - now) / 60000)) + ' min';
   $('hAguaNext').textContent = nx(S.aguaOn, S.aguaNext);
@@ -2370,12 +2373,12 @@ function saludAlert(kind) {
   hAlertKind = kind;
   const S = db.salud;
   const agua = kind === 'agua';
-  const tip = agua ? 'Bebe un vaso de agua. Tu cuerpo y tu mente lo agradecerán.' : MOV_TIPS[Math.floor(Math.random() * MOV_TIPS.length)];
+  const tip = agua ? 'Bebe medio vaso de agua. Tu cuerpo y tu mente lo agradecerán.' : MOV_TIPS[Math.floor(Math.random() * MOV_TIPS.length)];
   $('hAlertTitle').textContent = agua ? '💧 Hora de beber agua' : '🤸 Hora de moverte';
   $('hAlertSub').textContent = tip;
   $('hAlert').classList.remove('hidden');
   chime();
-  setTimeout(() => speak(agua ? 'Es hora de beber un vaso de agua.' : 'Es hora de moverte. ' + tip), 1000);
+  setTimeout(() => speak(agua ? 'Es hora de beber medio vaso de agua.' : 'Es hora de moverte. ' + tip), 1000);
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
     try { new Notification(agua ? '💧 Hora de beber agua' : '🤸 Hora de moverte', { body: tip, icon: 'icon-192.png', tag: 'salud-' + kind }); } catch (e) {}
@@ -2389,7 +2392,7 @@ function saludAnswer(done) {
   $('hAlert').classList.add('hidden');
   hAlertKind = null;
   if (!kind) return;
-  if (done) { saludToday()[kind] += 1; }
+  if (done) { saludToday()[kind] += kind === 'agua' ? AGUA_STEP : 1; }
   else if (kind === 'agua') S.aguaNext = Date.now() + 10 * 60000;
   else S.movNext = Date.now() + 10 * 60000;
   save();
@@ -2452,8 +2455,8 @@ function bindSalud() {
   });
   num('hAguaMin', 'aguaMin', 10, 240, 'aguaNext'); num('hMovMin', 'movMin', 10, 240, 'movNext'); num('hAguaGoal', 'aguaGoal', 1, 20);
   const add = (kind, n) => { const t = saludToday(); t[kind] = Math.max(0, t[kind] + n); save(); renderSalud(); setTimeout(sendState, 50); };
-  $('hAguaPlus').addEventListener('click', () => { add('agua', 1); S.aguaNext = Date.now() + S.aguaMin * 60000; save(); renderSalud(); });
-  $('hAguaMinus').addEventListener('click', () => add('agua', -1));
+  $('hAguaPlus').addEventListener('click', () => { add('agua', AGUA_STEP); S.aguaNext = Date.now() + S.aguaMin * 60000; save(); renderSalud(); });
+  $('hAguaMinus').addEventListener('click', () => add('agua', -AGUA_STEP));
   $('hMovPlus').addEventListener('click', () => { add('mov', 1); S.movNext = Date.now() + S.movMin * 60000; save(); renderSalud(); });
   $('hMovMinus').addEventListener('click', () => add('mov', -1));
   $('hAlertDone').addEventListener('click', () => saludAnswer(true));
