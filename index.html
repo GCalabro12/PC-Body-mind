@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.62</title>
+<title>PC & Body-mind v1.63</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -194,6 +194,14 @@
   .scr-toast, .scr-cele { pointer-events: none; }
   /* Sonido y vídeo a los lados de los pasos */
   .scr-side { display: none; }
+  /* vista móvil dentro de la pantalla del PC */
+  .remote-wait { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #cbd5e1; font-size: 18px; background: #0f172a; z-index: 99; }
+  .remote-wait.hidden { display: none; }
+  body.remote .home-link[data-go="pc"], body.remote #toggleBtn, body.remote #apkCard, body.remote #installBtn { display: none !important; }
+  .scr-remote { position: fixed; inset: 0; z-index: 60; background: #0f172a; }
+  .scr-remote.hidden { display: none; }
+  .scr-remote iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .scr-remote-back { position: absolute; bottom: 14px; right: 14px; z-index: 2; width: auto; padding: 8px 14px; border-radius: 99px; font-size: 13px; font-weight: 700; background: #0284c7; border: 0; color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
   .scr-grip { position: absolute; left: 3px; bottom: 3px; width: 14px; height: 22px; display: flex; align-items: center; justify-content: center; color: #64748B; cursor: grab; touch-action: none; z-index: 4; opacity: 0.75; }
   .scr-grip svg { width: 9px; height: 15px; fill: currentColor; }
   .scr-grip:hover { color: #E2E8F0; opacity: 1; }
@@ -332,7 +340,7 @@
     .pip #sFull { display: none; }
     /* sonido, volumen y vídeo ya están junto a los pasos: aquí no se repiten */
     .scr-ctrl #sSound, .scr-ctrl .scr-vol, .scr-ctrl #sVideoBtn { display: none; }
-    .scr-ctrl #sFull { order: 1; } .scr-ctrl #sPip { order: 2; } .scr-ctrl #sPlay { display: none !important; }
+    .scr-ctrl #sFull { order: 1; } .scr-ctrl #sPip { order: 2; } .scr-ctrl #sRemote { order: 3; } .pip #sRemote { display: none; } .scr-ctrl #sPlay { display: none !important; }
     .scr-ctrl .scr-conn { order: 4; flex-basis: 100%; text-align: center; background: transparent; padding: 2px 0 0; }
     .pip .scr-ctrl.folded::before { content: "🗗 Ventana flotante · conexión y cerrar ventana"; color: #7DD3FC; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
@@ -971,7 +979,9 @@
 </div>
 
 <!-- Modo pantalla (ordenador): ?pantalla -->
+<div class="remote-wait hidden" id="remoteWait">Cargando los datos del móvil…</div>
 <div id="screen" class="hidden">
+  <div class="scr-remote hidden" id="sRemoteBox"><button class="scr-remote-back" id="sRemoteBack">🖥️ Vista PC</button><iframe id="sRemoteFrame" title="Vista móvil"></iframe></div>
   <div class="scr-drag" title="Arrastra desde aquí para mover la ventana"></div>
   <div class="scr-video" id="scrVideoBox"><div id="scrVideo"></div></div>
   <div class="scr-shade"></div>
@@ -1049,6 +1059,7 @@
         <button id="sVideoBtn">🎬 Ocultar vídeo</button>
         <button id="sFull">⛶ Pantalla completa</button>
         <button id="sPip" class="hidden">🗗 Ventana flotante</button>
+        <button id="sRemote">📱 Vista móvil</button>
       </div>
     </div>
   </div>
@@ -1063,7 +1074,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.62';
+const VERSION = 'v1.63';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1075,7 +1086,9 @@ const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: tr
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
-const NATIVE = !SCREEN && !!window.AndroidPasos; // dentro de la app Android (cuenta con la pantalla apagada)
+// ?remoto: la app completa dentro de la pantalla del PC, trabajando con los datos del móvil (no guarda nada en el PC)
+const REMOTE = !SCREEN && new URLSearchParams(location.search).has('remoto');
+const NATIVE = !SCREEN && !REMOTE && !!window.AndroidPasos; // dentro de la app Android (cuenta con la pantalla apagada)
 const APK_URL = 'https://github.com/GCalabro12/PC-Body-mind-Android/releases/latest/download/PC-Body-mind.apk';
 const CAST_PREFIX = 'pasos-gc-';
 const RING_C = 2 * Math.PI * 104;
@@ -1094,7 +1107,62 @@ function load() {
   } catch (e) {}
   return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT }, bloques: { ...BLOQUES_DEFAULT, days: {} }, salud: { ...SALUD_DEFAULT, days: {} }, pausi: { ...PAUSI_DEFAULT } };
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative(); }
+function save() {
+  if (REMOTE) { remotePush(); return; }
+  try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative();
+  castDbSoon();
+}
+// --- vista móvil: lo que se edita en el PC se manda al móvil por secciones ---
+const REMOTE_KEYS = ['bloques', 'salud', 'vista', 'alerts', 'settings', 'pausi'];
+let remoteSnap = {};
+function remotePush() {
+  REMOTE_KEYS.forEach(k => {
+    const j = JSON.stringify(db[k]);
+    if (remoteSnap[k] !== j) { remoteSnap[k] = j; try { parent.postMessage({ t: 'patch', key: k, val: JSON.parse(j) }, '*'); } catch (e) {} }
+  });
+}
+// recibe los datos del móvil y los mezcla en los mismos objetos (hay funciones que guardan referencias a ellos)
+function remoteMerge(d) {
+  if (!d) return;
+  ['settings', 'music', 'alerts', 'vista', 'bloques', 'salud', 'pausi'].forEach(k => { if (d[k] && db[k]) Object.assign(db[k], d[k]); });
+  if (d.days) db.days = d.days;
+  db.running = !!d.running;
+  REMOTE_KEYS.forEach(k => { remoteSnap[k] = JSON.stringify(db[k]); });
+}
+// --- en el móvil: manda sus datos a la pantalla mientras está abierta la vista móvil ---
+let remoteWanted = false, castDbT = null;
+function castDbSoon() {
+  if (!remoteWanted || SCREEN || REMOTE) return;
+  clearTimeout(castDbT);
+  castDbT = setTimeout(() => { if (typeof castSend === 'function') castSend({ t: 'db', db: { ...db, cast: null } }); }, 600);
+}
+function applyRemotePatch(key, val) {
+  if (!REMOTE_KEYS.includes(key) || !val || typeof val !== 'object' || !db[key]) return;
+  const cur = db[key], now = Date.now();
+  if (key === 'vista') {
+    const wasActive = cur.active, oldEvery = cur.every;
+    ['every', 'dur', 'dist', 'remind', 'active'].forEach(f => { if (f in val) cur[f] = val[f]; });
+    if (cur.active && (!wasActive || cur.every !== oldEvery)) cur.nextAt = now + cur.every * 60000;
+    if (!cur.active && wasActive) { try { vistaStop(); } catch (e) {} }
+  } else if (key === 'salud') {
+    ['aguaOn', 'aguaMin', 'aguaGoal', 'movOn', 'movMin', 'days'].forEach(f => { if (f in val) cur[f] = val[f]; });
+    if (val.aguaNext > cur.aguaNext) cur.aguaNext = val.aguaNext;
+    if (val.movNext > cur.movNext) cur.movNext = val.movNext;
+  } else if (key === 'bloques') {
+    const keep = { lastBlk: cur.lastBlk, sleepDone: cur.sleepDone };
+    Object.assign(cur, val, keep);
+  } else if (key === 'pausi') {
+    const next = cur.next; Object.assign(cur, val); cur.next = next;
+  } else Object.assign(cur, val);
+  save();
+  try {
+    if (!$('home').classList.contains('hidden')) renderHome();
+    if (!$('bloques').classList.contains('hidden')) renderBloques();
+    if (!$('agua').classList.contains('hidden')) renderSalud();
+    vistaTick();
+  } catch (e) {}
+  setTimeout(sendState, 80);
+}
 function dayKey(d = new Date()) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
@@ -1280,6 +1348,7 @@ function speakFlushHeld() {
   saludTick(); // si tocaba un aviso de agua o movimiento, sale ahora
 }
 function speak(text, done) {
+  if (REMOTE) { if (done) setTimeout(done, 50); return; }
   if (vBreakEnd && !speakBypass) { speakHeld.push([text, done]); return; }
   if (NATIVE) { // en la app Android habla el teléfono (también con la pantalla apagada)
     if (musicPlaying()) { yt.setVolume(Math.round(M.vol * 0.25)); ducked = true; }
@@ -1785,7 +1854,7 @@ async function castConnect() {
     conn = peer.connect(CAST_PREFIX + code, { reliable: true });
     conn.on('open', () => { castStatus('✔ Conectado a la pantalla ' + code, 'ok'); sendState(); });
     conn.on('data', castCommand);
-    conn.on('close', () => { if (castOn) { if (!castBusy) castStatus('Se perdió la conexión. Reintentando…'); castLater(); } });
+    conn.on('close', () => { remoteWanted = false; if (castOn) { if (!castBusy) castStatus('Se perdió la conexión. Reintentando…'); castLater(); } });
   };
   peer.open ? go() : peer.once('open', go);
 }
@@ -1809,6 +1878,9 @@ function castCommand(m) {
   const S = db.salud;
   switch (m.c) {
     case 'update': checkUpdate(); return;
+    case 'getdb': remoteWanted = true; castSend({ t: 'db', db: { ...db, cast: null } }); return;
+    case 'remoteoff': remoteWanted = false; return;
+    case 'patch': applyRemotePatch(m.key, m.val); return;
     case 'addTask': {
       const text = String(m.text || '').trim().slice(0, 200), c = curBlock();
       if (!text || c < 0) break;
@@ -1879,7 +1951,7 @@ function bindCast() {
     castConnect();
   });
   setInterval(sendState, 10000);
-  if (db.cast) castConnect();
+  if (db.cast && !REMOTE) castConnect();
 }
 
 // ---------- Modo pantalla (ordenador) ----------
@@ -2071,8 +2143,25 @@ const BATT_LOW = 20;
 let scrBattWarned = false, phoneBattWarned = false;
 function battLowMsg(n) { return 'Atención: al móvil le queda un ' + n + ' por ciento de batería. Ponlo a cargar.'; }
 let scrPhoneVer = '', scrUpdAsked = 0, scrCodeNow = '', scrLinkDev = '', scrLinkAt = 0;
+let scrRemoteDb = null;
+function scrRemoteOpen() {
+  if (!scrLink || !scrLink.open) { scrCmd('getdb'); return; }
+  const f = $('sRemoteFrame');
+  if (!f.getAttribute('src')) f.setAttribute('src', location.pathname + '?remoto&v=' + VERSION + '#home');
+  $('sRemoteBox').classList.remove('hidden');
+  scrLink.send({ t: 'cmd', c: 'getdb' });
+}
+function scrRemoteClose() {
+  $('sRemoteBox').classList.add('hidden');
+  try { if (scrLink && scrLink.open) scrLink.send({ t: 'cmd', c: 'remoteoff' }); } catch (e) {}
+}
+function scrRemoteSend() {
+  const f = $('sRemoteFrame');
+  if (scrRemoteDb && f && f.contentWindow) f.contentWindow.postMessage({ t: 'db', db: scrRemoteDb }, '*');
+}
 function scrData(m) {
   if (!m || typeof m !== 'object') return;
+  if (m.t === 'db') { scrRemoteDb = m.db; scrRemoteSend(); return; }
   if (m.t === 'state') {
     scrPhoneVer = m.ver || 'antigua';
     if (scrCodeNow) scrConn('Conexión: ' + scrCodeNow + ' · ' + (m.ver || 'versión antigua ⚠️'));
@@ -2266,6 +2355,17 @@ function initScreen() {
   setInterval(scrEyeTick, 500);
   scrFoldInit();
   scrOrderInit();
+  // vista móvil: la app completa con los datos del móvil
+  $('sRemote').addEventListener('click', scrRemoteOpen);
+  $('sRemoteBack').addEventListener('click', scrRemoteClose);
+  addEventListener('message', e => {
+    const f = $('sRemoteFrame');
+    if (!f || e.source !== f.contentWindow) return;
+    const m = e.data || {};
+    if (m.t === 'ready') scrRemoteSend();
+    else if (m.t === 'patch' && scrLink && scrLink.open) scrLink.send({ t: 'cmd', c: 'patch', key: m.key, val: m.val });
+    else if (m.t === 'cmd') scrCmd(m.c);
+  });
   // ⚙: abre y cierra los controles; se cierran al tocar fuera
   // escribir una tarea para el bloque de ahora desde el PC
   const planClose = () => { $('sPlan').classList.add('hidden'); $('sPlanIn').value = ''; $('sTaskAdd').classList.remove('hidden'); };
@@ -2528,7 +2628,7 @@ function vistaSnooze() {
 }
 function vistaTick() {
   const V = db.vista, now = Date.now();
-  if (V.active && !vAlerting && !vBreakEnd && now >= V.nextAt) vistaAlert();
+  if (V.active && !vAlerting && !vBreakEnd && now >= V.nextAt && !REMOTE) vistaAlert();
   const total = V.every * 60000;
   const left = V.active ? Math.max(0, V.nextAt - now) : total;
   $('vCount').textContent = mmss(left);
@@ -2637,6 +2737,7 @@ function battTick() {
   else speak(battLowMsg(b.level));
 }
 function saludTick() {
+  if (REMOTE) { if (!$('agua').classList.contains('hidden')) renderSalud(); return; }
   battTick();
   pausiTick();
   const S = db.salud, now = Date.now();
@@ -2927,6 +3028,7 @@ function activityReminder(c) {
   }
 }
 function bloquesTick() {
+  if (REMOTE) { if (!$('bloques').classList.contains('hidden')) { const st = $('bStrip').scrollLeft; renderBloques(); $('bStrip').scrollLeft = st; } return; }
   const c = curBlock();
   if (c !== bLastCur) {
     bRemindAt = Date.now();
@@ -3081,6 +3183,7 @@ function initShell() {
 // ---------- Comprobar si hay versión nueva (el móvil a veces enseña la anterior guardada) ----------
 let pipUpdPending = '';
 async function checkUpdate() {
+  if (REMOTE) return;
   try {
     const r = await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' });
     const m = (await r.text()).match(/const VERSION = '([^']+)'/);
@@ -3106,7 +3209,7 @@ if (SCREEN) setInterval(checkUpdate, 10 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
 
 // ---------- Arranque ----------
-window.onYouTubeIframeAPIReady = () => SCREEN ? createScreenPlayer() : createMainPlayer();
+window.onYouTubeIframeAPIReady = () => SCREEN ? createScreenPlayer() : REMOTE ? null : createMainPlayer();
 
 // Tarjetas del inicio: se reordenan arrastrando el asa de 8 puntos; el orden se guarda
 // Cuenta atrás del bloque actual (min:seg) en la tarjeta del inicio
@@ -3187,10 +3290,31 @@ function initApp() {
       if (!running && M.auto) musicPause();
     }
   });
-  if (db.running || db.settings.autoStart) start(false); // empieza a contar solo al abrir la app
+  if (!REMOTE && (db.running || db.settings.autoStart)) start(false); // empieza a contar solo al abrir la app
 }
 
-SCREEN ? initScreen() : initApp();
+if (SCREEN) initScreen();
+else if (REMOTE) {
+  document.body.classList.add('remote');
+  $('remoteWait').classList.remove('hidden');
+  // la pausa de vista la hace el móvil
+  vistaBreak = () => { try { parent.postMessage({ t: 'cmd', c: 'vistaStart' }, '*'); } catch (e) {} };
+  let started = false;
+  addEventListener('message', e => {
+    const m = e.data;
+    if (!m || m.t !== 'db') return;
+    remoteMerge(m.db);
+    if (!started) { started = true; $('remoteWait').classList.add('hidden'); initApp(); return; }
+    try {
+      render();
+      if (!$('home').classList.contains('hidden')) renderHome();
+      if (!$('bloques').classList.contains('hidden') && !(document.activeElement && document.activeElement.id === 'bText')) { const st = $('bStrip').scrollLeft; renderBloques(); $('bStrip').scrollLeft = st; }
+      if (!$('agua').classList.contains('hidden')) renderSalud();
+      vistaTick();
+    } catch (er) {}
+  });
+  parent.postMessage({ t: 'ready' }, '*');
+} else initApp();
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
 </body>
