@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.51</title>
+<title>PC & Body-mind v1.52</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -586,7 +586,7 @@
     </div>
     <div class="row">
       <div><label for="vDist">Mirar a (metros)</label><input type="number" id="vDist" min="1" max="50" inputmode="numeric"></div>
-      <div><label for="vRemind">Si no la haces, recordar cada (minutos)</label><input type="number" id="vRemind" min="1" max="30" inputmode="numeric"></div>
+      <div><label for="vRemind">Si no la haces, recordar una vez a los (minutos; 0 = no recordar)</label><input type="number" id="vRemind" min="0" max="30" inputmode="numeric" placeholder="0"></div>
     </div>
     <div class="hint">Regla 20-20-20 de la Academia Americana de Oftalmología: cada 20 minutos, 20 segundos mirando a 20 pies (unos 6 metros).</div>
     <button class="btn-outline mt" id="vTest">Probar una pausa ahora</button>
@@ -1037,7 +1037,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.51';
+const VERSION = 'v1.52';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2358,7 +2358,7 @@ function vistaAlert() {
   sendState();
   // si no se hace la pausa, se recuerda UNA vez más a los X minutos (no se repite)
   clearInterval(vReminder);
-  vReminder = setTimeout(() => {
+  if (db.vista.remind > 0) vReminder = setTimeout(() => {
     if (!vAlerting || vBreakEnd) return;
     chime();
     clearTimeout(vAlertSpeak);
@@ -2585,7 +2585,7 @@ function bindVista() {
       save(); vistaTick();
     } else $(id).value = V[key];
   });
-  num('vEvery', 'every', 1, 180); num('vDur', 'dur', 5, 600); num('vDist', 'dist', 1, 50); num('vRemind', 'remind', 1, 30);
+  num('vEvery', 'every', 1, 180); num('vDur', 'dur', 5, 600); num('vDist', 'dist', 1, 50); num('vRemind', 'remind', 0, 30);
   $('vToggle').addEventListener('click', () => db.vista.active ? vistaStop() : vistaStart());
   $('vTest').addEventListener('click', vistaBreak);
   $('vStartBreak').addEventListener('click', vistaBreak);
