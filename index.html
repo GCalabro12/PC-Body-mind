@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.56</title>
+<title>PC & Body-mind v1.57</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -289,6 +289,7 @@
     .scr-pasos.folded .scr-steps { font-size: clamp(18px, 7vw, 30px) !important; }
     .scr-pasos.folded .scr-label { margin: 0; }
     .scr-stats .us { display: none; }
+    .scr-stats .st-lbl { align-self: center; color: #4ADE80; font-weight: 800; font-size: clamp(12px, 3.6vw, 16px); }
     .scr-stats.folded { padding-top: 0.5vh; padding-bottom: 0.5vh; gap: 16px; }
     .scr-stats.folded b { display: inline; margin-right: 4px; font-size: 15px; }
     .scr-stats.folded .u { display: none; }
@@ -990,6 +991,7 @@
     <div class="scr-stats" data-box="datos">
       <button class="scr-fold" data-fold="datos" aria-label="Plegar o desplegar">▴</button>
       <div id="sBattBox" class="hidden"><b class="batt-row"><span class="batt"><span id="sBattFill"></span></span><span id="sBatt">--</span></b>batería móvil</div>
+      <div class="st-lbl">Pasos:</div>
       <div><b id="sKm">0,00</b><span class="u">kilómetros</span><span class="us">km</span></div>
       <div><b id="sKcal">0</b><span class="u">kilocalorías</span><span class="us">kcal</span></div>
       <div><b id="sMins">0</b><span class="u">minutos activos</span><span class="us">min</span></div>
@@ -1059,7 +1061,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.56';
+const VERSION = 'v1.57';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
