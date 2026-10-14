@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.37</title>
+<title>PC & Body-mind v1.38</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -187,8 +187,10 @@
   .scr-eye-time { font-size: clamp(18px, min(4.6vw, 6.5vh), 54px); font-weight: 800; font-variant-numeric: tabular-nums; }
   .scr-eye-lbl { font-size: clamp(9px, 1.4vmin, 14px); color: #bae6fd; margin-top: 2px; }
   .scr-eye.alert #sEyeLid { stroke: #facc15; }
-  .scr-eye.alert { animation: eyePulse 1.2s infinite; }
+  .scr-eye.alert svg { animation: eyePulse 1.2s infinite; }
+  .scr-eye.alert .eye-center { animation: eyeFade 1.2s infinite; }
   @keyframes eyePulse { 50% { opacity: 0.55; transform: scale(1.04); } }
+  @keyframes eyeFade { 50% { opacity: 0.55; } }
   /* App instalada sin barra de título: franja superior para arrastrar la ventana y margen para no tapar los botones */
   .scr-drag { position: fixed; top: 0; left: env(titlebar-area-x, 0px); width: env(titlebar-area-width, 0px); height: env(titlebar-area-height, 0px); -webkit-app-region: drag; app-region: drag; z-index: 90; background: rgba(15,23,42,0.55); }
   .scr-panel, .scr-top { margin-top: env(titlebar-area-height, 0px); }
@@ -202,7 +204,7 @@
     .scr-eye { order: 2; margin: 0 auto; width: min(80vw, 30vh, 320px); }
     .scr-eye-time { font-size: clamp(16px, min(9vw, 5vh), 40px); }
     /* batería al lado derecho del ojo */
-    .scr-eye-batt { position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; color: #CBD5E1; }
+    .scr-eye-batt { position: absolute; left: calc(100% + clamp(8px, 4vw, 26px)); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; color: #CBD5E1; }
     .scr-eye-batt.hidden { display: none !important; }
     .scr-eye-batt b { font-size: clamp(11px, 3.4vw, 15px); color: #F8FAFC; font-variant-numeric: tabular-nums; }
     .batt-v { position: relative; width: 18px; height: 32px; border: 2px solid currentColor; border-radius: 4px; }
@@ -962,7 +964,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.37';
+const VERSION = 'v1.38';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1682,6 +1684,7 @@ function castCommand(m) {
   if (!m || m.t !== 'cmd') return;
   const S = db.salud;
   switch (m.c) {
+    case 'update': checkUpdate(); return;
     case 'vistaStart': if (!vBreakEnd) vistaBreak(); break;
     case 'vistaEnd': if (vBreakEnd) vistaBreakEnd(false); break;
     case 'vistaSnooze': if (vAlerting) vistaSnooze(); break;
@@ -1710,7 +1713,7 @@ function sendState() {
   const d = today(), st = dayStats(d);
   const b = batteryInfo();
   castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos,
-    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState() });
+    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION });
 }
 function saludState() {
   const S = db.salud, t = saludToday(), now = Date.now();
@@ -1821,6 +1824,12 @@ function scrCmd(cmd, btn) {
     return;
   }
   scrLink.send({ t: 'cmd', c: cmd });
+  if (scrPhoneVer === 'antigua') {
+    clearTimeout(toastT);
+    $('sToast').textContent = '📱 El móvil tiene una versión antigua y no entiende los botones. Abre la app en el móvil para que se actualice.';
+    $('sToast').classList.remove('hidden');
+    toastT = setTimeout(() => $('sToast').classList.add('hidden'), 8000);
+  }
   if (btn) { btn.classList.add('sent'); setTimeout(() => btn.classList.remove('sent'), 1200); }
 }
 function scrEyeTick() {
@@ -1856,9 +1865,14 @@ function scrEyeTick() {
 const BATT_LOW = 10;
 let scrBattWarned = false, phoneBattWarned = false;
 function battLowMsg(n) { return 'Atención: al móvil le queda un ' + n + ' por ciento de batería. Ponlo a cargar.'; }
+let scrPhoneVer = '', scrUpdAsked = 0;
 function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'state') {
+    scrPhoneVer = m.ver || 'antigua';
+    if (m.ver && m.ver !== VERSION && scrLink && scrLink.open && Date.now() - scrUpdAsked > 60000) {
+      scrUpdAsked = Date.now(); scrLink.send({ t: 'cmd', c: 'update' });
+    }
     $('sPair').classList.add('hidden');
     $('sSteps').textContent = fmt(m.steps);
     $('sGoal').textContent = 'de ' + fmt(m.goal) + (m.running ? '' : ' · en pausa');
@@ -2781,6 +2795,10 @@ async function checkUpdate() {
   } catch (e) {}
 }
 setTimeout(checkUpdate, 1500);
+if (!SCREEN) setInterval(() => {
+  if (vBreakEnd || vAlerting || hAlertKind || (typeof musicPlaying === 'function' && musicPlaying())) return;
+  checkUpdate();
+}, 10 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
 
 // ---------- Arranque ----------
