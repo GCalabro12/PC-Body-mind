@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.18</title>
+<title>PC & Body-mind v1.19</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -226,6 +226,48 @@
   body.has-badge { padding-top: 26px; }
   .cele-art svg { width: 120px; height: 132px; display: block; margin: 0 auto; }
 
+  /* ---------- Bloques de tiempo ---------- */
+  .sun { color: #FACC15 !important; }
+  .home-btn.bloques .st { color: #FACC15; }
+  .btn-sun { background: #CA8A04; }
+  .btn-sun:hover { background: #A16207; }
+  .b-strip-card { padding: 0.8rem 0.6rem; }
+  .b-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x proximity; padding: 6px 4px 10px; scrollbar-width: thin; }
+  .b-blk { flex: none; width: 118px; min-height: 112px; scroll-snap-align: center; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; background: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 10px; font-size: 0.8rem; font-weight: 400; color: #cbd5e1; position: relative; }
+  .b-blk:hover { background: #16213a; }
+  .b-blk-time { font-weight: 800; font-size: 1.05rem; color: #F8FAFC; font-variant-numeric: tabular-nums; }
+  .b-blk-end { color: #94A3B8; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+  .b-blk-acts { margin-top: 6px; font-size: 0.72rem; line-height: 1.3; color: #CBD5E1; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .b-blk-empty { margin-top: 6px; font-size: 0.72rem; color: #475569; }
+  .b-blk.past { opacity: 0.45; }
+  .b-blk.sel { border-color: #94A3B8; }
+  .b-blk.now { border: 2px solid #FACC15; box-shadow: 0 0 0 4px rgba(250,204,21,0.15); }
+  .b-now-tag { position: absolute; top: 8px; right: 8px; font-size: 0.58rem; font-weight: 800; color: #0F172A; background: #FACC15; border-radius: 99px; padding: 2px 6px; }
+  .b-daynav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .b-daynav button { width: 40px; height: 40px; padding: 0; flex: none; background: transparent; border: 1px solid #475569; color: #cbd5e1; border-radius: 50%; font-size: 1.3rem; line-height: 1; }
+  .b-daynav button:hover { background: #334155; }
+  .b-date { font-size: clamp(1.15rem, 5.6vw, 1.7rem); font-weight: 800; text-align: center; white-space: nowrap; }
+  .b-range { font-size: 2.6rem; font-weight: 800; color: #FACC15; text-align: center; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 6px; }
+  .b-state { text-align: center; color: #94A3B8; font-size: 0.85rem; margin-top: 4px; }
+  .b-progress { height: 6px; background: #0f172a; border-radius: 99px; overflow: hidden; margin: 10px 0 4px; }
+  .b-progress div { height: 100%; width: 0; background: #FACC15; border-radius: 99px; transition: width 0.5s; }
+  .b-acts { list-style: none; padding: 0; margin: 14px 0 0; display: flex; flex-direction: column; gap: 8px; }
+  .b-acts:empty { display: none; }
+  .b-acts li { display: flex; gap: 10px; align-items: flex-start; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; }
+  .b-acts .n { color: #FACC15; font-weight: 800; }
+  .b-acts .t { flex: 1; white-space: pre-wrap; word-break: break-word; }
+  .b-acts li button { width: auto; background: transparent; color: #64748b; padding: 0 4px; font-size: 1rem; flex: none; }
+  .b-acts li button:hover { color: #f87171; background: transparent; }
+  .b-input-row { display: flex; gap: 8px; align-items: flex-start; }
+  #bText { flex: 1; min-height: 70px; resize: vertical; padding: 0.7rem; border-radius: 0.6rem; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1rem; font-family: inherit; line-height: 1.4; overflow: hidden; }
+  #bText:focus { outline: none; border-color: #FACC15; }
+  .b-mic { width: 48px; height: 48px; flex: none; border-radius: 50%; padding: 0; background: #334155; display: flex; align-items: center; justify-content: center; }
+  .b-mic:hover { background: #475569; }
+  .b-mic.rec { background: #dc2626; animation: eyePulse 1s infinite; }
+  .b-more { background: #0f172a; border: 1px dashed #FACC15; border-radius: 14px; padding: 12px; margin-top: 12px; text-align: center; }
+  .b-more p { margin: 0 0 10px; }
+  .b-full { text-align: center; color: #FACC15; font-weight: 700; margin-top: 12px; }
+
   /* ---------- Descansos de la vista ---------- */
   .eye-box { position: relative; width: 100%; max-width: 340px; margin: 0 auto; }
   .eye-box svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 18px rgba(56,189,248,0.25)); }
@@ -266,7 +308,7 @@
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
     <div class="home-btns">
       <button class="home-btn vista" data-go="vista"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Descansos de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      <button class="home-btn bloques" data-go="bloques"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3>Bloques de tiempo</h3><span class="pill">Próximamente</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn bloques" data-go="bloques"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3>Bloques de tiempo</h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">busca el punto más lejano de la habitación y míralo un momento.</span></p></div>
@@ -317,16 +359,48 @@
   </div>
 </div>
 
-<!-- Bloques de tiempo (se explicará más adelante) -->
+<!-- Bloques de tiempo: de 5:30 a 22:00 en bloques de hora y media -->
 <div class="wrap view hidden" id="bloques">
   <header>
     <button class="back" data-back>← Inicio</button>
-    <h1 style="color:#facc15">⏱ Bloques de tiempo</h1>
+    <h1 class="sun">⏱ Bloques</h1>
     <span></span>
   </header>
-  <div class="card" style="text-align:center">
-    <div style="font-size:3rem">⏱</div>
-    <p class="note">Próximamente. Aquí irán los bloques de tiempo.</p>
+  <div class="card b-strip-card">
+    <div class="b-strip" id="bStrip"></div>
+  </div>
+  <div class="card">
+    <div class="b-daynav">
+      <button id="bPrev" aria-label="Día anterior">‹</button>
+      <div class="b-date" id="bDate">Viernes 9 oct</div>
+      <button id="bNext" aria-label="Día siguiente">›</button>
+    </div>
+    <div class="b-range" id="bRange">13:00 – 14:30</div>
+    <div class="b-state" id="bState"></div>
+    <div class="b-progress" id="bProgBox"><div id="bProg"></div></div>
+    <ol class="b-acts" id="bActs"></ol>
+    <div id="bEditor">
+      <label for="bText">¿A qué vas a dedicar este bloque?</label>
+      <div class="b-input-row">
+        <textarea id="bText" rows="2" placeholder="Por ejemplo: preparar la sesión del curso"></textarea>
+        <button class="b-mic" id="bMic" aria-label="Dictar con el micrófono"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      </div>
+      <div class="hint" id="bMicHint"></div>
+      <button class="btn-sun mt" id="bSave">Guardar actividad</button>
+    </div>
+    <div class="b-more hidden" id="bMore">
+      <p>¿Quieres añadir otra actividad en este bloque?</p>
+      <div class="row">
+        <div><button class="btn-sun" id="bMoreYes">Sí, otra</button></div>
+        <div><button class="btn-outline" id="bMoreNo">No, listo</button></div>
+      </div>
+    </div>
+    <button class="link-btn hidden" id="bAdd">+ Añadir otra actividad</button>
+    <div class="b-full hidden" id="bFull">Bloque completo · 3 actividades</div>
+    <button class="btn-outline mt hidden" id="bNow">↺ Volver al bloque actual</button>
+  </div>
+  <div class="card">
+    <label class="check" style="margin:0"><input type="checkbox" id="bSleepOn"> A las 22:00, recordarme apagar el ordenador e ir a dormir</label>
   </div>
 </div>
 
@@ -513,6 +587,16 @@
   </div>
 </div>
 
+<!-- Aviso: hora de dormir -->
+<div class="cele hidden" id="bSleep">
+  <div class="cele-box" style="border-color:#818CF8">
+    <div class="cele-art"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L26 122"/><path d="M158 104 L174 122"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="26" cy="122" r="7" fill="#4ADE80"/><circle cx="174" cy="122" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><path d="M76 96 Q84 88 92 96" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/><path d="M108 96 Q116 88 124 96" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg></div>
+    <div class="cele-title" style="color:#A5B4FC">🌙 Hora de descansar</div>
+    <div class="cele-sub">Son las 22:00. Apaga el ordenador y vete a dormir. Mañana el primer bloque empieza a las 5:30.</div>
+    <button id="bSleepOk" style="background:#4F46E5">Buenas noches</button>
+  </div>
+</div>
+
 <!-- Pausa de vista en marcha -->
 <div class="break-overlay hidden" id="vBreak">
   <div class="break-stars"></div>
@@ -593,10 +677,11 @@
 </div>
 
 <script>
-const VERSION = 'v1.18';
+const VERSION = 'v1.19';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
+const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '' };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
@@ -614,10 +699,10 @@ function load() {
     if (d && d.days) return {
       settings: { ...DEFAULTS, ...d.settings }, days: d.days, running: !!d.running,
       music: { ...MUSIC_DEFAULT, ...d.music }, alerts: { ...ALERTS_DEFAULT, ...d.alerts }, cast: d.cast || null,
-      vista: { ...VISTA_DEFAULT, ...d.vista }
+      vista: { ...VISTA_DEFAULT, ...d.vista }, bloques: { ...BLOQUES_DEFAULT, ...d.bloques }
     };
   } catch (e) {}
-  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT } };
+  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT }, bloques: { ...BLOQUES_DEFAULT, days: {} } };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative(); }
 function dayKey(d = new Date()) {
@@ -1516,6 +1601,7 @@ function showView() {
   ['home', 'vista', 'bloques', 'app'].forEach(v => $(v).classList.toggle('hidden', v !== id));
   if (id === 'home') { fromHome = false; renderHome(); $('pausiTip').textContent = PAUSI_TIPS[Math.floor(Math.random() * PAUSI_TIPS.length)]; }
   if (id === 'app') render();
+  if (id === 'bloques') { bloquesReset(); renderBloques(true); }
   window.scrollTo(0, 0);
 }
 function goBack() {
@@ -1540,6 +1626,7 @@ function renderHome() {
     : 'Regla 20-20-20 · sin activar';
   $('homeVistaBar').style.width = V.active ? Math.min(100, (1 - left / (V.every * 60000)) * 100) + '%' : '0';
   $('homeSteps').textContent = fmt(today().steps) + ' pasos hoy';
+  $('homeBloques').textContent = bloquesHome();
 }
 
 // Bienvenida: logo grande → se queda solo el logo → sube a su sitio en el inicio → aparecen los botones
@@ -1717,6 +1804,160 @@ function bindVista() {
   vistaTick();
 }
 
+// ---------- Bloques de tiempo ----------
+const BLOCKS = [];
+for (let m = 330; m < 1320; m += 90) BLOCKS.push({ start: m, end: m + 90 }); // 5:30 … 22:00
+const BLOCK_MAX = 3;
+const escapeHtml = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const hm = m => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+const curBlock = () => { const m = nowMin(); return BLOCKS.findIndex(b => m >= b.start && m < b.end); };
+const WD = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const MON = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+let bDay = 0, bSel = 0, bMode = 'edit', bLastCur = null, bRec = null;
+function bDate() { const d = new Date(); d.setDate(d.getDate() + bDay); return d; }
+function bActs(i, create) {
+  const k = dayKey(bDate()), days = db.bloques.days;
+  if (!days[k]) { if (!create) return []; days[k] = {}; }
+  if (!days[k][i]) { if (!create) return []; days[k][i] = []; }
+  return days[k][i];
+}
+// Al entrar: el bloque de ahora; después de las 22:00, el primero de mañana
+function bloquesReset() {
+  if (nowMin() >= 1320) { bDay = 1; bSel = 0; }
+  else { bDay = 0; const c = curBlock(); bSel = c >= 0 ? c : 0; }
+  bMode = bActs(bSel).length ? 'idle' : 'edit';
+}
+function bloquesHome() {
+  const c = curBlock(), m = nowMin();
+  if (c >= 0) {
+    const b = BLOCKS[c];
+    const k = dayKey(), acts = (db.bloques.days[k] && db.bloques.days[k][c]) || [];
+    return `${hm(b.start)} – ${hm(b.end)} · ` + (acts.length ? acts[0] : 'sin planificar');
+  }
+  return m >= 1320 ? 'Hora de descansar 🌙' : 'El primer bloque empieza a las 5:30';
+}
+function renderBloques(scroll) {
+  const d = bDate(), today = bDay === 0, cur = today ? curBlock() : -1, m = nowMin();
+  $('bDate').textContent = `${WD[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`;
+  // tira con todos los bloques
+  $('bStrip').innerHTML = BLOCKS.map((b, i) => {
+    const acts = bActs(i);
+    const cls = ['b-blk', i === cur ? 'now' : '', (bDay < 0 || (today && b.end <= m)) ? 'past' : '', i === bSel ? 'sel' : ''].join(' ');
+    const body = acts.length ? `<span class="b-blk-acts">${acts.map(a => '• ' + escapeHtml(a)).join('<br>')}</span>` : '<span class="b-blk-empty">Sin planificar</span>';
+    return `<button class="${cls}" data-i="${i}"><span class="b-blk-time">${hm(b.start)}</span><span class="b-blk-end">a ${hm(b.end)}</span>${body}${i === cur ? '<span class="b-now-tag">AHORA</span>' : ''}</button>`;
+  }).join('');
+  // bloque elegido, en grande
+  const b = BLOCKS[bSel], acts = bActs(bSel);
+  $('bRange').textContent = `${hm(b.start)} – ${hm(b.end)}`;
+  let state = '';
+  if (bSel === cur) state = `Ahora · quedan ${b.end - m} min`;
+  else if (bDay < 0 || (today && b.end <= m)) state = 'Este bloque ya pasó';
+  else if (today) state = `Empieza dentro de ${b.start - m >= 60 ? Math.floor((b.start - m) / 60) + ' h ' : ''}${(b.start - m) % 60} min`;
+  else state = bDay === 1 ? 'Mañana' : (bDay > 1 ? 'Dentro de ' + bDay + ' días' : '');
+  $('bState').textContent = state;
+  $('bProgBox').classList.toggle('hidden', bSel !== cur);
+  if (bSel === cur) $('bProg').style.width = ((m - b.start) / 90 * 100) + '%';
+  $('bActs').innerHTML = acts.map((a, i) => `<li><span class="n">${i + 1}.</span><span class="t">${escapeHtml(a)}</span><button data-del="${i}" aria-label="Borrar actividad">✕</button></li>`).join('');
+  const full = acts.length >= BLOCK_MAX;
+  if (full && bMode !== 'idle') bMode = 'idle';
+  $('bEditor').classList.toggle('hidden', bMode !== 'edit');
+  $('bMore').classList.toggle('hidden', bMode !== 'ask');
+  $('bAdd').classList.toggle('hidden', !(bMode === 'idle' && !full));
+  $('bFull').classList.toggle('hidden', !full);
+  $('bNow').classList.toggle('hidden', !(curBlock() >= 0 && (bDay !== 0 || bSel !== curBlock())));
+  if (scroll) {
+    const el = $('bStrip').querySelector(`[data-i="${bSel}"]`), st = $('bStrip');
+    if (el) st.scrollTo({ left: el.offsetLeft - (st.clientWidth - el.offsetWidth) / 2, behavior: scroll === 'smooth' ? 'smooth' : 'auto' });
+  }
+}
+function bGrow() { const t = $('bText'); t.style.height = 'auto'; t.style.height = Math.max(70, t.scrollHeight + 2) + 'px'; }
+function bSave() {
+  const text = $('bText').value.trim();
+  if (!text) { $('bText').focus(); return; }
+  if (bRec) bRec.stop();
+  const acts = bActs(bSel, true);
+  if (acts.length >= BLOCK_MAX) return;
+  acts.push(text);
+  save();
+  $('bText').value = ''; bGrow(); $('bMicHint').textContent = '';
+  bMode = acts.length < BLOCK_MAX ? 'ask' : 'idle';
+  renderBloques();
+  if (!$('home').classList.contains('hidden')) renderHome();
+}
+function bMicToggle() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { $('bMicHint').textContent = 'Aquí no se puede dictar desde la app: usa el micrófono 🎤 del teclado del móvil.'; return; }
+  if (bRec) { bRec.stop(); return; }
+  const base = $('bText').value.trim();
+  bRec = new SR();
+  bRec.lang = 'es-ES'; bRec.interimResults = true; bRec.continuous = true;
+  bRec.onresult = e => {
+    let t = '';
+    for (const r of e.results) t += r[0].transcript;
+    $('bText').value = (base ? base + ' ' : '') + t.trim();
+    bGrow();
+  };
+  bRec.onerror = e => { $('bMicHint').textContent = e.error === 'not-allowed' ? 'Permite el micrófono en el navegador para poder dictar.' : 'No se pudo dictar (' + e.error + ').'; };
+  bRec.onend = () => { bRec = null; $('bMic').classList.remove('rec'); if ($('bMicHint').textContent.startsWith('Escuchando')) $('bMicHint').textContent = ''; };
+  $('bMic').classList.add('rec');
+  $('bMicHint').textContent = 'Escuchando… habla y pulsa el micrófono otra vez para terminar.';
+  try { bRec.start(); } catch (e) { bRec = null; $('bMic').classList.remove('rec'); }
+}
+function sleepCheck() {
+  const B = db.bloques, k = dayKey();
+  if (!B.sleepOn || nowMin() < 1320 || B.sleepDone === k) return;
+  B.sleepDone = k; save();
+  $('bSleep').classList.remove('hidden');
+  chime();
+  setTimeout(() => speak('Son las diez de la noche. Es hora de apagar el ordenador e ir a dormir. ¡Buenas noches!'), 1000);
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    try { new Notification('🌙 Hora de descansar', { body: 'Son las 22:00: apaga el ordenador y vete a dormir.', icon: 'icon-192.png', tag: 'dormir' }); } catch (e) {}
+  }
+}
+function bloquesTick() {
+  const c = curBlock();
+  if (c !== bLastCur) {
+    // si estabas mirando el bloque que acaba de terminar, pasa solo al siguiente
+    if (bDay === 0 && c >= 0 && bSel === bLastCur) { bSel = c; bMode = bActs(c).length ? 'idle' : 'edit'; }
+    bLastCur = c;
+    if (!$('bloques').classList.contains('hidden')) renderBloques('smooth');
+  } else if (!$('bloques').classList.contains('hidden')) {
+    // refresca minutos y barra sin mover la tira
+    const st = $('bStrip').scrollLeft; renderBloques(); $('bStrip').scrollLeft = st;
+  }
+  sleepCheck();
+}
+function bindBloques() {
+  $('bStrip').addEventListener('click', e => {
+    const el = e.target.closest('[data-i]'); if (!el) return;
+    bSel = Number(el.dataset.i); bMode = bActs(bSel).length ? 'idle' : 'edit';
+    renderBloques('smooth');
+  });
+  $('bActs').addEventListener('click', e => {
+    const el = e.target.closest('[data-del]'); if (!el) return;
+    bActs(bSel, true).splice(Number(el.dataset.del), 1); save();
+    if (!bActs(bSel).length) bMode = 'edit';
+    renderBloques();
+  });
+  $('bPrev').addEventListener('click', () => { bDay--; bSel = 0; bMode = bActs(0).length ? 'idle' : 'edit'; renderBloques(true); });
+  $('bNext').addEventListener('click', () => { bDay++; bSel = 0; bMode = bActs(0).length ? 'idle' : 'edit'; renderBloques(true); });
+  $('bNow').addEventListener('click', () => { bloquesReset(); renderBloques('smooth'); });
+  $('bText').addEventListener('input', bGrow);
+  $('bText').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) bSave(); });
+  $('bSave').addEventListener('click', bSave);
+  $('bMic').addEventListener('click', bMicToggle);
+  $('bMoreYes').addEventListener('click', () => { bMode = 'edit'; renderBloques(); $('bText').focus(); });
+  $('bMoreNo').addEventListener('click', () => { bMode = 'idle'; renderBloques(); });
+  $('bAdd').addEventListener('click', () => { bMode = 'edit'; renderBloques(); $('bText').focus(); });
+  $('bSleepOn').checked = db.bloques.sleepOn;
+  $('bSleepOn').addEventListener('change', () => { db.bloques.sleepOn = $('bSleepOn').checked; save(); });
+  $('bSleepOk').addEventListener('click', () => $('bSleep').classList.add('hidden'));
+  bLastCur = curBlock();
+  setInterval(bloquesTick, 20000);
+  sleepCheck();
+}
+
 function initShell() {
   // cada copia del logo con su propio degradado (si no, al ocultar la bienvenida el del inicio se queda sin color)
   document.querySelectorAll('[data-logo]').forEach((el, i) => { el.innerHTML = LOGO_SVG.replace(/lgPcbm/g, 'lgPcbm' + i); });
@@ -1727,6 +1968,7 @@ function initShell() {
   document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', goBack));
   addEventListener('hashchange', showView);
   bindVista();
+  bindBloques();
   showView();
   if (!location.hash) runSplash();
 }
