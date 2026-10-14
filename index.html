@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.39</title>
+<title>PC & Body-mind v1.40</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -984,7 +984,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.39';
+const VERSION = 'v1.40';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1274,7 +1274,7 @@ function startCelebrationSong() {
     yt.loadVideoById({ videoId: cel.id, startSeconds: cel.pos });
   } else {
     if (celPrev.playing) yt.pauseVideo();
-    startFanfare();
+    startFanfare(true);
   }
 }
 function stopCelebration() {
@@ -1298,14 +1298,14 @@ const NOTE = n => { const m = n.match(/^([A-G])(#?)(\d)$/); const st = { C: 0, D
 const MELODY = 'C5:1 E5:1 G5:1 C6:3 G5:1 C6:1 A5:1 C6:1 A5:1 F5:3 A5:2 G5:1 B5:1 D6:1 G5:2 B5:1 D6:2 E6:2 D6:1 C6:1 G5:1 E5:1 C5:2'.split(' ').map(x => x.split(':'));
 const BASS = ['C3', 'F3', 'G3', 'C3'];
 const BEAT = 0.14;
-function startFanfare() {
+function startFanfare(once) { // once: suena una sola vez y se cierra la celebración
   stopFanfare();
   const c = audio(); if (!c) return;
   const loop = () => {
     let t = c.currentTime + 0.05;
     BASS.forEach((b, i) => { tone(NOTE(b), t + i * 8 * BEAT, 4 * BEAT, 'triangle', 0.18); tone(NOTE(b), t + (i * 8 + 4) * BEAT, 4 * BEAT, 'triangle', 0.15); });
     MELODY.forEach(([n, len]) => { tone(NOTE(n), t, Number(len) * BEAT * 0.95, 'square', 0.07); tone(NOTE(n), t, Number(len) * BEAT * 0.95, 'triangle', 0.16); t += Number(len) * BEAT; });
-    fanfareT = setTimeout(loop, 32 * BEAT * 1000 + 350);
+    fanfareT = setTimeout(once ? () => { if (celebrating) stopCelebration(); } : loop, 32 * BEAT * 1000 + 350);
   };
   loop();
 }
@@ -1553,7 +1553,10 @@ function createMainPlayer() {
         renderMusic();
       },
       onStateChange: e => {
-        if (e.data === YT.PlayerState.ENDED) { yt.seekTo(0, true); yt.playVideo(); } // bucle
+        if (e.data === YT.PlayerState.ENDED) {
+          if (celYT) { stopCelebration(); return; } // la canción de celebración suena una sola vez
+          yt.seekTo(0, true); yt.playVideo(); // bucle de la música de fondo
+        }
         if (e.data === YT.PlayerState.PLAYING) setMusicTitle();
         renderMusic();
       },
