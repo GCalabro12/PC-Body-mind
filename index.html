@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.21</title>
+<title>PC & Body-mind v1.22</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -151,6 +151,9 @@
   .scr-cele .emo { font-size: clamp(60px, 8vw, 140px); line-height: 1; }
   .scr-cele .big { font-size: clamp(40px, 6.5vw, 120px); font-weight: 800; color: #facc15; }
   .scr-cele .sub { font-size: clamp(18px, 2.4vw, 40px); color: #e2e8f0; }
+  .scr-task { margin-top: 2.2vh; text-align: right; }
+  .scr-task-range { color: #FACC15; font-weight: 800; font-size: clamp(11px, min(2.2vw, 3.2vh), 26px); font-variant-numeric: tabular-nums; }
+  .scr-task-act { color: #F8FAFC; font-weight: 800; font-size: clamp(14px, min(3vw, 4.4vh), 38px); line-height: 1.2; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
   .scr-eye { position: relative; width: clamp(150px, min(30vw, 38vh), 320px); margin: 2.5vh 0 0 auto; }
   .scr-eye svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 16px rgba(56,189,248,0.35)); }
   .scr-eye-time { font-size: clamp(18px, min(4.6vw, 6.5vh), 54px); font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -256,6 +259,34 @@
   .b-acts:empty { display: none; }
   .b-acts li { display: flex; gap: 10px; align-items: flex-start; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; }
   .b-acts .n { color: #FACC15; font-weight: 800; }
+  .b-chk { width: 26px; height: 26px; flex: none; padding: 0; border-radius: 8px; border: 2px solid #FACC15; background: transparent; display: flex; align-items: center; justify-content: center; color: #0f172a; }
+  .b-chk:hover { background: rgba(250,204,21,0.15); }
+  .b-acts li.done .b-chk { background: #FACC15; }
+  .b-acts li.done .t { text-decoration: line-through; color: #64748b; }
+  .b-blk-acts .done { text-decoration: line-through; opacity: 0.55; }
+  .b-remind-row { display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.85rem; margin: 6px 0 0 26px; }
+  .b-remind-row input { width: 70px; padding: 0.35rem 0.5rem; font-size: 0.95rem; }
+  #bCalBtn { margin-bottom: 14px; }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-head button { width: 40px; height: 40px; padding: 0; flex: none; background: transparent; border: 1px solid #475569; color: #cbd5e1; border-radius: 50%; font-size: 1.3rem; line-height: 1; }
+  .cal-title { font-weight: 800; font-size: 1.15rem; text-transform: capitalize; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-wd { text-align: center; color: #64748b; font-size: 0.7rem; font-weight: 700; padding: 4px 0; }
+  .cal-d { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 0; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+  .cal-d:hover { background: #16213a; }
+  .cal-d small { font-size: 0.58rem; color: #94a3b8; font-weight: 700; }
+  .cal-d.has { border-color: #a16207; }
+  .cal-d.all { background: rgba(250,204,21,0.18); border-color: #FACC15; }
+  .cal-d.all small { color: #FACC15; }
+  .cal-d.today { outline: 2px solid #38bdf8; outline-offset: -2px; }
+  .cal-d.sel { background: #334155; }
+  .cal-d.empty { visibility: hidden; }
+  .cal-day { margin-top: 14px; }
+  .cal-sum-title { font-weight: 800; margin-bottom: 8px; }
+  .cal-blk { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; margin-top: 8px; }
+  .cal-blk b { color: #FACC15; font-variant-numeric: tabular-nums; }
+  .cal-act { font-size: 0.9rem; margin-top: 4px; }
+  .cal-act.done { text-decoration: line-through; color: #64748b; }
   .b-acts .t { flex: 1; white-space: pre-wrap; word-break: break-word; }
   .b-acts li button { width: auto; background: transparent; color: #64748b; padding: 0 4px; font-size: 1rem; flex: none; }
   .b-acts li button:hover { color: #f87171; background: transparent; }
@@ -402,7 +433,19 @@
   </div>
   <div class="card">
     <label class="check" style="margin:0"><input type="checkbox" id="bStartVoice"> Avisar con voz al empezar cada bloque</label>
+    <label class="check"><input type="checkbox" id="bRemindOn"> Recordarme por voz la actividad en la que estoy</label>
+    <div class="b-remind-row">cada <input type="number" id="bRemindMin" min="1" max="60" inputmode="numeric" aria-label="Minutos entre recordatorios"> minutos</div>
     <label class="check"><input type="checkbox" id="bSleepOn"> A las 22:00, recordarme apagar el ordenador e ir a dormir</label>
+  </div>
+  <button class="btn-outline" id="bCalBtn">📅 Calendario</button>
+  <div class="card mt hidden" id="bCal">
+    <div class="cal-head">
+      <button id="calPrev" aria-label="Mes anterior">‹</button>
+      <div class="cal-title" id="calTitle"></div>
+      <button id="calNext" aria-label="Mes siguiente">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-day" id="calDay"></div>
   </div>
 </div>
 
@@ -647,6 +690,10 @@
       <div><b id="sMins">0</b>min activos</div>
     </div>
     <div class="scr-block"><span id="sBlockTxt">Bloque 1 · 0 / 2000</span><div class="scr-bar yellow"><div id="sBlockBar"></div></div></div>
+    <div class="scr-task hidden" id="sTask">
+      <div class="scr-task-range" id="sTaskRange"></div>
+      <div class="scr-task-act" id="sTaskAct"></div>
+    </div>
     <div class="scr-eye hidden" id="sEye">
       <svg viewBox="0 0 340 220" aria-hidden="true">
         <defs><radialGradient id="eyeWhiteS" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#0b1220"/></radialGradient></defs>
@@ -679,11 +726,11 @@
 </div>
 
 <script>
-const VERSION = 'v1.21';
+const VERSION = 'v1.22';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
-const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true };
+const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '' };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
@@ -1396,7 +1443,13 @@ function sendState() {
   const d = today(), st = dayStats(d);
   const b = batteryInfo();
   castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos,
-    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState() });
+    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState() });
+}
+function bloqueState() {
+  const c = curBlock();
+  if (c < 0) return null;
+  const b = BLOCKS[c], acts = dayActs(dayKey(), c), next = acts.find(a => !a.d);
+  return { range: `${hm(b.start)} – ${hm(b.end)}`, left: b.end - nowMin(), act: next ? next.t : (acts.length ? '✓ Todo hecho en este bloque' : 'Sin planificar'), done: acts.filter(a => a.d).length, total: acts.length };
 }
 function vistaState() {
   const V = db.vista, now = Date.now();
@@ -1483,6 +1536,11 @@ function scrData(m) {
     if (hasBatt) {
       $('sBatt').textContent = (m.charging ? '⚡' : '') + m.battery + '%';
       $('sBatt').style.color = m.battery <= 15 ? '#f87171' : m.battery <= 30 ? '#facc15' : '#fff';
+    }
+    $('sTask').classList.toggle('hidden', !m.bloque);
+    if (m.bloque) {
+      $('sTaskRange').textContent = `⏱ Bloque ${m.bloque.range} · quedan ${m.bloque.left} min` + (m.bloque.total ? ` · ${m.bloque.done}/${m.bloque.total}` : '');
+      $('sTaskAct').textContent = m.bloque.act;
     }
     if (m.vista) {
       if (m.vista.alerting && !(scrVista && scrVista.alerting)) {
@@ -1818,11 +1876,16 @@ const WD = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'S�
 const MON = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 let bDay = 0, bSel = 0, bMode = 'edit', bLastCur = null, bRec = null;
 function bDate() { const d = new Date(); d.setDate(d.getDate() + bDay); return d; }
+function normActs(arr) {
+  for (let j = 0; j < arr.length; j++) if (typeof arr[j] === 'string') arr[j] = { t: arr[j], d: false };
+  return arr;
+}
+function dayActs(k, i) { const d = db.bloques.days[k]; return d && d[i] ? normActs(d[i]) : []; }
 function bActs(i, create) {
   const k = dayKey(bDate()), days = db.bloques.days;
   if (!days[k]) { if (!create) return []; days[k] = {}; }
   if (!days[k][i]) { if (!create) return []; days[k][i] = []; }
-  return days[k][i];
+  return normActs(days[k][i]);
 }
 // Al entrar: el bloque de ahora; después de las 22:00, el primero de mañana
 function bloquesReset() {
@@ -1834,8 +1897,8 @@ function bloquesHome() {
   const c = curBlock(), m = nowMin();
   if (c >= 0) {
     const b = BLOCKS[c];
-    const k = dayKey(), acts = (db.bloques.days[k] && db.bloques.days[k][c]) || [];
-    return `${hm(b.start)} – ${hm(b.end)} · ` + (acts.length ? acts[0] : 'sin planificar');
+    const acts = dayActs(dayKey(), c), next = acts.find(a => !a.d);
+    return `${hm(b.start)} – ${hm(b.end)} · ` + (acts.length ? (next ? next.t : '✓ todo hecho') : 'sin planificar');
   }
   return m >= 1320 ? 'Hora de descansar 🌙' : 'El primer bloque empieza a las 5:30';
 }
@@ -1846,7 +1909,7 @@ function renderBloques(scroll) {
   $('bStrip').innerHTML = BLOCKS.map((b, i) => {
     const acts = bActs(i);
     const cls = ['b-blk', i === cur ? 'now' : '', (bDay < 0 || (today && b.end <= m)) ? 'past' : '', i === bSel ? 'sel' : ''].join(' ');
-    const body = acts.length ? `<span class="b-blk-acts">${acts.map(a => '• ' + escapeHtml(a)).join('<br>')}</span>` : '<span class="b-blk-empty">Sin planificar</span>';
+    const body = acts.length ? `<span class="b-blk-acts">${acts.map(a => `<span class="${a.d ? 'done' : ''}">• ${escapeHtml(a.t)}</span>`).join('<br>')}</span>` : '<span class="b-blk-empty">Sin planificar</span>';
     return `<button class="${cls}" data-i="${i}"><span class="b-blk-time">${hm(b.start)}</span><span class="b-blk-end">a ${hm(b.end)}</span>${body}${i === cur ? '<span class="b-now-tag">AHORA</span>' : ''}</button>`;
   }).join('');
   // bloque elegido, en grande
@@ -1860,7 +1923,7 @@ function renderBloques(scroll) {
   $('bState').textContent = state;
   $('bProgBox').classList.toggle('hidden', bSel !== cur);
   if (bSel === cur) $('bProg').style.width = ((m - b.start) / 90 * 100) + '%';
-  $('bActs').innerHTML = acts.map((a, i) => `<li><span class="n">${i + 1}.</span><span class="t">${escapeHtml(a)}</span><button data-del="${i}" aria-label="Borrar actividad">✕</button></li>`).join('');
+  $('bActs').innerHTML = acts.map((a, i) => `<li class="${a.d ? 'done' : ''}"><button class="b-chk" data-done="${i}" aria-label="${a.d ? 'Marcar como pendiente' : 'Marcar como hecha'}">${a.d ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>' : ''}</button><span class="t">${escapeHtml(a.t)}</span><button data-del="${i}" aria-label="Borrar actividad">✕</button></li>`).join('');
   const full = acts.length >= BLOCK_MAX;
   if (full && bMode !== 'idle') bMode = 'idle';
   $('bEditor').classList.toggle('hidden', bMode !== 'edit');
@@ -1880,11 +1943,12 @@ function bSave() {
   if (bRec) bRec.stop();
   const acts = bActs(bSel, true);
   if (acts.length >= BLOCK_MAX) return;
-  acts.push(text);
+  acts.push({ t: text, d: false });
   save();
   $('bText').value = ''; bGrow(); $('bMicHint').textContent = '';
   bMode = acts.length < BLOCK_MAX ? 'ask' : 'idle';
   renderBloques();
+  sendState();
   if (!$('home').classList.contains('hidden')) renderHome();
 }
 const KEYBOARD_MIC = 'el micrófono 🎤 del teclado del móvil (aparece al tocar el cuadro de texto)';
@@ -1894,6 +1958,12 @@ function bMicStop(msg) {
 }
 async function bMicToggle() {
   if (bRec) { try { bRec.stop(); } catch (e) {} bRec = null; bMicStop(''); return; }
+  // App Android (v1.22 o más nueva): dicta con el dictado de Google del propio teléfono
+  if (NATIVE && typeof AndroidPasos.dictate === 'function') {
+    $('bMicHint').textContent = 'Habla cuando aparezca la ventana de dictado…';
+    AndroidPasos.dictate();
+    return;
+  }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   // Brave y el visor de la app Android no tienen dictado por voz (Brave bloquea el servicio de Google)
   if (navigator.brave) { bMicStop('Brave no permite dictar por voz en las páginas web: usa ' + KEYBOARD_MIC + ', o abre la app en Chrome.'); return; }
@@ -1935,6 +2005,17 @@ async function bMicToggle() {
   $('bMicHint').textContent = 'Escuchando… habla y pulsa 🎤 otra vez para terminar.';
   try { rec.start(); } catch (e) { bRec = null; bMicStop('No se pudo empezar a dictar. Prueba a usar ' + KEYBOARD_MIC + '.'); }
 }
+// La app Android devuelve aquí lo dictado
+window.nativeDictation = (text, err) => {
+  if (text) {
+    const t = $('bText');
+    t.value = (t.value.trim() ? t.value.trim() + ' ' : '') + text;
+    bGrow();
+    $('bMicHint').textContent = 'Listo. Revisa el texto y pulsa «Guardar actividad».';
+  } else {
+    $('bMicHint').textContent = err || 'No se pudo dictar.';
+  }
+};
 function sleepCheck() {
   const B = db.bloques, k = dayKey();
   if (!B.sleepOn || nowMin() < 1320 || B.sleepDone === k) return;
@@ -1949,7 +2030,7 @@ function sleepCheck() {
 // Al empezar un bloque: campanita + voz con lo planificado
 function blockStartVoice(c) {
   if (!db.bloques.startVoice || c < 0) return;
-  const b = BLOCKS[c], k = dayKey(), acts = (db.bloques.days[k] && db.bloques.days[k][c]) || [];
+  const b = BLOCKS[c], acts = dayActs(dayKey(), c).map(a => a.t);
   const text = `Empieza el bloque de ${hm(b.start)} a ${hm(b.end)}. ` +
     (acts.length ? (acts.length === 1 ? 'Tienes planeado: ' : 'Tienes planeadas estas actividades: ') + acts.join('. ') + '.' : 'Todavía no has planificado este bloque.');
   chime();
@@ -1958,9 +2039,23 @@ function blockStartVoice(c) {
     try { new Notification(`⏱ Bloque ${hm(b.start)} – ${hm(b.end)}`, { body: acts.length ? acts.join(' · ') : 'Sin planificar todavía', icon: 'icon-192.png', tag: 'bloque' }); } catch (e) {}
   }
 }
+// Cada X minutos: «Recuerda: ahora estás con …» (la primera actividad sin marcar del bloque actual)
+let bRemindAt = Date.now();
+function activityReminder(c) {
+  const B = db.bloques;
+  if (!B.remindOn || c < 0 || Date.now() - bRemindAt < B.remindMin * 60000) return;
+  bRemindAt = Date.now();
+  const next = dayActs(dayKey(), c).find(a => !a.d);
+  if (!next) return;
+  speak(`Recuerda: ahora estás con ${next.t}.`);
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    try { new Notification('⏱ Ahora estás con…', { body: next.t, icon: 'icon-192.png', tag: 'actividad' }); } catch (e) {}
+  }
+}
 function bloquesTick() {
   const c = curBlock();
   if (c !== bLastCur) {
+    bRemindAt = Date.now();
     if (c >= 0) blockStartVoice(c);
     // si estabas mirando el bloque que acaba de terminar, pasa solo al siguiente
     if (bDay === 0 && c >= 0 && bSel === bLastCur) { bSel = c; bMode = bActs(c).length ? 'idle' : 'edit'; }
@@ -1970,7 +2065,65 @@ function bloquesTick() {
     // refresca minutos y barra sin mover la tira
     const st = $('bStrip').scrollLeft; renderBloques(); $('bStrip').scrollLeft = st;
   }
+  activityReminder(c);
   sleepCheck();
+}
+
+// ---------- Calendario con el historial de tareas ----------
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+let calMonth = null, calSel = null;
+function dayStatsB(k) {
+  const d = db.bloques.days[k];
+  let t = 0, done = 0;
+  if (d) Object.keys(d).forEach(i => normActs(d[i]).forEach(a => { t++; if (a.d) done++; }));
+  return { t, done };
+}
+function renderCal() {
+  const y = calMonth.getFullYear(), mo = calMonth.getMonth();
+  $('calTitle').textContent = MONTHS[mo] + ' ' + y;
+  const first = (new Date(y, mo, 1).getDay() + 6) % 7, n = new Date(y, mo + 1, 0).getDate(), tk = dayKey();
+  let html = ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(w => `<div class="cal-wd">${w}</div>`).join('');
+  for (let i = 0; i < first; i++) html += '<div class="cal-d empty"></div>';
+  for (let d = 1; d <= n; d++) {
+    const k = dayKey(new Date(y, mo, d)), st = dayStatsB(k);
+    const cls = ['cal-d', st.t ? 'has' : '', st.t && st.done === st.t ? 'all' : '', k === tk ? 'today' : '', k === calSel ? 'sel' : ''].join(' ');
+    html += `<button class="${cls}" data-k="${k}">${d}${st.t ? `<small>${st.done}/${st.t}</small>` : ''}</button>`;
+  }
+  $('calGrid').innerHTML = html;
+  renderCalDay();
+}
+function renderCalDay() {
+  if (!calSel) { $('calDay').innerHTML = '<p class="note">Toca un día para ver sus tareas.</p>'; return; }
+  const [y, m, d] = calSel.split('-').map(Number), date = new Date(y, m - 1, d), st = dayStatsB(calSel);
+  const blocks = BLOCKS.map((b, i) => ({ b, acts: dayActs(calSel, i) })).filter(x => x.acts.length);
+  $('calDay').innerHTML = `<div class="cal-sum-title">${WD[date.getDay()]} ${d} ${MON[m - 1]} · ${st.t ? st.done + ' de ' + st.t + ' hechas' : 'sin tareas'}</div>` +
+    blocks.map(x => `<div class="cal-blk"><b>${hm(x.b.start)} – ${hm(x.b.end)}</b>${x.acts.map(a => `<div class="cal-act ${a.d ? 'done' : ''}">${a.d ? '✓' : '○'} ${escapeHtml(a.t)}</div>`).join('')}</div>`).join('') +
+    '<button class="btn-sun mt" id="calOpen">Abrir este día</button>';
+}
+function bindCalendar() {
+  $('bCalBtn').addEventListener('click', () => {
+    const open = $('bCal').classList.toggle('hidden') === false;
+    $('bCalBtn').textContent = open ? '📅 Cerrar calendario' : '📅 Calendario';
+    if (!open) return;
+    const d = bDate();
+    calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    calSel = dayKey(d);
+    renderCal();
+    $('bCal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  $('calPrev').addEventListener('click', () => { calMonth.setMonth(calMonth.getMonth() - 1); renderCal(); });
+  $('calNext').addEventListener('click', () => { calMonth.setMonth(calMonth.getMonth() + 1); renderCal(); });
+  $('calGrid').addEventListener('click', e => { const el = e.target.closest('[data-k]'); if (!el) return; calSel = el.dataset.k; renderCal(); });
+  $('calDay').addEventListener('click', e => {
+    if (!e.target.closest('#calOpen')) return;
+    const [y, m, d] = calSel.split('-').map(Number), t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    bDay = Math.round((new Date(y, m - 1, d) - t0) / 86400000);
+    const firstWith = BLOCKS.findIndex((b, i) => bActs(i).length);
+    bSel = bDay === 0 && curBlock() >= 0 ? curBlock() : (firstWith >= 0 ? firstWith : 0);
+    bMode = bActs(bSel).length ? 'idle' : 'edit';
+    renderBloques(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 }
 function bindBloques() {
   $('bStrip').addEventListener('click', e => {
@@ -1979,6 +2132,15 @@ function bindBloques() {
     renderBloques('smooth');
   });
   $('bActs').addEventListener('click', e => {
+    const chk = e.target.closest('[data-done]');
+    if (chk) {
+      const acts = bActs(bSel, true), a = acts[Number(chk.dataset.done)];
+      a.d = !a.d; save(); sendState();
+      if (a.d && acts.every(x => x.d) && bDay === 0 && bSel === curBlock() && db.bloques.startVoice) { chime(); setTimeout(() => speak('¡Muy bien! Has terminado las actividades de este bloque.'), 900); }
+      renderBloques();
+      if (!$('bCal').classList.contains('hidden')) renderCal();
+      return;
+    }
     const el = e.target.closest('[data-del]'); if (!el) return;
     bActs(bSel, true).splice(Number(el.dataset.del), 1); save();
     if (!bActs(bSel).length) bMode = 'edit';
@@ -1994,6 +2156,14 @@ function bindBloques() {
   $('bMoreYes').addEventListener('click', () => { bMode = 'edit'; renderBloques(); $('bText').focus(); });
   $('bMoreNo').addEventListener('click', () => { bMode = 'idle'; renderBloques(); });
   $('bAdd').addEventListener('click', () => { bMode = 'edit'; renderBloques(); $('bText').focus(); });
+  $('bRemindOn').checked = db.bloques.remindOn;
+  $('bRemindMin').value = db.bloques.remindMin;
+  $('bRemindOn').addEventListener('change', () => { db.bloques.remindOn = $('bRemindOn').checked; bRemindAt = Date.now(); save(); });
+  $('bRemindMin').addEventListener('change', () => {
+    const v = Math.round(Number($('bRemindMin').value));
+    if (v >= 1 && v <= 60) { db.bloques.remindMin = v; bRemindAt = Date.now(); save(); } else $('bRemindMin').value = db.bloques.remindMin;
+  });
+  bindCalendar();
   $('bStartVoice').checked = db.bloques.startVoice;
   $('bStartVoice').addEventListener('change', () => {
     db.bloques.startVoice = $('bStartVoice').checked; save();
