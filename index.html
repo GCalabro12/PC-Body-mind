@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.61</title>
+<title>PC & Body-mind v1.62</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1063,7 +1063,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.61';
+const VERSION = 'v1.62';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1754,7 +1754,10 @@ function castStatus(t, cls = '') {
   $('castMini').textContent = cls === 'ok' ? '✔ conectado' : '';
   if ($('homePc')) $('homePc').textContent = cls === 'ok' ? '· ✔ conectado' : '';
 }
-function castLater() { clearTimeout(castRetry); if (castOn) castRetry = setTimeout(castConnect, 5000); }
+// identificador de este móvil (para que la pantalla acepte solo uno)
+const DEV_ID = (() => { let d = lsGet('pcbm_dev'); if (!d) { d = Math.random().toString(36).slice(2, 10); lsSet('pcbm_dev', d); } return d; })();
+let castBusy = false;
+function castLater() { clearTimeout(castRetry); if (castOn) castRetry = setTimeout(castConnect, castBusy ? 60000 : 5000); }
 async function castConnect() {
   const code = db.cast && db.cast.code;
   if (!code) return;
@@ -1777,11 +1780,12 @@ async function castConnect() {
   }
   const go = () => {
     if (!castOn) return;
+    castBusy = false;
     try { conn && conn.close(); } catch (e) {}
     conn = peer.connect(CAST_PREFIX + code, { reliable: true });
     conn.on('open', () => { castStatus('✔ Conectado a la pantalla ' + code, 'ok'); sendState(); });
     conn.on('data', castCommand);
-    conn.on('close', () => { if (castOn) { castStatus('Se perdió la conexión. Reintentando…'); castLater(); } });
+    conn.on('close', () => { if (castOn) { if (!castBusy) castStatus('Se perdió la conexión. Reintentando…'); castLater(); } });
   };
   peer.open ? go() : peer.once('open', go);
 }
@@ -1796,6 +1800,11 @@ function castStop() {
 }
 // Órdenes que llegan desde la pantalla del PC
 function castCommand(m) {
+  if (m && m.t === 'busy') {
+    castBusy = true;
+    castStatus('Esta pantalla ya está conectada con otro móvil. Lo vuelvo a intentar cada minuto.', 'err');
+    return;
+  }
   if (!m || m.t !== 'cmd') return;
   const S = db.salud;
   switch (m.c) {
@@ -1841,7 +1850,7 @@ function sendState() {
   const d = today(), st = dayStats(d);
   const b = batteryInfo();
   castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos,
-    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION });
+    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION, dev: DEV_ID });
 }
 function saludState() {
   const S = db.salud, t = saludToday(), now = Date.now();
@@ -1890,9 +1899,27 @@ function scrStart() {
     const p = scrPeer = new Peer(CAST_PREFIX + code);
     p.on('open', () => { scrTries = 0; scrConn('Esperando al móvil · código ' + code); });
     p.on('connection', c => {
-      c.on('open', () => { scrLink = c; scrCodeNow = code; $('sPair').classList.add('hidden'); scrConn('Conexión: ' + code); });
-      c.on('data', scrData);
-      c.on('close', () => scrConn('Móvil desconectado · conexión ' + code));
+      c.on('open', () => { scrCodeNow = code; });
+      c.on('data', m => {
+        if (m && m.t === 'state') {
+          const dev = m.dev || 'antiguo';
+          if (c !== scrLink) {
+            // ya hay otro móvil mandando datos: este se rechaza (si no, salen dos cuentas atrás distintas)
+            const alive = scrLink && scrLink.open && Date.now() - scrLinkAt < 25000;
+            if (alive && dev !== scrLinkDev) {
+              try { c.send({ t: 'busy' }); } catch (e) {}
+              setTimeout(() => { try { c.close(); } catch (e) {} }, 500);
+              return;
+            }
+            if (scrLink) { try { scrLink.close(); } catch (e) {} } // el mismo móvil que se ha vuelto a conectar
+            scrLink = c; scrLinkDev = dev;
+            $('sPair').classList.add('hidden'); scrConn('Conexión: ' + code);
+          }
+          scrLinkAt = Date.now();
+        } else if (c !== scrLink) return;
+        scrData(m);
+      });
+      c.on('close', () => { if (c === scrLink) { scrLink = null; scrConn('Móvil desconectado · conexión ' + code); } });
     });
     p.on('disconnected', () => { if (!p.destroyed) p.reconnect(); });
     p.on('error', e => {
@@ -2043,7 +2070,7 @@ function scrEyeTick() {
 const BATT_LOW = 20;
 let scrBattWarned = false, phoneBattWarned = false;
 function battLowMsg(n) { return 'Atención: al móvil le queda un ' + n + ' por ciento de batería. Ponlo a cargar.'; }
-let scrPhoneVer = '', scrUpdAsked = 0, scrCodeNow = '';
+let scrPhoneVer = '', scrUpdAsked = 0, scrCodeNow = '', scrLinkDev = '', scrLinkAt = 0;
 function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'state') {
@@ -2051,6 +2078,7 @@ function scrData(m) {
     if (scrCodeNow) scrConn('Conexión: ' + scrCodeNow + ' · ' + (m.ver || 'versión antigua ⚠️'));
     if (m.ver && m.ver !== VERSION && scrLink && scrLink.open && Date.now() - scrUpdAsked > 60000) {
       scrUpdAsked = Date.now(); scrLink.send({ t: 'cmd', c: 'update' });
+      checkUpdate();
       clearTimeout(toastT);
       $('sToast').textContent = `📱 El móvil tiene la ${m.ver} y el PC la ${VERSION}. Abre la app en el móvil para que se actualice.`;
       $('sToast').classList.remove('hidden');
@@ -2169,6 +2197,7 @@ async function openPip() {
   w.document.body.appendChild(box);
   $('sPip').textContent = '🗗 Cerrar ventana flotante';
   w.addEventListener('pagehide', () => {
+    if (pipUpdPending) setTimeout(checkUpdate, 300);
     home.insertBefore(panel, next);
     home.append(toast, cele);
     window.__pip = null;
@@ -3050,11 +3079,17 @@ function initShell() {
 }
 
 // ---------- Comprobar si hay versión nueva (el móvil a veces enseña la anterior guardada) ----------
+let pipUpdPending = '';
 async function checkUpdate() {
   try {
     const r = await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' });
     const m = (await r.text()).match(/const VERSION = '([^']+)'/);
     if (!m || m[1] === VERSION) return;
+    if (window.__pip) { // con la ventana flotante abierta no se recarga: se hace al cerrarla
+      pipUpdPending = m[1];
+      try { scrConn('Conexión: ' + (scrCodeNow || '') + ' · nueva ' + m[1] + ' al cerrar la ventana flotante'); } catch (e) {}
+      return;
+    }
     const k = 'pcbm_upd_' + m[1];
     try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (e) {}
     const u = new URL(location.href);
@@ -3067,6 +3102,7 @@ if (!SCREEN) setInterval(() => {
   if (vBreakEnd || (typeof musicPlaying === 'function' && musicPlaying())) return;
   checkUpdate();
 }, 10 * 60000);
+if (SCREEN) setInterval(checkUpdate, 10 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
 
 // ---------- Arranque ----------
