@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.52</title>
+<title>PC & Body-mind v1.53</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -354,7 +354,7 @@
   .home-title { position: relative; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.4px; margin: 14px 0 0; text-align: center; color: #F8FAFC; animation: pcbm-text-in 0.6s var(--ease-out) both; }
   .home-sub { font-size: 15px; line-height: 22px; color: #CBD5E1; margin: 6px 0 0; text-align: center; animation: pcbm-text-in 0.6s var(--ease-out) 0.1s both; }
   .home-btns { display: flex; flex-direction: column; gap: 14px; width: 100%; margin-top: 28px; }
-  .home-btn { display: grid; grid-template-columns: 56px 1fr 20px; gap: 16px; align-items: center; padding: 18px; border-radius: 24px; background: #1E293B; border: 1px solid rgba(248,250,252,0.06); box-shadow: 0 8px 24px rgba(2,6,23,0.35); color: #F8FAFC; text-align: left; width: 100%; font: inherit; font-weight: 400; transition: transform 0.2s var(--ease-out), border-color 0.2s; animation: pcbm-text-in 0.6s var(--ease-out) both; }
+  .home-btn { display: grid; grid-template-columns: 14px 56px 1fr 20px; gap: 14px; align-items: center; padding: 18px 18px 18px 10px; border-radius: 24px; background: #1E293B; border: 1px solid rgba(248,250,252,0.06); box-shadow: 0 8px 24px rgba(2,6,23,0.35); color: #F8FAFC; text-align: left; width: 100%; font: inherit; font-weight: 400; transition: transform 0.2s var(--ease-out), border-color 0.2s; animation: pcbm-text-in 0.6s var(--ease-out) both; }
   .home-btn:hover { background: #1E293B; transform: translateY(-2px); }
   .home-btn:nth-child(1) { animation-delay: 0.2s; }
   .home-btn:nth-child(2) { animation-delay: 0.3s; }
@@ -368,6 +368,12 @@
   .home-btn .bar { display: block; height: 4px; border-radius: 4px; background: rgba(248,250,252,0.10); margin-top: 10px; overflow: hidden; }
   .home-btn .bar span { display: block; height: 100%; width: 0; border-radius: 4px; background: #38BDF8; transition: width 0.5s; }
   .home-btn .chev { width: 20px; height: 20px; color: #94A3B8; }
+  /* asa de 8 puntos para cambiar el orden de las tarjetas */
+  .home-btn .grip { display: flex; align-items: center; justify-content: center; width: 14px; height: 40px; margin: -10px 0; padding: 10px 0; color: #64748B; cursor: grab; touch-action: none; }
+  .home-btn .grip svg { width: 10px; height: 16px; fill: currentColor; }
+  .home-btn .grip:hover { color: #CBD5E1; }
+  .home-btn.dragging { transform: scale(1.03); border-color: rgba(248,250,252,0.35); box-shadow: 0 14px 34px rgba(2,6,23,0.6); transition: none; z-index: 2; position: relative; }
+  .home-btn.dragging .grip { cursor: grabbing; color: #F8FAFC; }
   .home-btn.vista .ico { background: rgba(56,189,248,0.14); }
   .home-btn.vista .st { color: #38BDF8; }
   .home-btn.vista:hover { border-color: rgba(56,189,248,0.45); }
@@ -540,10 +546,10 @@
     <h1 class="home-title">PC <b>&amp;</b> Body-mind</h1>
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
     <div class="home-btns">
-      <button class="home-btn vista" data-go="vista"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Descansos de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      <button class="home-btn bloques" data-go="bloques"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3>Bloques de tiempo</h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      <button class="home-btn pasos" data-go="pasos"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      <button class="home-btn agua" data-go="agua"><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Descansos de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn bloques" data-go="bloques"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3>Bloques de tiempo</h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn pasos" data-go="pasos"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn agua" data-go="agua"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
@@ -1037,7 +1043,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.52';
+const VERSION = 'v1.53';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2931,6 +2937,7 @@ function initShell() {
   $('verBadge').classList.remove('hidden');
   document.body.classList.add('has-badge');
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { fromHome = true; location.hash = b.dataset.go; }));
+  homeOrderInit();
   document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', goBack));
   addEventListener('hashchange', showView);
   bindVista();
@@ -2963,6 +2970,42 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 // ---------- Arranque ----------
 window.onYouTubeIframeAPIReady = () => SCREEN ? createScreenPlayer() : createMainPlayer();
 
+// Tarjetas del inicio: se reordenan arrastrando el asa de 8 puntos; el orden se guarda
+function homeOrderInit() {
+  const box = document.querySelector('.home-btns'); if (!box) return;
+  const order = (db.settings && db.settings.homeOrder) || [];
+  order.forEach(k => { const el = box.querySelector(`.home-btn[data-go="${k}"]`); if (el) box.appendChild(el); });
+  let drag = null, moved = false;
+  // un toque en el asa nunca abre la sección
+  box.addEventListener('click', e => { if (e.target.closest('.grip') || moved) { e.preventDefault(); e.stopImmediatePropagation(); moved = false; } }, true);
+  box.addEventListener('pointerdown', e => {
+    const g = e.target.closest('.grip'); if (!g) return;
+    e.preventDefault();
+    drag = g.closest('.home-btn'); moved = false;
+    drag.classList.add('dragging');
+    try { g.setPointerCapture(e.pointerId); } catch (er) {}
+  });
+  box.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const cards = [...box.querySelectorAll('.home-btn')].filter(c => c !== drag);
+    let before = null;
+    for (const c of cards) { const r = c.getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { before = c; break; } }
+    if (before ? drag.nextElementSibling !== before : box.querySelector('.home-btn:last-of-type') !== drag) {
+      if (before) box.insertBefore(drag, before); else box.insertBefore(drag, [...box.children].filter(c => !c.classList.contains('home-btn'))[0] || null);
+      moved = true;
+      if (navigator.vibrate) navigator.vibrate(10);
+    }
+  });
+  const end = () => {
+    if (!drag) return;
+    drag.classList.remove('dragging'); drag = null;
+    db.settings.homeOrder = [...box.querySelectorAll('.home-btn')].map(c => c.dataset.go);
+    save();
+    setTimeout(() => { moved = false; }, 0);
+  };
+  box.addEventListener('pointerup', end);
+  box.addEventListener('pointercancel', end);
+}
 function initApp() {
   initShell();
   bindSettings();
