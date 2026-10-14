@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.58</title>
+<title>PC & Body-mind v1.59</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -223,6 +223,8 @@
   .scr-ico.muted svg path:nth-child(2) { display: none; }
   .scr-ico .cross { display: none; }
   .scr-ico.off { color: #64748b; }
+  .scr-ico.needplay { background: #16a34a; border-color: #16a34a; color: #fff; animation: needPlay 1.6s ease-in-out infinite; }
+  @keyframes needPlay { 50% { box-shadow: 0 0 10px 3px rgba(74,222,128,0.6); } }
   .scr-ico.off .cross { display: block; }
   .scr-ico.off .play { display: none; }
   .scr-vslider { writing-mode: vertical-lr; direction: rtl; width: 22px; height: 100%; min-height: 60px; margin: 0; padding: 0; accent-color: #4ade80; cursor: pointer; } /* los avisos no tapan los botones */
@@ -330,7 +332,7 @@
     .pip #sFull { display: none; }
     /* sonido, volumen y vídeo ya están junto a los pasos: aquí no se repiten */
     .scr-ctrl #sSound, .scr-ctrl .scr-vol, .scr-ctrl #sVideoBtn { display: none; }
-    .scr-ctrl #sFull { order: 1; } .scr-ctrl #sPip { order: 2; } .scr-ctrl #sPlay { order: 3; }
+    .scr-ctrl #sFull { order: 1; } .scr-ctrl #sPip { order: 2; } .scr-ctrl #sPlay { display: none !important; }
     .scr-ctrl .scr-conn { order: 4; flex-basis: 100%; text-align: center; background: transparent; padding: 2px 0 0; }
     .pip .scr-ctrl.folded::before { content: "🗗 Ventana flotante · conexión y cerrar ventana"; color: #7DD3FC; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
@@ -1061,7 +1063,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.58';
+const VERSION = 'v1.59';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2133,7 +2135,11 @@ function createScreenPlayer() {
 }
 function scrCheckPlaying() {
   const playing = scrYTReady && [YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(scrYT.getPlayerState());
-  $('sPlay').classList.toggle('hidden', playing || $('scrVideoBox').classList.contains('off'));
+  const need = !playing && !$('scrVideoBox').classList.contains('off');
+  $('sPlay').classList.toggle('hidden', !need);
+  // el botón de la pantallita (junto a los pasos) se pone verde cuando hay que iniciar el vídeo
+  $('sVid2').classList.toggle('needplay', need);
+  $('sVid2').title = need ? 'Iniciar vídeo' : 'Vídeo de fondo';
 }
 async function openPip() {
   if (window.__pip) { window.__pip.close(); return; }
@@ -2189,7 +2195,10 @@ function initScreen() {
     if (scrYTReady && scrYT.isMuted() && scrVol === 0) { $('sVol').value = 60; $('sVol').dispatchEvent(new Event('input')); }
     else $('sSound').click();
   });
-  $('sVid2').addEventListener('click', () => $('sVideoBtn').click());
+  $('sVid2').addEventListener('click', () => {
+    if ($('sVid2').classList.contains('needplay') && scrYTReady) { scrYT.playVideo(); setTimeout(scrCheckPlaying, 600); }
+    else $('sVideoBtn').click();
+  });
   setTimeout(scrSoundLabel, 1500);
   $('sVol').addEventListener('input', () => {
     scrVol = Number($('sVol').value);
