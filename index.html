@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.55</title>
+<title>PC & Body-mind v1.56</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -302,6 +302,11 @@
     .scr-salud b { margin: 0; font-size: 1.35em; }
     .scr-salud .nx { margin-left: auto; }
     .scr-eye-act { margin-top: 2px; }
+    /* Botones del ojo (Pausa ahora, Empezar, Posponer, Terminar) a la izquierda del ojo, como la batería a la derecha */
+    @media (min-width: 400px) {
+      .scr-eye .scr-eye-act { position: absolute; right: calc(100% + clamp(6px, 2vw, 14px)); top: 50%; transform: translateY(-50%); margin: 0; flex-direction: column; align-items: flex-end; flex-wrap: nowrap; width: max-content; max-width: min(100px, calc((100vw - min(80vw, 30vh, 320px)) / 2 - 5vw - 20px)); }
+      .scr-eye .scr-eye-act .scr-btn { white-space: normal; text-align: center; line-height: 1.25; padding: 3px 8px; font-size: 11.5px; }
+    }
     .scr-eye.folded .scr-eye-act { display: none; }
     .scr-task.folded .scr-act, .scr-salud.folded .scr-btn { display: none; }
     .scr-salud.folded { flex-direction: row; justify-content: center; gap: 16px; }
@@ -1054,7 +1059,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.55';
+const VERSION = 'v1.56';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
