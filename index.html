@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.50</title>
+<title>PC & Body-mind v1.51</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -194,6 +194,14 @@
   .scr-toast, .scr-cele { pointer-events: none; }
   /* Sonido y vídeo a los lados de los pasos */
   .scr-side { display: none; }
+  /* Casilla para marcar la tarea como hecha, igual que en el móvil */
+  .scr-chk { display: inline-flex; vertical-align: middle; position: relative; top: -0.06em; width: 0.72em; height: 0.72em; min-width: 22px; min-height: 22px; margin: 0 0.28em 0 0; padding: 0; border: 3px solid #FACC15; border-radius: 0.16em; background: rgba(15,23,42,0.6); cursor: pointer; align-items: center; justify-content: center; color: #fff; font-size: 1em; font-weight: 900; line-height: 1; }
+  .scr-chk::after { font-size: 0.55em; }
+  .scr-chk.hidden { display: none; }
+  .scr-chk:hover { background: rgba(250,204,21,0.25); }
+  .scr-chk:hover::after { content: "✓"; color: #FACC15; }
+  .scr-chk.sent { background: #16a34a; border-color: #16a34a; }
+  .scr-chk.sent::after { content: "✓"; color: #fff; }
   .scr-eye-batt.charging .batt-v { color: #4ade80; animation: chargeGlow 2s ease-in-out infinite; }
   .scr-eye-batt.charging .batt-v::after { content: "⚡"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1; filter: drop-shadow(0 0 2px #0f172a); }
   .scr-eye-batt.charging b { color: #4ade80; }
@@ -977,8 +985,8 @@
     <div class="scr-task hidden" id="sTask" data-box="tarea">
       <button class="scr-fold" data-fold="tarea" aria-label="Plegar o desplegar">▴</button>
       <div class="scr-task-range" id="sTaskRange"></div>
-      <div class="scr-task-act" id="sTaskAct"></div>
-      <div class="scr-act"><button class="scr-btn sun hidden" data-cmd="taskDone" id="sTaskDone">✓ Hecha</button><button class="scr-btn ghost hidden" id="sTaskAdd">＋ Añadir tarea</button></div>
+      <div class="scr-task-act"><button class="scr-chk hidden" data-cmd="taskDone" id="sTaskChk" aria-label="Marcar la tarea como hecha" title="Marcar como hecha"></button><span id="sTaskAct"></span></div>
+      <div class="scr-act"><button class="scr-btn ghost hidden" id="sTaskAdd">＋ Añadir tarea</button></div>
       <form class="scr-plan hidden" id="sPlan" autocomplete="off">
         <input id="sPlanIn" maxlength="140" placeholder="¿Qué vas a hacer en este bloque?" aria-label="Nueva tarea para este bloque">
         <button type="submit" class="sun" style="background:#CA8A04;border:0;color:#fff">Guardar</button>
@@ -1029,7 +1037,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.50';
+const VERSION = 'v1.51';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1999,7 +2007,7 @@ function scrData(m) {
     if (m.bloque) {
       $('sTaskRange').textContent = `⏱ Bloque ${m.bloque.range} · quedan ${m.bloque.left} min` + (m.bloque.total ? ` · ${m.bloque.done}/${m.bloque.total}` : '');
       $('sTaskAct').textContent = m.bloque.act;
-      $('sTaskDone').classList.toggle('hidden', !(m.bloque.total > m.bloque.done));
+      $('sTaskChk').classList.toggle('hidden', !(m.bloque.total > m.bloque.done));
       $('sTaskAdd').classList.toggle('hidden', m.bloque.total >= 3 || !$('sPlan').classList.contains('hidden'));
     }
     if (m.salud) { scrSalud = { ...m.salud, at: Date.now() }; }
