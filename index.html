@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.30</title>
+<title>PC & Body-mind v1.31</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -860,7 +860,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.30';
+const VERSION = 'v1.31';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1831,19 +1831,26 @@ function renderHome() {
 }
 
 // Bienvenida: logo grande → se queda solo el logo → sube a su sitio en el inicio → aparecen los botones
-// Banda sonora de PC & Body-mind (unos 3 s): acorde suave + melodía ascendente + destellos
+// Banda sonora de PC & Body-mind (unos 7 s): acordes suaves de fondo y una melodía en tres frases que termina en destellos
 function playTheme() {
   const c = audio(); if (!c) return;
   const master = c.createGain(); master.gain.value = 0.9; master.connect(c.destination);
   const t = c.currentTime + 0.05;
-  ['C4', 'G4', 'E5'].forEach(n => softTone(NOTE(n), t, 3.2, 0.035, master));
-  [['E5', 0], ['G5', 0.22], ['C6', 0.44], ['D6', 0.8], ['E6', 1.15]].forEach(([n, at], i) => {
-    const len = i === 4 ? 1.9 : 0.7;
-    tone(NOTE(n), t + at, len, 'triangle', 0.13, master);
-    tone(NOTE(n) * 2, t + at, len * 0.6, 'sine', 0.03, master);
+  // acordes de fondo: Do · La menor · Fa · Do
+  [[['C4', 'G4', 'E5'], 0, 2.6], [['A3', 'E4', 'C5'], 2.3, 2.2], [['F3', 'C4', 'A4'], 4.2, 1.8], [['C4', 'G4', 'E5'], 5.6, 2.6]]
+    .forEach(([notes, at, len]) => notes.forEach(n => softTone(NOTE(n), t + at, len, 0.032, master)));
+  const mel = [
+    ['E5', 0], ['G5', 0.22], ['C6', 0.44], ['D6', 0.8], ['E6', 1.15, 0.9],   // 1: sube
+    ['D6', 2.2], ['C6', 2.45], ['A5', 2.7], ['C6', 3.05, 0.8],              // 2: responde
+    ['G5', 4.0], ['A5', 4.25], ['C6', 4.5], ['D6', 4.85],                     // 3: vuelve a subir
+    ['E6', 5.45, 1.6], ['G6', 5.9, 1.9]                                       // final
+  ];
+  mel.forEach(([n, at, len = 0.6]) => {
+    tone(NOTE(n), t + at, len, 'triangle', 0.12, master);
+    tone(NOTE(n) * 2, t + at, len * 0.6, 'sine', 0.025, master);
   });
-  [['G6', 1.55], ['C7', 1.8], ['E7', 2.05]].forEach(([n, at]) => tone(NOTE(n), t + at, 1.1, 'sine', 0.035, master));
-  setTimeout(() => { try { master.disconnect(); } catch (e) {} }, 4500);
+  [['C7', 6.3], ['E7', 6.55], ['G7', 6.8]].forEach(([n, at]) => tone(NOTE(n), t + at, 1.2, 'sine', 0.03, master));
+  setTimeout(() => { try { master.disconnect(); } catch (e) {} }, 9000);
 }
 
 function runSplash() {
