@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.59</title>
+<title>PC & Body-mind v1.60</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1063,7 +1063,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.59';
+const VERSION = 'v1.60';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2014,7 +2014,9 @@ function scrEyeTick() {
   const v = scrVista;
   $('sEye').classList.toggle('hidden', !v || !v.active);
   // con el ojo a la vista, la batería va a su lado; si no, en la fila de datos
-  document.querySelector('.scr-panel').classList.toggle('eye-batt', !!(v && v.active) && !$('sEyeBatt').classList.contains('hidden'));
+  // el panel puede estar en la ventana flotante: se busca en las dos
+  const scrPanelEl = document.querySelector('.scr-panel') || (window.__pip && window.__pip.document.querySelector('.scr-panel'));
+  if (scrPanelEl) scrPanelEl.classList.toggle('eye-batt', !!(v && v.active) && !$('sEyeBatt').classList.contains('hidden'));
   if (!v || !v.active) return;
   const since = Date.now() - v.at, C = 2 * Math.PI * 78;
   let time, lbl, frac;
