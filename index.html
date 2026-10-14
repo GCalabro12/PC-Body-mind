@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.41</title>
+<title>PC & Body-mind v1.42</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -189,6 +189,9 @@
   .scr-eye.alert #sEyeLid { stroke: #facc15; }
   .scr-eye.alert svg { animation: eyePulse 1.2s infinite; }
   .scr-eye.alert .eye-center { animation: eyeFade 1.2s infinite; }
+  .scr-eye .eye-center { bottom: auto; aspect-ratio: 340 / 220; pointer-events: none; }
+  .scr-eye .scr-act { position: relative; z-index: 2; }
+  .scr-toast, .scr-cele { pointer-events: none; } /* los avisos no tapan los botones */
   @keyframes eyePulse { 50% { opacity: 0.55; transform: scale(1.04); } }
   @keyframes eyeFade { 50% { opacity: 0.55; } }
   /* Ventana grande: la misma columna, a la derecha, dejando ver el vídeo */
@@ -208,7 +211,9 @@
   .scr-plan button { width: auto; padding: 4px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; }
   /* App instalada sin barra de título: franja superior para arrastrar la ventana y margen para no tapar los botones */
   .scr-drag { position: fixed; top: 0; left: env(titlebar-area-x, 0px); width: env(titlebar-area-width, 0px); height: env(titlebar-area-height, 0px); -webkit-app-region: drag; app-region: drag; z-index: 90; background: rgba(15,23,42,0.55); }
-  .scr-panel, .scr-top { margin-top: env(titlebar-area-height, 0px); }
+  .scr-panel, .scr-top, .scr-menu-btn { margin-top: env(titlebar-area-height, 0px); }
+  .scr-menu-btn { position: absolute; top: 6px; left: 6px; z-index: 7; width: 28px; height: 28px; min-width: 28px; padding: 0; border-radius: 50%; background: rgba(15,23,42,0.8); border: 1px solid #475569; color: #cbd5e1; font-size: 15px; line-height: 1; opacity: 0.6; display: flex; align-items: center; justify-content: center; }
+  .scr-menu-btn:hover, #screen.menu-open .scr-menu-btn { opacity: 1; background: #334155; }
   /* Ventana estrecha: lo más importante arriba (tarea), luego la vista, los pasos y abajo los datos secundarios */
   @media all {
     .scr-shade { background: rgba(15,23,42,0.74); }
@@ -242,7 +247,7 @@
     .scr-task.folded { padding: 0.5vh 34px 0.6vh 3vw; }
     .scr-eye.folded { width: 100%; }
     .scr-eye.folded svg, .scr-eye.folded .scr-eye-lbl { display: none; }
-    .scr-eye.folded .eye-center { position: static; flex-direction: row; justify-content: center; gap: 8px; padding: 0.4vh 0; }
+    .scr-eye.folded .eye-center { aspect-ratio: auto; position: static; flex-direction: row; justify-content: center; gap: 8px; padding: 0.4vh 0; }
     .scr-eye.folded .eye-center::before { content: "👁 pausa de vista en"; font-size: clamp(11px, 3.6vw, 15px); color: #bae6fd; }
     .scr-eye.folded .scr-eye-time { font-size: clamp(14px, 5vw, 22px); }
     .scr-pasos.folded .scr-block { display: none; }
@@ -275,8 +280,8 @@
     .scr-pausi.folded { justify-content: center; }
     .scr-stats { order: 5; margin-top: auto; justify-content: center; gap: 5vw; font-size: clamp(9px, 2.8vw, 12px); opacity: 0.75; }
     .scr-stats b { font-size: clamp(12px, 4.4vw, 18px); }
-    .scr-top { top: auto; bottom: 1vh; left: 2vw; right: 2vw; max-width: none; flex-direction: row; flex-wrap: wrap; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-    #screen:hover .scr-top { opacity: 1; }
+    .scr-top { display: none; top: 40px; left: 6px; right: auto; max-width: calc(100vw - 12px); z-index: 6; background: rgba(2,6,23,0.94); border: 1px solid #334155; border-radius: 12px; padding: 8px; }
+    #screen.menu-open .scr-top { display: flex; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
   }
   .scr-toast { position: absolute; right: 1.5vw; bottom: 3vh; background: rgba(15,23,42,0.9); border-right: 8px solid #4ade80; padding: 1.5vh 2vw; border-radius: 1rem; font-size: clamp(16px, min(3.5vw, 5vh), 48px); font-weight: 800; animation: slideIn 0.4s ease; }
@@ -965,6 +970,7 @@
       </div>
     </div>
   </div>
+  <button class="scr-menu-btn" id="sMenuBtn" aria-label="Opciones de la pantalla" title="Opciones">⚙</button>
   <div class="scr-top">
     <span class="scr-conn" id="sConn">Conectando…</span>
     <button id="sPlay" class="hidden" style="background:#16a34a;border-color:#16a34a"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Iniciar vídeo</button>
@@ -985,7 +991,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.41';
+const VERSION = 'v1.42';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2070,6 +2076,9 @@ function initScreen() {
   }
   setInterval(scrEyeTick, 500);
   scrFoldInit();
+  // ⚙: abre y cierra los controles; se cierran al tocar fuera
+  $('sMenuBtn').addEventListener('click', e => { e.stopPropagation(); $('screen').classList.toggle('menu-open'); });
+  $('screen').addEventListener('click', e => { if (!e.target.closest('.scr-top, #sMenuBtn')) $('screen').classList.remove('menu-open'); });
   // escribir una tarea para el bloque de ahora desde el PC
   const planClose = () => { $('sPlan').classList.add('hidden'); $('sPlanIn').value = ''; $('sTaskAdd').classList.remove('hidden'); };
   $('sTaskAdd').addEventListener('click', e => {
