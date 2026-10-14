@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.20</title>
+<title>PC & Body-mind v1.21</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -84,6 +84,7 @@
   .note b { color: #cbd5e1; }
   .mt { margin-top: 12px; }
   .hidden { display: none !important; }
+  .ic { width: 1em; height: 1em; vertical-align: -0.14em; margin-right: 0.4em; flex: none; }
   .music-head { display: flex; justify-content: space-between; align-items: baseline; }
   .music-head h2 { margin: 0; }
   .sum-flex { display: flex; align-items: center; gap: 8px; }
@@ -339,7 +340,7 @@
         <div class="goal-txt" id="vCountLbl">hasta la próxima pausa</div>
       </div>
     </div>
-    <button class="btn-sky mt" id="vToggle">▶ Empezar</button>
+    <button class="btn-sky mt" id="vToggle"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Empezar</button>
     <div class="status" id="vStatus">Regla 20-20-20: cada 20 minutos, 20 segundos mirando a 6 metros.</div>
   </div>
   <div class="card">
@@ -409,7 +410,7 @@
   <header>
     <button class="back" data-back>← Inicio</button>
     <h1>👣 Pasos</h1>
-    <button class="install hidden" id="installBtn">⬇ Instalar</button>
+    <button class="install hidden" id="installBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg>Instalar</button>
     <span class="date" id="dateTxt"></span>
   </header>
 
@@ -436,14 +437,14 @@
     </div>
   </div>
 
-  <button id="toggleBtn">▶ Empezar a contar</button>
+  <button id="toggleBtn"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Empezar a contar</button>
   <div class="status" id="status">Pulsa para empezar. Lleva el teléfono encima (bolsillo o mano).</div>
   <div class="help hidden" id="permHelp"></div>
 
   <div class="card mt hidden" id="apkCard">
     <h2>📲 App Android: cuenta con la pantalla apagada</h2>
     <p class="note">Desde el navegador solo se cuentan pasos con la app delante. La app Android usa el podómetro del teléfono y cuenta siempre, aunque esté bloqueado o cerrada, y te dice los avisos en voz alta.</p>
-    <a id="apkLink" class="btn-link" href="#">⬇ Descargar la app Android</a>
+    <a id="apkLink" class="btn-link" href="#"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg>Descargar la app Android</a>
     <div class="hint">Ábrelo al terminar la descarga y acepta «instalar apps de origen desconocido» la primera vez.</div>
   </div>
 
@@ -554,7 +555,7 @@
       <div class="hint">Se usan para calcular distancia (largo de zancada) y calorías aproximadas.</div>
       <div id="sensorBox">
       <label class="check"><input type="checkbox" id="autoStart"> Empezar a contar solo al abrir la app</label>
-      <div class="hint">La música no puede arrancar sola: el teléfono exige tocar ▶ al menos una vez.</div>
+      <div class="hint">La música no puede arrancar sola: el teléfono exige tocar el botón de reproducir al menos una vez.</div>
       <label for="sens">Sensibilidad: <span id="sensVal">5</span></label>
       <input type="range" id="sens" min="1" max="10" step="1">
       <div class="hint">Si cuenta de menos, súbela. Si cuenta pasos estando quieto, bájala. La línea amarilla es el umbral: cada pico que la cruza es un paso.</div>
@@ -583,7 +584,7 @@
     <div class="cele-art"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L26 122"/><path d="M158 104 L174 122"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="26" cy="122" r="7" fill="#4ADE80"/><circle cx="174" cy="122" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><path d="M76 96 Q84 88 92 96" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/><path d="M108 96 Q116 88 124 96" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg></div>
     <div class="cele-title sky">Pausa de vista</div>
     <div class="cele-sub" id="vAlertSub">Llevas 20 minutos mirando la pantalla</div>
-    <button class="btn-sky" id="vStartBreak">▶ Comenzar pausa de vista</button>
+    <button class="btn-sky" id="vStartBreak"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Comenzar pausa de vista</button>
     <button class="btn-outline mt" id="vSnooze">Posponer 5 minutos</button>
   </div>
 </div>
@@ -627,7 +628,7 @@
     <div class="cele-art cele-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><circle cx="30" cy="40" r="5" fill="#FACC15"/><rect x="160" y="30" width="10" height="10" rx="3" fill="#38BDF8" transform="rotate(20 165 35)"/><circle cx="182" cy="44" r="4" fill="#4ADE80"/><rect x="14" y="56" width="9" height="9" rx="3" fill="#4ADE80" transform="rotate(-15 18 60)"/><circle cx="150" cy="18" r="3.5" fill="#FACC15"/><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 100 L20 70"/><path d="M158 100 L180 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="20" cy="70" r="7" fill="#4ADE80"/><circle cx="180" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M88 112 Q100 126 112 112 Z" fill="#F8FAFC"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg></div>
     <div class="cele-title" id="celeTitle"></div>
     <div class="cele-sub" id="celeSub"></div>
-    <button id="celeStop">⏸ Parar la canción y seguir</button>
+    <button id="celeStop"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>Parar la canción y seguir</button>
   </div>
 </div>
 
@@ -661,7 +662,7 @@
   </div>
   <div class="scr-top">
     <span class="scr-conn" id="sConn">Conectando…</span>
-    <button id="sPlay" class="hidden" style="background:#16a34a;border-color:#16a34a">▶ Iniciar vídeo</button>
+    <button id="sPlay" class="hidden" style="background:#16a34a;border-color:#16a34a"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Iniciar vídeo</button>
     <button id="sSound">🔇 Sonido del vídeo</button>
     <div class="scr-vol"><span>🔈</span><input type="range" id="sVol" min="0" max="100" step="5" aria-label="Volumen del vídeo"><span id="sVolVal">60</span></div>
     <button id="sVideoBtn">🎬 Ocultar vídeo</button>
@@ -678,7 +679,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.20';
+const VERSION = 'v1.21';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1109,7 +1110,7 @@ function releaseWake() { try { wakeLock && wakeLock.release(); } catch (e) {} wa
 // ---------- Interfaz ----------
 function setStatus(html, cls = '') { $('status').innerHTML = html; $('status').className = 'status ' + cls; }
 function renderButton() {
-  $('toggleBtn').textContent = running ? '⏸ Pausar' : '▶ Empezar a contar';
+  $('toggleBtn').innerHTML = running ? ICON_PAUSE.replace('<svg', '<svg class="ic"') + 'Pausar' : ICON_PLAY.replace('<svg', '<svg class="ic"') + 'Empezar a contar';
   $('toggleBtn').className = running ? 'stop' : '';
 }
 
@@ -1474,7 +1475,7 @@ function scrData(m) {
   if (m.t === 'state') {
     $('sPair').classList.add('hidden');
     $('sSteps').textContent = fmt(m.steps);
-    $('sGoal').textContent = 'de ' + fmt(m.goal) + (m.running ? '' : ' · ⏸ en pausa');
+    $('sGoal').textContent = 'de ' + fmt(m.goal) + (m.running ? '' : ' · en pausa');
     $('sGoalBar').style.width = Math.min(100, m.steps / m.goal * 100) + '%';
     $('sKm').textContent = m.km; $('sKcal').textContent = m.kcal; $('sMins').textContent = m.mins;
     const hasBatt = typeof m.battery === 'number' && m.battery >= 0;
@@ -1775,7 +1776,7 @@ function vistaTick() {
   const EYE_C = 2 * Math.PI * 78;
   $('vRing').style.strokeDasharray = EYE_C;
   $('vRing').style.strokeDashoffset = EYE_C * (1 - left / total);
-  $('vToggle').textContent = V.active ? '⏸ Detener' : '▶ Empezar';
+  $('vToggle').innerHTML = V.active ? ICON_PAUSE.replace('<svg', '<svg class="ic"') + 'Detener' : ICON_PLAY.replace('<svg', '<svg class="ic"') + 'Empezar';
   $('vToggle').className = (V.active ? 'stop' : 'btn-sky') + ' mt';
   $('vStatus').textContent = V.active
     ? `Te aviso cada ${V.every} minutos para mirar a ${V.dist} metros durante ${V.dur} segundos.`
@@ -1886,24 +1887,53 @@ function bSave() {
   renderBloques();
   if (!$('home').classList.contains('hidden')) renderHome();
 }
-function bMicToggle() {
+const KEYBOARD_MIC = 'el micrófono 🎤 del teclado del móvil (aparece al tocar el cuadro de texto)';
+function bMicStop(msg) {
+  $('bMic').classList.remove('rec');
+  if (msg !== undefined) $('bMicHint').textContent = msg;
+}
+async function bMicToggle() {
+  if (bRec) { try { bRec.stop(); } catch (e) {} bRec = null; bMicStop(''); return; }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { $('bMicHint').textContent = 'Aquí no se puede dictar desde la app: usa el micrófono 🎤 del teclado del móvil.'; return; }
-  if (bRec) { bRec.stop(); return; }
+  // Brave y el visor de la app Android no tienen dictado por voz (Brave bloquea el servicio de Google)
+  if (navigator.brave) { bMicStop('Brave no permite dictar por voz en las páginas web: usa ' + KEYBOARD_MIC + ', o abre la app en Chrome.'); return; }
+  if (!SR || NATIVE) { bMicStop('Aquí no se puede dictar con este botón: usa ' + KEYBOARD_MIC + '.'); return; }
+  // Primero se pide el permiso del micrófono: así el navegador muestra la ventana «Permitir»
+  $('bMic').classList.add('rec');
+  $('bMicHint').textContent = 'Pidiendo permiso para el micrófono…';
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      const st = await navigator.mediaDevices.getUserMedia({ audio: true });
+      st.getTracks().forEach(t => t.stop());
+    }
+  } catch (e) {
+    bMicStop('El micrófono está bloqueado. Toca el icono que hay a la izquierda de la dirección → Permisos → Micrófono → Permitir, y vuelve a pulsar 🎤. También puedes usar ' + KEYBOARD_MIC + '.');
+    return;
+  }
   const base = $('bText').value.trim();
-  bRec = new SR();
-  bRec.lang = 'es-ES'; bRec.interimResults = true; bRec.continuous = true;
-  bRec.onresult = e => {
+  const rec = bRec = new SR();
+  rec.lang = 'es-ES'; rec.interimResults = true; rec.continuous = true;
+  let heard = false;
+  rec.onresult = e => {
+    heard = true;
     let t = '';
     for (const r of e.results) t += r[0].transcript;
     $('bText').value = (base ? base + ' ' : '') + t.trim();
     bGrow();
   };
-  bRec.onerror = e => { $('bMicHint').textContent = e.error === 'not-allowed' ? 'Permite el micrófono en el navegador para poder dictar.' : 'No se pudo dictar (' + e.error + ').'; };
-  bRec.onend = () => { bRec = null; $('bMic').classList.remove('rec'); if ($('bMicHint').textContent.startsWith('Escuchando')) $('bMicHint').textContent = ''; };
-  $('bMic').classList.add('rec');
-  $('bMicHint').textContent = 'Escuchando… habla y pulsa el micrófono otra vez para terminar.';
-  try { bRec.start(); } catch (e) { bRec = null; $('bMic').classList.remove('rec'); }
+  rec.onerror = e => {
+    const msg = e.error === 'not-allowed' || e.error === 'service-not-allowed'
+      ? 'Este navegador no deja dictar por voz: usa ' + KEYBOARD_MIC + '.'
+      : e.error === 'network' ? 'El dictado necesita internet y no ha podido conectar. Prueba otra vez o usa ' + KEYBOARD_MIC + '.'
+      : e.error === 'no-speech' ? 'No te he oído. Pulsa 🎤 y habla cerca del micrófono.'
+      : 'No se pudo dictar (' + e.error + '). Prueba a usar ' + KEYBOARD_MIC + '.';
+    bRec = null; bMicStop(msg);
+  };
+  rec.onend = () => {
+    if (bRec === rec) { bRec = null; bMicStop(heard ? 'Listo. Revisa el texto y pulsa «Guardar actividad».' : undefined); }
+  };
+  $('bMicHint').textContent = 'Escuchando… habla y pulsa 🎤 otra vez para terminar.';
+  try { rec.start(); } catch (e) { bRec = null; bMicStop('No se pudo empezar a dictar. Prueba a usar ' + KEYBOARD_MIC + '.'); }
 }
 function sleepCheck() {
   const B = db.bloques, k = dayKey();
