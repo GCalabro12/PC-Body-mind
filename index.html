@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.49</title>
+<title>PC & Body-mind v1.50</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1029,7 +1029,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.49';
+const VERSION = 'v1.50';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1968,6 +1968,10 @@ function scrData(m) {
     if (scrCodeNow) scrConn('📱 Móvil conectado · código ' + scrCodeNow + ' · móvil ' + (m.ver || 'versión antigua ⚠️'));
     if (m.ver && m.ver !== VERSION && scrLink && scrLink.open && Date.now() - scrUpdAsked > 60000) {
       scrUpdAsked = Date.now(); scrLink.send({ t: 'cmd', c: 'update' });
+      clearTimeout(toastT);
+      $('sToast').textContent = `📱 El móvil tiene la ${m.ver} y el PC la ${VERSION}. Abre la app en el móvil para que se actualice.`;
+      $('sToast').classList.remove('hidden');
+      toastT = setTimeout(() => $('sToast').classList.add('hidden'), 8000);
     }
     $('sPair').classList.add('hidden');
     $('sSteps').textContent = fmt(m.steps);
@@ -2943,7 +2947,7 @@ async function checkUpdate() {
 }
 setTimeout(checkUpdate, 1500);
 if (!SCREEN) setInterval(() => {
-  if (vBreakEnd || vAlerting || hAlertKind || (typeof musicPlaying === 'function' && musicPlaying())) return;
+  if (vBreakEnd || (typeof musicPlaying === 'function' && musicPlaying())) return;
   checkUpdate();
 }, 10 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
