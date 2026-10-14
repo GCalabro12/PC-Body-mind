@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.28</title>
+<title>PC & Body-mind v1.29</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -246,6 +246,13 @@
   .pill { display: inline-flex; align-items: center; font-size: 13px; font-weight: 700; color: #FACC15; background: rgba(250,204,21,0.14); border-radius: 999px; padding: 4px 10px; margin-top: 6px; }
   .tip { display: flex; gap: 12px; align-items: center; width: 100%; margin-top: 18px; padding: 12px 16px 12px 8px; border-radius: 24px; background: rgba(30,41,59,0.55); border: 1px dashed #334155; animation: pcbm-text-in 0.6s var(--ease-out) 0.5s both; }
   .tip svg { width: 56px; height: 62px; flex: none; }
+  .tip { cursor: pointer; }
+  .tip.talk svg { animation: pausiWiggle 0.6s ease 2; }
+  @keyframes pausiWiggle { 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+  .tip-hint { display: block; color: #64748b; font-size: 0.72rem; margin-top: 3px; }
+  #homeLogo { cursor: pointer; }
+  #homeLogo.jump { animation: logoJump 0.9s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes logoJump { 30% { transform: translateY(-14px) scale(1.12) rotate(-6deg); } 60% { transform: translateY(0) scale(0.96) rotate(3deg); } 100% { transform: none; } }
   .tip p { font-size: 14px; line-height: 20px; color: #CBD5E1; margin: 0; }
   .tip p b { color: #F8FAFC; }
   .home .seal { margin-top: auto; padding-top: 6px; position: relative; top: 0; animation: pcbm-text-in 0.6s var(--ease-out) 0.6s both; }
@@ -390,7 +397,7 @@
 <!-- Inicio: logo arriba y los tres botones -->
 <div class="wrap view hidden" id="home">
   <div class="home">
-    <div class="logo" id="homeLogo" data-logo></div>
+    <div class="logo" id="homeLogo" data-logo role="button" tabindex="0" aria-label="Escuchar la banda sonora"></div>
     <h1 class="home-title">PC <b>&amp;</b> Body-mind</h1>
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
     <div class="home-btns">
@@ -400,7 +407,7 @@
       <button class="home-btn agua" data-go="agua"><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
-    <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">busca el punto más lejano de la habitación y míralo un momento.</span></p></div>
+    <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">un vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
     <div class="seal-wrap"><a class="seal" href="https://practicaintegral.club" target="_blank" rel="noopener">by Práctica Integral</a></div>
   </div>
 </div>
@@ -482,6 +489,12 @@
     <label class="check"><input type="checkbox" id="hMovOn"> Avisarme para levantarme y moverme</label>
     <label for="hMovMin">Cada (minutos)</label>
     <input type="number" id="hMovMin" min="10" max="240" inputmode="numeric">
+  </div>
+  <div class="card">
+    <h2 class="teal">🤖 Pausi</h2>
+    <label class="check" style="margin:0"><input type="checkbox" id="pausiOn"> Que Pausi me dé un consejo en voz alta</label>
+    <div class="b-remind-row">cada <input type="number" id="pausiEvery" min="5" max="240" inputmode="numeric" aria-label="Minutos entre consejos de Pausi"> minutos</div>
+    <div class="hint">En el inicio, toca a Pausi para oír su consejo y que te dé otro.</div>
   </div>
   <p class="hint" style="text-align:center">Los avisos suenan solo entre las 5:30 y las 22:00, con la app abierta.</p>
 </div>
@@ -844,10 +857,11 @@
 </div>
 
 <script>
-const VERSION = 'v1.28';
+const VERSION = 'v1.29';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
+const PAUSI_DEFAULT = { voiceOn: true, every: 30, next: 0 };
 const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
@@ -867,10 +881,10 @@ function load() {
     if (d && d.days) return {
       settings: { ...DEFAULTS, ...d.settings }, days: d.days, running: !!d.running,
       music: { ...MUSIC_DEFAULT, ...d.music }, alerts: { ...ALERTS_DEFAULT, ...d.alerts }, cast: d.cast || null,
-      vista: { ...VISTA_DEFAULT, ...d.vista }, bloques: { ...BLOQUES_DEFAULT, ...d.bloques }, salud: { ...SALUD_DEFAULT, ...d.salud }
+      vista: { ...VISTA_DEFAULT, ...d.vista }, bloques: { ...BLOQUES_DEFAULT, ...d.bloques }, salud: { ...SALUD_DEFAULT, ...d.salud }, pausi: { ...PAUSI_DEFAULT, ...d.pausi }
     };
   } catch (e) {}
-  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT }, bloques: { ...BLOQUES_DEFAULT, days: {} }, salud: { ...SALUD_DEFAULT, days: {} } };
+  return { settings: { ...DEFAULTS }, days: {}, running: false, music: { ...MUSIC_DEFAULT }, alerts: { ...ALERTS_DEFAULT }, cast: null, vista: { ...VISTA_DEFAULT }, bloques: { ...BLOQUES_DEFAULT, days: {} }, salud: { ...SALUD_DEFAULT, days: {} }, pausi: { ...PAUSI_DEFAULT } };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative(); }
 function dayKey(d = new Date()) {
@@ -1780,7 +1794,7 @@ function showView() {
   const id = VIEWS[location.hash.replace('#', '')] || 'home';
   ['home', 'vista', 'bloques', 'app', 'pc', 'agua'].forEach(v => $(v).classList.toggle('hidden', v !== id));
   if (id === 'agua') renderSalud();
-  if (id === 'home') { fromHome = false; renderHome(); $('pausiTip').textContent = PAUSI_TIPS[Math.floor(Math.random() * PAUSI_TIPS.length)]; }
+  if (id === 'home') { fromHome = false; renderHome(); $('pausiTip').textContent = pausiNewTip(); }
   if (id === 'app') render();
   if (id === 'bloques') { bloquesReset(); renderBloques(true); }
   window.scrollTo(0, 0);
@@ -1814,9 +1828,25 @@ function renderHome() {
 }
 
 // Bienvenida: logo grande → se queda solo el logo → sube a su sitio en el inicio → aparecen los botones
+// Banda sonora de PC & Body-mind (unos 3 s): acorde suave + melodía ascendente + destellos
+function playTheme() {
+  const c = audio(); if (!c) return;
+  const master = c.createGain(); master.gain.value = 0.9; master.connect(c.destination);
+  const t = c.currentTime + 0.05;
+  ['C4', 'G4', 'E5'].forEach(n => softTone(NOTE(n), t, 3.2, 0.035, master));
+  [['E5', 0], ['G5', 0.22], ['C6', 0.44], ['D6', 0.8], ['E6', 1.15]].forEach(([n, at], i) => {
+    const len = i === 4 ? 1.9 : 0.7;
+    tone(NOTE(n), t + at, len, 'triangle', 0.13, master);
+    tone(NOTE(n) * 2, t + at, len * 0.6, 'sine', 0.03, master);
+  });
+  [['G6', 1.55], ['C7', 1.8], ['E7', 2.05]].forEach(([n, at]) => tone(NOTE(n), t + at, 1.1, 'sine', 0.035, master));
+  setTimeout(() => { try { master.disconnect(); } catch (e) {} }, 4500);
+}
+
 function runSplash() {
   const sp = $('splash'), home = $('home');
   sp.classList.remove('hidden');
+  setTimeout(playTheme, 150); // si el navegador no deja sonar sin tocar antes la pantalla, simplemente no suena
   home.classList.add('pre');
   setTimeout(() => {
     const logo = $('splashLogo');
@@ -2028,7 +2058,28 @@ function saludAnswer(done) {
   renderSalud();
   if (!$('home').classList.contains('hidden')) renderHome();
 }
+function pausiNewTip() {
+  const cur = $('pausiTip').textContent;
+  let tip;
+  do { tip = PAUSI_TIPS[Math.floor(Math.random() * PAUSI_TIPS.length)]; } while (tip === cur && PAUSI_TIPS.length > 1);
+  return tip;
+}
+function pausiSay(tip) {
+  $('pausiTip').textContent = tip;
+  const card = document.querySelector('.tip');
+  card.classList.remove('talk'); void card.offsetWidth; card.classList.add('talk');
+  speak('Pausi dice: ' + tip);
+}
+function pausiTick() {
+  const P = db.pausi, now = Date.now();
+  if (!P.voiceOn || !inHours() || hAlertKind || vAlerting || vBreakEnd) return;
+  if (!P.next || now - P.next > 30 * 60000) { P.next = now + P.every * 60000; save(); return; }
+  if (now < P.next) return;
+  P.next = now + P.every * 60000; save();
+  pausiSay(pausiNewTip());
+}
 function saludTick() {
+  pausiTick();
   const S = db.salud, now = Date.now();
   if (!hAlertKind && inHours()) {
     if (S.aguaOn && now >= S.aguaNext) saludAlert('agua');
@@ -2059,6 +2110,21 @@ function bindSalud() {
   $('hAlertDone').addEventListener('click', () => saludAnswer(true));
   $('hAlertSnooze').addEventListener('click', () => saludAnswer(false));
   setInterval(saludTick, 20000);
+  // Pausi
+  const P = db.pausi;
+  $('pausiOn').checked = P.voiceOn; $('pausiEvery').value = P.every;
+  $('pausiOn').addEventListener('change', () => { P.voiceOn = $('pausiOn').checked; P.next = Date.now() + P.every * 60000; save(); unlockSound(); });
+  $('pausiEvery').addEventListener('change', () => {
+    const v = Math.round(Number($('pausiEvery').value));
+    if (v >= 5 && v <= 240) { P.every = v; P.next = Date.now() + v * 60000; save(); } else $('pausiEvery').value = P.every;
+  });
+  document.querySelector('.tip').addEventListener('click', () => { unlockSound(); pausiSay(pausiNewTip()); });
+  // Logo del inicio: salta y suena la banda sonora
+  const logo = $('homeLogo');
+  const jump = () => { unlockSound(); playTheme(); logo.classList.remove('jump'); void logo.offsetWidth; logo.classList.add('jump'); };
+  logo.addEventListener('click', jump);
+  logo.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(); } });
+  logo.addEventListener('animationend', e => { if (e.animationName === 'logoJump') logo.classList.remove('jump'); });
 }
 
 function bindVista() {
