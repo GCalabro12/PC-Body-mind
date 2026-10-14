@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.60</title>
+<title>PC & Body-mind v1.61</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1063,7 +1063,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.60';
+const VERSION = 'v1.61';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2852,10 +2852,31 @@ function sleepCheck() {
   }
 }
 // Al empezar un bloque: campanita + voz con lo planificado
-function blockStartVoice(c) {
+// Al pasar de bloque, las tareas sin terminar se vuelcan al bloque nuevo (hasta 3 por bloque)
+function blockCarry(c) {
+  const B = db.bloques, k = dayKey();
+  if (c < 0) return 0;
+  const last = B.lastBlk;
+  B.lastBlk = { k, i: c };
+  if (!last || last.k !== k || last.i >= c) { save(); return 0; }
+  const day = B.days[k] || (B.days[k] = {});
+  const to = normActs(day[c] || (day[c] = []));
+  let moved = 0;
+  for (let i = last.i; i < c && to.length < BLOCK_MAX; i++) {
+    const from = day[i] ? normActs(day[i]) : [];
+    for (let j = 0; j < from.length && to.length < BLOCK_MAX;) {
+      if (!from[j].d) { to.push(from.splice(j, 1)[0]); moved++; } else j++;
+    }
+  }
+  save();
+  if (moved) setTimeout(sendState, 100);
+  return moved;
+}
+function blockStartVoice(c, moved) {
   if (!db.bloques.startVoice || c < 0) return;
   const b = BLOCKS[c], acts = dayActs(dayKey(), c).map(a => a.t);
   const text = `Empieza el bloque de ${hm(b.start)} a ${hm(b.end)}. ` +
+    (moved ? (moved === 1 ? 'Pasa una tarea sin terminar del bloque anterior. ' : `Pasan ${moved} tareas sin terminar del bloque anterior. `) : '') +
     (acts.length ? (acts.length === 1 ? 'Tienes planeado: ' : 'Tienes planeadas estas actividades: ') + acts.join('. ') + '.' : 'Todavía no has planificado este bloque.');
   chime();
   setTimeout(() => speak(text), 1000);
@@ -2880,7 +2901,8 @@ function bloquesTick() {
   const c = curBlock();
   if (c !== bLastCur) {
     bRemindAt = Date.now();
-    if (c >= 0) blockStartVoice(c);
+    const moved = blockCarry(c);
+    if (c >= 0) blockStartVoice(c, moved);
     // si estabas mirando el bloque que acaba de terminar, pasa solo al siguiente
     if (bDay === 0 && c >= 0 && bSel === bLastCur) { bSel = c; bMode = bActs(c).length ? 'idle' : 'edit'; }
     bLastCur = c;
@@ -3005,6 +3027,7 @@ function bindBloques() {
   $('bSleepOn').addEventListener('change', () => { db.bloques.sleepOn = $('bSleepOn').checked; save(); });
   $('bSleepOk').addEventListener('click', () => $('bSleep').classList.add('hidden'));
   bLastCur = curBlock();
+  blockCarry(bLastCur); // si la app estuvo cerrada al cambiar de bloque, se vuelcan ahora
   setInterval(bloquesTick, 20000);
   sleepCheck();
 }
