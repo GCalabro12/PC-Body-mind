@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.45</title>
+<title>PC & Body-mind v1.46</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -308,6 +308,7 @@
     .scr-ctrl.folded .scr-top { display: none; }
     .scr-ctrl.folded::before { content: "⚙ Sonido, vídeo, pantalla completa y ventana flotante"; display: block; text-align: center; color: #94a3b8; font-size: 12px; padding: 2px 0; }
     .pip #sFull { display: none; }
+    .pip .scr-ctrl.folded::before { content: "🗗 Ventana flotante · sonido, vídeo y cerrar ventana"; color: #7DD3FC; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
   }
   .scr-toast { position: absolute; right: 1.5vw; bottom: 3vh; background: rgba(15,23,42,0.9); border-right: 8px solid #4ade80; padding: 1.5vh 2vw; border-radius: 1rem; font-size: clamp(16px, min(3.5vw, 5vh), 48px); font-weight: 800; animation: slideIn 0.4s ease; }
@@ -1026,7 +1027,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.45';
+const VERSION = 'v1.46';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2298,10 +2299,13 @@ function stopRelax() {
   setTimeout(() => { try { m.disconnect(); } catch (e) {} }, 2500);
   relax = null;
 }
+let vNotif = null;
+function vistaNotifClose() { try { if (vNotif) vNotif.close(); } catch (e) {} vNotif = null; }
 function vistaNotify(pending) {
   if (!('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
   try {
-    const n = new Notification(pending ? '👁 Tienes pendiente mirar a lo lejos' : '👁 Pausa de vista', { body: `Mira al menos a ${db.vista.dist} metros durante ${db.vista.dur} segundos`, icon: 'icon-192.png', tag: 'vista', renotify: true, requireInteraction: true });
+    vistaNotifClose();
+    const n = vNotif = new Notification(pending ? '👁 Tienes pendiente mirar a lo lejos' : '👁 Pausa de vista', { body: `Mira al menos a ${db.vista.dist} metros durante ${db.vista.dur} segundos`, icon: 'icon-192.png', tag: 'vista', renotify: true, requireInteraction: true });
     n.onclick = () => { window.focus(); n.close(); };
   } catch (e) {}
 }
@@ -2312,7 +2316,12 @@ function vistaStart() {
   if ('Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
   vistaTick();
 }
-function vistaStop() { db.vista.active = false; save(); vistaTick(); sendState(); }
+function vistaStop() {
+  db.vista.active = false; save();
+  clearInterval(vReminder); clearTimeout(vAlertSpeak); vistaNotifClose();
+  if (vAlerting) { vAlerting = false; $('vAlert').classList.add('hidden'); }
+  vistaTick(); sendState();
+}
 function vistaAlert() {
   vAlerting = true;
   $('vAlertSub').textContent = `Llevas ${db.vista.every} minutos mirando la pantalla`;
@@ -2322,9 +2331,10 @@ function vistaAlert() {
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   vistaNotify();
   sendState();
-  // si no se hace la pausa, se recuerda cada X minutos hasta que se haga o se posponga
+  // si no se hace la pausa, se recuerda UNA vez más a los X minutos (no se repite)
   clearInterval(vReminder);
-  vReminder = setInterval(() => {
+  vReminder = setTimeout(() => {
+    if (!vAlerting || vBreakEnd) return;
     chime();
     clearTimeout(vAlertSpeak);
     vAlertSpeak = setTimeout(() => speak('Tienes pendiente mirar a lo lejos.'), 1000);
@@ -2334,7 +2344,7 @@ function vistaAlert() {
 }
 function vistaBreak() {
   const V = db.vista;
-  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false;
+  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; vistaNotifClose();
   $('vAlert').classList.add('hidden');
   unlockSound();
   vBreakEnd = Date.now() + V.dur * 1000;
@@ -2370,7 +2380,7 @@ function vistaBreakEnd(done) {
   sendState();
 }
 function vistaSnooze() {
-  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false;
+  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; vistaNotifClose();
   $('vAlert').classList.add('hidden');
   db.vista.nextAt = Date.now() + 5 * 60000; save();
   vistaTick();
