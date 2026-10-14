@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.22</title>
+<title>PC & Body-mind v1.23</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -215,6 +215,11 @@
   .home-btn.pasos .ico { background: rgba(74,222,128,0.14); }
   .home-btn.pasos .st { color: #4ADE80; }
   .home-btn.pasos:hover { border-color: rgba(74,222,128,0.45); }
+  .home-link { width: 100%; margin-top: 14px; background: transparent; border: 1px dashed #38BDF8; color: #38BDF8; border-radius: 18px; padding: 0.85rem; font-size: 0.95rem; font-weight: 700; animation: pcbm-text-in 0.6s var(--ease-out) 0.45s both; }
+  .home-link:hover { background: rgba(56,189,248,0.08); }
+  .home-link span { color: #4ADE80; font-weight: 600; }
+  .home.pre .home-link { animation: none; opacity: 0; }
+  .pc-steps { display: flex; flex-direction: column; gap: 8px; color: #cbd5e1; font-size: 0.92rem; line-height: 1.45; }
   .pill { display: inline-flex; align-items: center; font-size: 13px; font-weight: 700; color: #FACC15; background: rgba(250,204,21,0.14); border-radius: 999px; padding: 4px 10px; margin-top: 6px; }
   .tip { display: flex; gap: 12px; align-items: center; width: 100%; margin-top: 18px; padding: 12px 16px 12px 8px; border-radius: 24px; background: rgba(30,41,59,0.55); border: 1px dashed #334155; animation: pcbm-text-in 0.6s var(--ease-out) 0.5s both; }
   .tip svg { width: 56px; height: 62px; flex: none; }
@@ -259,7 +264,9 @@
   .b-acts:empty { display: none; }
   .b-acts li { display: flex; gap: 10px; align-items: flex-start; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 10px 12px; }
   .b-acts .n { color: #FACC15; font-weight: 800; }
-  .b-chk { width: 26px; height: 26px; flex: none; padding: 0; border-radius: 8px; border: 2px solid #FACC15; background: transparent; display: flex; align-items: center; justify-content: center; color: #0f172a; }
+  .b-del { color: #64748b; display: flex; align-items: center; flex: 0 0 auto; }
+  .b-acts-hint { color: #64748b; font-size: 0.75rem; margin-top: 6px; }
+  .b-chk { width: 28px; height: 28px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; flex: 0 0 28px; align-self: flex-start; line-height: 0; box-sizing: border-box; padding: 0; border-radius: 8px; border: 2px solid #FACC15; background: transparent; display: flex; align-items: center; justify-content: center; color: #0f172a; }
   .b-chk:hover { background: rgba(250,204,21,0.15); }
   .b-acts li.done .b-chk { background: #FACC15; }
   .b-acts li.done .t { text-decoration: line-through; color: #64748b; }
@@ -343,6 +350,7 @@
       <button class="home-btn bloques" data-go="bloques"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3>Bloques de tiempo</h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
+    <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">busca el punto más lejano de la habitación y míralo un momento.</span></p></div>
     <div class="seal-wrap"><a class="seal" href="https://practicaintegral.club" target="_blank" rel="noopener">by Práctica Integral</a></div>
   </div>
@@ -391,6 +399,29 @@
   </div>
 </div>
 
+<!-- Sincronizar el móvil con la pantalla del PC -->
+<div class="wrap view hidden" id="pc">
+  <header>
+    <button class="back" data-back>← Inicio</button>
+    <h1 class="sky">🖥️ Sincronizar</h1>
+    <span></span>
+  </header>
+  <div class="card">
+    <div class="pc-steps">
+      <div><b>1.</b> En el ordenador abre esta dirección:</div>
+      <div class="url-box" id="castUrl"></div>
+      <div><b>2.</b> Saldrá un código de 4 números. Escríbelo aquí y pulsa <b>Conectar</b>.</div>
+    </div>
+    <div class="row mt">
+      <div><input type="text" id="castCode" class="code-input" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Código de la pantalla del PC"></div>
+      <div><button class="btn-sky" id="castBtn">Conectar</button></div>
+    </div>
+    <div class="status" id="castStatus"></div>
+    <span class="cast-mini hidden" id="castMini"></span>
+    <p class="note mt">En la pantalla del PC verás tus <b>pasos</b>, la cuenta atrás de la <b>pausa de vista</b> y el <b>bloque y la tarea</b> en la que estás, todo sincronizado con este móvil.</p>
+  </div>
+</div>
+
 <!-- Bloques de tiempo: de 5:30 a 22:00 en bloques de hora y media -->
 <div class="wrap view hidden" id="bloques">
   <header>
@@ -411,6 +442,7 @@
     <div class="b-state" id="bState"></div>
     <div class="b-progress" id="bProgBox"><div id="bProg"></div></div>
     <ol class="b-acts" id="bActs"></ol>
+    <div class="b-acts-hint hidden" id="bActsHint">Toca el cuadradito amarillo para marcar una actividad como hecha.</div>
     <div id="bEditor">
       <label for="bText">¿A qué vas a dedicar este bloque?</label>
       <div class="b-input-row">
@@ -555,18 +587,7 @@
     </details>
   </div>
 
-  <div class="card">
-    <details>
-    <summary><div class="sum-flex"><span class="grow">📺 Ver en el ordenador</span><span class="cast-mini" id="castMini"></span></div></summary>
-    <p class="note">En el ordenador abre esta dirección. Saldrá un código de 4 números; escríbelo aquí. Verás tus pasos en grande sobre el vídeo de paisajes.</p>
-    <div class="url-box" id="castUrl"></div>
-    <div class="row">
-      <div><input type="text" id="castCode" class="code-input" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Código de la pantalla"></div>
-      <div><button class="btn-outline" id="castBtn">Conectar</button></div>
-    </div>
-    <div class="status" id="castStatus"></div>
-    </details>
-  </div>
+  <button class="btn-outline mt" data-go="pc">🖥️ Sincronizar con el PC</button>
 
   <div class="card mt">
     <details open>
@@ -716,8 +737,8 @@
     <button id="sFull">⛶ Pantalla completa</button>
   </div>
   <div class="scr-pair" id="sPair">
-    <h1>👣 Pasos en pantalla</h1>
-    <p>En el móvil abre la app de pasos, ve a <b>📺 Ver en el ordenador</b> y escribe este código:</p>
+    <h1>🖥️ Sincronizar PC y móvil</h1>
+    <p>En el móvil abre <b>PC &amp; Body-mind</b>, toca <b>🖥️ Sincronizar con el PC</b> y escribe este código:</p>
     <div class="scr-code" id="sCode">····</div>
     <p style="font-size:16px;color:#94a3b8">Deja esta ventana abierta. El código se mantiene aunque recargues la página.</p>
   </div>
@@ -726,7 +747,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.22';
+const VERSION = 'v1.23';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1397,6 +1418,7 @@ let peer = null, conn = null, castOn = false, castRetry = null;
 function castStatus(t, cls = '') {
   $('castStatus').textContent = t; $('castStatus').className = 'status ' + cls;
   $('castMini').textContent = cls === 'ok' ? '✔ conectado' : '';
+  if ($('homePc')) $('homePc').textContent = cls === 'ok' ? '· ✔ conectado' : '';
 }
 function castLater() { clearTimeout(castRetry); if (castOn) castRetry = setTimeout(castConnect, 5000); }
 async function castConnect() {
@@ -1598,7 +1620,7 @@ function initScreen() {
   document.body.classList.add('screen');
   $('app').classList.add('hidden');
   $('screen').classList.remove('hidden');
-  document.title = 'Pasos en pantalla';
+  document.title = 'PC & Body-mind · pantalla del PC';
   $('sPlay').addEventListener('click', () => scrYTReady && scrYT.playVideo());
   document.addEventListener('pointerdown', () => {
     if (scrYTReady && !$('scrVideoBox').classList.contains('off') && scrYT.getPlayerState() !== YT.PlayerState.PLAYING) scrYT.playVideo();
@@ -1654,11 +1676,11 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.se
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><g transform="translate(256 256) scale(0.84) translate(-256 -262)"><g fill="none" stroke="#38BDF8" stroke-width="30" stroke-linecap="round"><rect x="84" y="150" width="344" height="236" rx="60"/><path d="M256 386 L256 420 M204 424 L308 424"/></g><circle cx="256" cy="148" r="56" fill="#0F172A"/><circle cx="256" cy="148" r="68" fill="#FACC15" opacity=".14"/><g fill="none" stroke="#4ADE80" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"><path d="M178 200 L256 252 L334 200"/><path d="M256 252 L256 298"/><path d="M222 352 L256 298 L290 352"/></g><circle cx="256" cy="148" r="40" fill="#FACC15"/></g></svg>`;
 
 // ---------- Navegación: inicio y secciones ----------
-const VIEWS = { '': 'home', vista: 'vista', bloques: 'bloques', pasos: 'app' };
+const VIEWS = { '': 'home', vista: 'vista', bloques: 'bloques', pasos: 'app', pc: 'pc' };
 let fromHome = false;
 function showView() {
   const id = VIEWS[location.hash.replace('#', '')] || 'home';
-  ['home', 'vista', 'bloques', 'app'].forEach(v => $(v).classList.toggle('hidden', v !== id));
+  ['home', 'vista', 'bloques', 'app', 'pc'].forEach(v => $(v).classList.toggle('hidden', v !== id));
   if (id === 'home') { fromHome = false; renderHome(); $('pausiTip').textContent = PAUSI_TIPS[Math.floor(Math.random() * PAUSI_TIPS.length)]; }
   if (id === 'app') render();
   if (id === 'bloques') { bloquesReset(); renderBloques(true); }
@@ -1923,7 +1945,8 @@ function renderBloques(scroll) {
   $('bState').textContent = state;
   $('bProgBox').classList.toggle('hidden', bSel !== cur);
   if (bSel === cur) $('bProg').style.width = ((m - b.start) / 90 * 100) + '%';
-  $('bActs').innerHTML = acts.map((a, i) => `<li class="${a.d ? 'done' : ''}"><button class="b-chk" data-done="${i}" aria-label="${a.d ? 'Marcar como pendiente' : 'Marcar como hecha'}">${a.d ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>' : ''}</button><span class="t">${escapeHtml(a.t)}</span><button data-del="${i}" aria-label="Borrar actividad">✕</button></li>`).join('');
+  $('bActs').innerHTML = acts.map((a, i) => `<li class="${a.d ? 'done' : ''}"><button class="b-chk" data-done="${i}" aria-label="${a.d ? 'Marcar como pendiente' : 'Marcar como hecha'}">${a.d ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>' : ''}</button><span class="t">${escapeHtml(a.t)}</span><button class="b-del" data-del="${i}" aria-label="Borrar actividad"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></li>`).join('');
+  $('bActsHint').classList.toggle('hidden', !acts.length || acts.some(a => a.d));
   const full = acts.length >= BLOCK_MAX;
   if (full && bMode !== 'idle') bMode = 'idle';
   $('bEditor').classList.toggle('hidden', bMode !== 'edit');
@@ -2142,6 +2165,7 @@ function bindBloques() {
       return;
     }
     const el = e.target.closest('[data-del]'); if (!el) return;
+    if (!confirm('¿Borrar esta actividad? (Para marcarla como hecha, toca el cuadradito amarillo de la izquierda.)')) return;
     bActs(bSel, true).splice(Number(el.dataset.del), 1); save();
     if (!bActs(bSel).length) bMode = 'edit';
     renderBloques();
@@ -2191,6 +2215,22 @@ function initShell() {
   showView();
   if (!location.hash) runSplash();
 }
+
+// ---------- Comprobar si hay versión nueva (el móvil a veces enseña la anterior guardada) ----------
+async function checkUpdate() {
+  try {
+    const r = await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' });
+    const m = (await r.text()).match(/const VERSION = '([^']+)'/);
+    if (!m || m[1] === VERSION) return;
+    const k = 'pcbm_upd_' + m[1];
+    try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (e) {}
+    const u = new URL(location.href);
+    u.searchParams.set('v', m[1]);
+    location.replace(u.toString());
+  } catch (e) {}
+}
+setTimeout(checkUpdate, 1500);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
 
 // ---------- Arranque ----------
 window.onYouTubeIframeAPIReady = () => SCREEN ? createScreenPlayer() : createMainPlayer();
