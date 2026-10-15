@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.71</title>
+<title>PC & Body-mind v1.72</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1104,7 +1104,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.71';
+const VERSION = 'v1.72';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1141,6 +1141,41 @@ function save() {
   if (REMOTE) { remotePush(); return; }
   try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} syncNative();
   castDbSoon();
+  gpSoon();
+}
+// ---------- Resumen para Grow Panel (fase 2): se queda en el navegador (localStorage «growpanel.fichas») ----------
+let gpT = null, gpLast = '';
+function gpSend(r) {
+  const j = JSON.stringify(r);
+  if (j === gpLast) return;
+  gpLast = j;
+  if (window.GrowPanel && typeof window.GrowPanel.resumen === 'function') { try { window.GrowPanel.resumen(r); } catch (e) {} }
+  else window.growPanelResumen = r;
+}
+function gpBuild(o) { // o = { steps, vdone, tdone, ttotal, block, act, quiet }
+  const m = nowMin();
+  let estado = 'ok', mensaje;
+  if (m >= 1320) { estado = 'aviso'; mensaje = 'Son más de las 22:00: apaga el ordenador y descansa'; }
+  else if (o.block) mensaje = 'Ahora: Bloque ' + o.block + (o.act ? ' · ' + o.act : '');
+  else mensaje = 'Fuera del horario de bloques (5:30 – 22:00)';
+  if (o.quiet) { estado = 'pausa'; mensaje = 'Avisos en pausa · ' + mensaje; }
+  if (mensaje.length > 90) mensaje = mensaje.slice(0, 89) + '…';
+  return { estado, mensaje, cifras: [
+    { valor: fmt(o.steps || 0), etiqueta: 'pasos hoy' },
+    { valor: o.vdone || 0, etiqueta: 'descansos vista' },
+    { valor: (o.tdone || 0) + '/' + (o.ttotal || 0), etiqueta: 'tareas' }
+  ], version: VERSION };
+}
+function gpLocal() { // la app (móvil) con sus propios datos
+  const c = curBlock(), acts = c >= 0 ? dayActs(dayKey(), c) : [], next = acts.find(a => !a.d), st = dayStatsB(dayKey());
+  const vd = db.vista.doneDay && db.vista.doneDay.k === dayKey() ? db.vista.doneDay.n : 0;
+  return gpBuild({ steps: today().steps, vdone: vd, tdone: st.done, ttotal: st.t,
+    block: c >= 0 ? `${hm(BLOCKS[c].start)} – ${hm(BLOCKS[c].end)}` : '', act: next ? next.t : '', quiet: isQuiet() });
+}
+function gpSoon() {
+  if (SCREEN || REMOTE) return;
+  clearTimeout(gpT);
+  gpT = setTimeout(() => { try { gpSend(gpLocal()); } catch (e) {} }, 1200);
 }
 // --- vista móvil: lo que se edita en el PC se manda al móvil por secciones ---
 const REMOTE_KEYS = ['bloques', 'salud', 'vista', 'alerts', 'settings', 'pausi'];
@@ -1956,7 +1991,7 @@ function sendState() {
   const d = today(), st = dayStats(d);
   const b = batteryInfo();
   castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos,
-    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION, dev: DEV_ID, quiet: isQuiet() });
+    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION, dev: DEV_ID, quiet: isQuiet(), gp: gpLocal() });
 }
 function saludState() {
   const S = db.salud, t = saludToday(), now = Date.now();
@@ -2196,6 +2231,7 @@ function scrRemoteSend() {
 function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'db') { scrRemoteDb = m.db; scrRemoteSend(); return; }
+  if (m.t === 'state' && m.gp) { const g = { ...m.gp, version: m.gp.version || VERSION }; gpSend(g); }
   if (m.t === 'toast') {
     clearTimeout(toastT);
     $('sToast').textContent = String(m.text || '');
@@ -2650,7 +2686,11 @@ function vistaBreak() {
   unlockSound();
   vBreakEnd = Date.now() + V.dur * 1000;
   $('vBreakMsg').textContent = `Mira al menos a ${V.dist} metros de distancia`;
-  const act = vistaNextAct(); save();
+  const act = vistaNextAct();
+  const dk = dayKey();
+  if (!V.doneDay || V.doneDay.k !== dk) V.doneDay = { k: dk, n: 0 };
+  V.doneDay.n++;
+  save();
   vBreakAct = act.title + ': ' + act.text;
   $('vBreakAct').textContent = 'Mientras tanto · ' + vBreakAct;
   $('vBreak').classList.remove('hidden');
@@ -3341,6 +3381,7 @@ function quietToggle() {
   setTimeout(sendState, 50);
 }
 function homeOrderInit() {
+  gpSoon(); setInterval(gpSoon, 60000);
   quietRender();
   $('quietBtn').addEventListener('click', quietToggle);
   homeBlkTick(); setInterval(homeBlkTick, 1000);
