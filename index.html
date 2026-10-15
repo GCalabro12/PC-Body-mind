@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.69</title>
+<title>PC & Body-mind v1.70</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -383,6 +383,9 @@
   .home::before { content: ""; position: absolute; left: 50%; top: -90px; width: 420px; max-width: 100vw; height: 320px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(56,189,248,0.16), rgba(56,189,248,0)); pointer-events: none; }
   .home .logo { position: relative; width: 72px; height: 72px; margin-top: 16px; animation: pcbm-breathe 6s var(--ease-breath) infinite; }
   .home-title { position: relative; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.4px; margin: 14px 0 0; text-align: center; color: #F8FAFC; animation: pcbm-text-in 0.6s var(--ease-out) both; }
+  .quiet-btn { width: auto; margin: 14px auto 0; display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 700; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.5); color: #7DD3FC; animation: pcbm-text-in 0.6s var(--ease-out) 0.15s both; }
+  .quiet-btn.on { background: #FACC15; border-color: #FACC15; color: #0F172A; }
+  .home.pre .quiet-btn { animation: none; opacity: 0; }
   .home-sub { font-size: 15px; line-height: 22px; color: #CBD5E1; margin: 6px 0 0; text-align: center; animation: pcbm-text-in 0.6s var(--ease-out) 0.1s both; }
   .home-btns { display: flex; flex-direction: column; gap: 14px; width: 100%; margin-top: 28px; }
   .home-btn { display: grid; grid-template-columns: 14px 56px 1fr 20px; gap: 14px; align-items: center; padding: 18px 18px 18px 10px; border-radius: 24px; background: #1E293B; border: 1px solid rgba(248,250,252,0.06); box-shadow: 0 8px 24px rgba(2,6,23,0.35); color: #F8FAFC; text-align: left; width: 100%; font: inherit; font-weight: 400; transition: transform 0.2s var(--ease-out), border-color 0.2s; animation: pcbm-text-in 0.6s var(--ease-out) both; }
@@ -584,6 +587,7 @@
     <div class="logo" id="homeLogo" data-logo role="button" tabindex="0" aria-label="Escuchar la banda sonora"></div>
     <h1 class="home-title">PC <b>&amp;</b> Body-mind</h1>
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
+    <button class="quiet-btn" id="quietBtn" aria-pressed="false"></button>
     <div class="home-btns">
       <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Descansos de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3 class="h-row">Bloques de tiempo<span class="blk-left hidden" id="homeBlkLeft" title="Tiempo que falta para terminar el bloque"></span></h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -1096,7 +1100,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.69';
+const VERSION = 'v1.70';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1259,7 +1263,7 @@ function addSteps(n, activeMs) {
 let nativeLast = null, nativeCfg = '';
 function syncNative() {
   if (!NATIVE) return;
-  const cfg = JSON.stringify({ goal: db.settings.goal, ...db.alerts });
+  const cfg = JSON.stringify({ goal: db.settings.goal, ...db.alerts, ...(isQuiet() ? { voice: false, blockOn: false } : {}) });
   if (cfg === nativeCfg) return;
   nativeCfg = cfg;
   try { AndroidPasos.setConfig(cfg); } catch (e) {}
@@ -1351,7 +1355,7 @@ const SOUNDS = {
   bip: t => { tone(880, t, 0.12, 'square', 0.1); tone(1175, t + 0.17, 0.18, 'square', 0.1); },
   silbato: t => { tone(1568, t, 0.16, 'triangle', 0.3); tone(2093, t + 0.18, 0.16, 'triangle', 0.3); tone(2637, t + 0.36, 0.35, 'triangle', 0.3); }
 };
-function playSound() { const c = audio(); if (c && SOUNDS[db.alerts.sound]) SOUNDS[db.alerts.sound](c.currentTime + 0.02); }
+function playSound() { if (isQuiet()) return; const c = audio(); if (c && SOUNDS[db.alerts.sound]) SOUNDS[db.alerts.sound](c.currentTime + 0.02); }
 
 function pickVoice() {
   if (!('speechSynthesis' in window)) return null;
@@ -1369,8 +1373,9 @@ function speakFlushHeld() {
   next();
   saludTick(); // si tocaba un aviso de agua o movimiento, sale ahora
 }
+const isQuiet = () => !!(db.settings && db.settings.quiet);
 function speak(text, done) {
-  if (REMOTE) { if (done) setTimeout(done, 50); return; }
+  if (REMOTE || isQuiet()) { if (done) setTimeout(done, 50); return; }
   if (vBreakEnd && !speakBypass) { speakHeld.push([text, done]); return; }
   if (NATIVE) { // en la app Android habla el teléfono (también con la pantalla apagada)
     if (musicPlaying()) { yt.setVolume(Math.round(M.vol * 0.25)); ducked = true; }
@@ -1435,6 +1440,7 @@ function celebrate(n, k, goalHit, silent) {
 
 // Qué hacer al pasar de «before» a «after» pasos: avisos, bloques y meta
 function reactToSteps(before, after, silent) {
+  if (isQuiet()) return;
   const A = db.alerts, goal = db.settings.goal;
   const goalHit = before < goal && after >= goal;
   if (goalHit && navigator.vibrate && !silent) navigator.vibrate([150, 80, 150]);
@@ -1946,7 +1952,7 @@ function sendState() {
   const d = today(), st = dayStats(d);
   const b = batteryInfo();
   castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos,
-    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION, dev: DEV_ID });
+    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION, dev: DEV_ID, quiet: isQuiet() });
 }
 function saludState() {
   const S = db.salud, t = saludToday(), now = Date.now();
@@ -2224,7 +2230,7 @@ function scrData(m) {
     $('sEyeBatt').classList.toggle('batt-low', low);
     $('sEyeBatt').classList.toggle('charging', hasBatt && !!m.charging);
     $('sBattBox').classList.toggle('batt-low', low);
-    if (low && !scrBattWarned) { scrBattWarned = true; speak(battLowMsg(m.battery)); }
+    if (low && !scrBattWarned) { scrBattWarned = true; if (!m.quiet) speak(battLowMsg(m.battery)); }
     if (hasBatt && (m.charging || m.battery > BATT_LOW + 2)) scrBattWarned = false;
     $('sTask').classList.toggle('hidden', !m.bloque);
     if (m.bloque) {
@@ -2539,6 +2545,7 @@ function runSplash() {
 let vAlertSpeak = null, vAlerting = false, vBreakEnd = 0, vBreakT = null, vReminder = null, vMusicWasPlaying = false;
 const mmss = ms => { const t = Math.ceil(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
 function chime() {
+  if (isQuiet()) return;
   const c = audio(); if (!c) return;
   const t = c.currentTime + 0.02;
   ['E5', 'G5', 'C6'].forEach((n, i) => tone(NOTE(n), t + i * 0.28, 1.4, 'sine', 0.22));
@@ -2682,6 +2689,7 @@ function vistaSnooze() {
 }
 function vistaTick() {
   const V = db.vista, now = Date.now();
+  if (V.active && !vAlerting && !vBreakEnd && now >= V.nextAt && isQuiet() && !REMOTE) { V.nextAt = now + V.every * 60000; save(); }
   if (V.active && !vAlerting && !vBreakEnd && now >= V.nextAt && !REMOTE) vistaAlert();
   const total = V.every * 60000;
   const left = V.active ? Math.max(0, V.nextAt - now) : total;
@@ -2810,6 +2818,13 @@ function walkTick() {
 }
 function saludTick() {
   if (REMOTE) { if (!$('agua').classList.contains('hidden')) renderSalud(); return; }
+  if (isQuiet()) { // en pausa: sin avisos; los relojes siguen corriendo
+    const S0 = db.salud, n0 = Date.now();
+    if (S0.aguaOn && n0 >= S0.aguaNext) S0.aguaNext = n0 + S0.aguaMin * 60000;
+    if (S0.movOn && n0 >= S0.movNext) S0.movNext = n0 + S0.movMin * 60000;
+    if (!$('agua').classList.contains('hidden')) renderSalud();
+    return;
+  }
   battTick();
   walkTick();
   pausiTick();
@@ -3044,6 +3059,7 @@ window.nativeDictation = (text, err) => {
   }
 };
 function sleepCheck() {
+  if (isQuiet()) return;
   const B = db.bloques, k = dayKey();
   if (!B.sleepOn || nowMin() < 1320 || B.sleepDone === k) return;
   B.sleepDone = k; save();
@@ -3294,7 +3310,35 @@ function homeBlkTick() {
   el.textContent = Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0');
   el.classList.remove('hidden');
 }
+// Pausa / play de todos los avisos (los pasos se siguen contando)
+function quietRender() {
+  const q = isQuiet(), b = $('quietBtn'); if (!b) return;
+  b.classList.toggle('on', q);
+  b.setAttribute('aria-pressed', q ? 'true' : 'false');
+  b.textContent = q ? '▶ Avisos en pausa · tocar para activarlos' : '⏸ Pausar avisos y voces';
+}
+function quietToggle() {
+  db.settings.quiet = !isQuiet();
+  const now = Date.now();
+  if (db.settings.quiet) {
+    try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
+    if (vAlerting) { clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; $('vAlert').classList.add('hidden'); vistaNotifClose(); }
+  } else {
+    // al volver: los avisos empiezan de nuevo desde ahora (no salen todos de golpe)
+    const V = db.vista, S = db.salud;
+    if (V.active) V.nextAt = now + V.every * 60000;
+    if (S.aguaOn) S.aguaNext = now + S.aguaMin * 60000;
+    if (S.movOn) S.movNext = now + S.movMin * 60000;
+    if (db.pausi) db.pausi.next = now + db.pausi.every * 60000;
+    bRemindAt = now;
+  }
+  save(); quietRender();
+  try { vistaTick(); } catch (e) {}
+  setTimeout(sendState, 50);
+}
 function homeOrderInit() {
+  quietRender();
+  $('quietBtn').addEventListener('click', quietToggle);
   homeBlkTick(); setInterval(homeBlkTick, 1000);
   const box = document.querySelector('.home-btns'); if (!box) return;
   const order = (db.settings && db.settings.homeOrder) || [];
