@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.64</title>
+<title>PC & Body-mind v1.65</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -551,6 +551,8 @@
   .break-eye-box { position: relative; max-width: 320px; }
   .break-msg { position: relative; font-size: 1.6rem; font-weight: 800; margin: 26px 0 8px; max-width: 360px; line-height: 1.25; }
   .break-hint { position: relative; color: #CBD5E1; font-size: 1rem; }
+  .break-act { position: relative; max-width: 340px; margin: 4px auto 10px; padding: 10px 14px; border-radius: 14px; background: rgba(45,212,191,0.12); border: 1px solid rgba(45,212,191,0.45); color: #F8FAFC; font-size: 1.05rem; line-height: 1.4; text-align: center; }
+  .break-act:empty { display: none; }
   .break-skip { position: absolute; bottom: 5vh; left: 50%; transform: translateX(-50%); width: auto; background: rgba(15,23,42,0.6); border: 1px solid #475569; color: #F8FAFC; padding: 0.8rem 2.2rem; border-radius: 999px; font-size: 1rem; }
   .break-skip:hover { background: rgba(30,41,59,0.9); }
 </style>
@@ -968,6 +970,7 @@
     <div class="eye-center"><div class="steps" id="vBreakCount" style="font-size:3.4rem">20</div><div class="goal-txt">segundos</div></div>
   </div>
   <div class="break-msg" id="vBreakMsg">Mira al menos a 6 metros de distancia</div>
+  <div class="break-act" id="vBreakAct"></div>
   <div class="break-hint">Parpadea despacio y relaja los hombros</div>
   <button class="break-skip" id="vEnd">Saltar pausa</button>
 </div>
@@ -1078,7 +1081,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.64';
+const VERSION = 'v1.65';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1944,7 +1947,7 @@ function bloqueState() {
 function vistaState() {
   const V = db.vista, now = Date.now();
   return { active: V.active, left: V.active ? Math.max(0, V.nextAt - now) : 0, every: V.every, dur: V.dur, dist: V.dist,
-    alerting: vAlerting, breakLeft: vBreakEnd ? Math.max(0, vBreakEnd - now) : 0 };
+    alerting: vAlerting, breakLeft: vBreakEnd ? Math.max(0, vBreakEnd - now) : 0, act: vBreakEnd ? vBreakAct : '' };
 }
 function bindCast() {
   $('castUrl').textContent = location.origin + location.pathname + '?pantalla';
@@ -2223,6 +2226,12 @@ function scrData(m) {
         $('sToast').textContent = `👁 Pausa de vista: mira a ${m.vista.dist} metros`;
         $('sToast').classList.remove('hidden');
         toastT = setTimeout(() => $('sToast').classList.add('hidden'), 8000);
+      }
+      if (m.vista.breakLeft > 0 && m.vista.act && !(scrVista && scrVista.breakLeft > 0 && scrVista.act === m.vista.act)) {
+        clearTimeout(toastT);
+        $('sToast').textContent = '👁 Mira a ' + m.vista.dist + ' m · ' + m.vista.act;
+        $('sToast').classList.remove('hidden');
+        toastT = setTimeout(() => $('sToast').classList.add('hidden'), Math.max(4000, m.vista.breakLeft));
       }
       scrVista = { ...m.vista, at: Date.now() };
       scrEyeTick();
@@ -2594,6 +2603,20 @@ function vistaAlert() {
     vistaNotify(true);
   }, db.vista.remind * 60000);
 }
+// Mientras miras lejos, una actividad que va rotando en orden: respiración → estiramiento → rodillas → ejercicio
+const BREAK_ACTS = [
+  ['🫁 Respiración', ['inspira en 4 tiempos, aguanta 4 y suelta el aire en 6.', 'respira hondo tres veces, llevando el aire a la tripa.', 'inspira por la nariz y suelta el aire despacio por la boca, tres veces.']],
+  ['🙆 Estiramiento', ['sube los brazos al techo y estira la espalda.', 'inclina la cabeza hacia un hombro y luego hacia el otro.', 'entrelaza las manos detrás de la espalda y abre el pecho.']],
+  ['🦵 Flexiones de rodillas', ['haz 10 sentadillas suaves.', 'flexiona las rodillas despacio 10 veces, con la espalda recta.', 'ponte de puntillas y baja, 10 veces.']],
+  ['💪 Ejercicio', ['gira los hombros hacia atrás 10 veces.', 'marcha en el sitio subiendo las rodillas.', 'haz 10 círculos con los brazos estirados.']]
+];
+let vBreakAct = '';
+function vistaNextAct() {
+  const V = db.vista, n = V.actN || 0;
+  const [title, list] = BREAK_ACTS[n % BREAK_ACTS.length], variant = list[Math.floor(n / BREAK_ACTS.length) % list.length];
+  V.actN = n + 1;
+  return { title, text: variant };
+}
 function vistaBreak() {
   const V = db.vista;
   clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; vistaNotifClose();
@@ -2601,10 +2624,13 @@ function vistaBreak() {
   unlockSound();
   vBreakEnd = Date.now() + V.dur * 1000;
   $('vBreakMsg').textContent = `Mira al menos a ${V.dist} metros de distancia`;
+  const act = vistaNextAct(); save();
+  vBreakAct = act.title + ': ' + act.text;
+  $('vBreakAct').textContent = 'Mientras tanto · ' + vBreakAct;
   $('vBreak').classList.remove('hidden');
   vMusicWasPlaying = musicPlaying();
   if (vMusicWasPlaying) yt.pauseVideo();
-  speakDuringBreak(`Mira al menos a ${V.dist} metros de distancia durante ${V.dur} segundos.`);
+  speakDuringBreak(`Mira al menos a ${V.dist} metros de distancia durante ${V.dur} segundos. Mientras tanto, ${act.title.replace(/^\S+\s/, '').toLowerCase()}: ${act.text}`);
   startRelax();
   setTimeout(sendState, 50);
   clearInterval(vBreakT);
