@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.65</title>
+<title>PC & Body-mind v1.66</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -335,14 +335,15 @@
     .scr-stats b { font-size: clamp(14px, 5vw, 22px); }
     .scr-ctrl { order: 7; border: 2px solid rgba(148,163,184,0.4); border-radius: 16px; padding: 0.8vh 36px 0.8vh 10px; background: rgba(15,23,42,0.6); }
     .scr-ctrl .scr-top { position: static; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; max-width: none; margin: 0; }
-    .scr-ctrl.folded .scr-top { display: none; }
-    .scr-ctrl.folded::before { content: "⚙ Conexión, pantalla completa y ventana flotante"; display: block; text-align: center; color: #94a3b8; font-size: 12px; padding: 2px 0; }
+    /* plegado: solo queda a la vista el botón amarillo de la ventana flotante */
+    .scr-ctrl.folded .scr-top > *:not(#sPip) { display: none !important; }
+    .scr-ctrl #sPip { background: #FACC15; border-color: #FACC15; color: #0F172A; font-weight: 800; }
+    .scr-ctrl #sPip:hover { background: #FDE047; }
     .pip #sFull { display: none; }
     /* sonido, volumen y vídeo ya están junto a los pasos: aquí no se repiten */
     .scr-ctrl #sSound, .scr-ctrl .scr-vol, .scr-ctrl #sVideoBtn { display: none; }
     .scr-ctrl #sFull { order: 1; } .scr-ctrl #sPip { order: 2; } .scr-ctrl #sRemote { order: 3; } .pip #sRemote { display: none; } .scr-ctrl #sPlay { display: none !important; }
     .scr-ctrl .scr-conn { order: 4; flex-basis: 100%; text-align: center; background: transparent; padding: 2px 0 0; }
-    .pip .scr-ctrl.folded::before { content: "🗗 Ventana flotante · conexión y cerrar ventana"; color: #7DD3FC; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
   }
   .scr-toast { position: absolute; right: 1.5vw; bottom: 3vh; background: rgba(15,23,42,0.9); border-right: 8px solid #4ade80; padding: 1.5vh 2vw; border-radius: 1rem; font-size: clamp(16px, min(3.5vw, 5vh), 48px); font-weight: 800; animation: slideIn 0.4s ease; }
@@ -1081,7 +1082,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.65';
+const VERSION = 'v1.66';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
