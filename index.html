@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.67</title>
+<title>PC & Body-mind v1.68</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -373,6 +373,12 @@
   a.seal:hover { color: #F8FAFC; border-color: #4ADE80; }
   .seal::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; flex: none; }
   .seal-gp { white-space: nowrap; }
+  /* dos enlaces dentro del sello: «by Práctica Integral» → la web y «Grow Panel» → su página */
+  .seal a { color: inherit; text-decoration: none; transition: color 0.2s; }
+  .seal a:hover { color: #F8FAFC; }
+  .seal a.gp:hover { text-decoration: underline; }
+  .seal.seal-links { transition: border-color 0.2s; }
+  .seal.seal-links:hover { border-color: #4ADE80; }
   /* en pantallas muy estrechas, «with Grow Panel» en una segunda línea, un poco más pequeño */
   @media (max-width: 360px) { .seal-txt { text-align: center; line-height: 1.3; } .seal-gp { display: block; font-size: 10.5px; } }
   .splash .seal { position: relative; margin-top: 14px; animation: pcbm-text-in 500ms var(--ease-out) 1200ms both, pcbm-text-out 400ms var(--ease-in) 1700ms forwards; }
@@ -569,7 +575,7 @@
   <div class="splash-glow"></div>
   <div class="logo" id="splashLogo" data-logo></div>
   <div class="splash-name">PC <b>&amp;</b> Body-mind</div>
-  <span class="seal"><span class="seal-txt">by Práctica Integral <span class="seal-gp">with Grow Panel</span></span></span>
+  <span class="seal"><span class="seal-txt"><a href="https://practicaintegral.club" target="_blank" rel="noopener">by Práctica Integral</a> <span class="seal-gp">with <a class="gp" href="https://practicaintegral.club/grow-panel/" target="_blank" rel="noopener">Grow Panel</a></span></span></span>
 </div>
 
 <!-- Inicio: logo arriba y los tres botones -->
@@ -586,7 +592,7 @@
     </div>
     <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
-    <div class="seal-wrap"><a class="seal" href="https://practicaintegral.club" target="_blank" rel="noopener"><span class="seal-txt">by Práctica Integral <span class="seal-gp">with Grow Panel</span></span></a></div>
+    <div class="seal-wrap"><span class="seal seal-links"><span class="seal-txt"><a href="https://practicaintegral.club" target="_blank" rel="noopener">by Práctica Integral</a> <span class="seal-gp">with <a class="gp" href="https://practicaintegral.club/grow-panel/" target="_blank" rel="noopener">Grow Panel</a></span></span></span></div>
   </div>
 </div>
 
@@ -1085,7 +1091,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.67';
+const VERSION = 'v1.68';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
