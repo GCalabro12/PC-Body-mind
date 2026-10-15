@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.70</title>
+<title>PC & Body-mind v1.71</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -449,6 +449,9 @@
   #agua .back { background: #0D9488; }
   .ver-badge { position: fixed; top: 6px; right: 10px; z-index: 40; color: #64748b; font-size: 0.72rem; font-variant-numeric: tabular-nums; pointer-events: none; }
   body.has-badge { padding-top: 26px; }
+  /* botón de Grow Panel (lo pone grow-panel-boton.js): arriba a la derecha, bajo el número de versión */
+  .gp-slot { position: fixed; top: 24px; right: 8px; z-index: 40; }
+  body.screen .gp-slot, body.remote .gp-slot { display: none; }
   .cele-art svg { width: 120px; height: 132px; display: block; margin: 0 auto; }
 
   /* ---------- Agua y movimiento ---------- */
@@ -569,6 +572,7 @@
 </head>
 <body>
 <div class="ver-badge hidden" id="verBadge"></div>
+<div class="gp-slot"><span id="grow-panel-boton"></span></div>
 <!-- Bienvenida: logo a pantalla completa que luego sube al inicio -->
 <div class="splash hidden" id="splash">
   <div class="splash-bg"></div>
@@ -1100,7 +1104,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.70';
+const VERSION = 'v1.71';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3434,5 +3438,6 @@ else if (REMOTE) {
 } else initApp();
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://gcalabro12.github.io/Grow-Panel/grow-panel-boton.js" data-app="pc-body-mind" data-nombre="PC & Body-mind" defer></script>
 </body>
 </html>
