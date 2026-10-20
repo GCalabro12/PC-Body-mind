@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.90';
+const VERSION = 'v1.91';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -205,6 +205,8 @@ function renderSetup(a) {
         <a class="go" href="${G}auth/clients/create" target="_blank" rel="noopener">⑤ Abrir «Crear cliente» ↗</a>
         <div class="ask">📱 ¿La página de Google sale cortada o sin el botón «Crear cliente»? Es que la consola de Google está pensada para el ordenador. Prueba una de estas dos cosas: <b>(a)</b> en el menú ⋮ de Brave marca <b>«Sitio de escritorio»</b> y recarga; <b>(b)</b> en la lista «Clientes», toca los <b>tres puntos ⋮</b> que hay junto al título y elige <b>«Crear cliente»</b>. Lo más fácil es hacer solo este paso desde el ordenador.</div></li>
       <li><b>Pega aquí la llave que te da Google.</b> Al pulsar <b>Crear</b> en el paso 5, Google te enseña una ventana con un texto largo llamado <b>«ID de cliente»</b> (acaba en <code>.apps.googleusercontent.com</code>). <b>Mantén pulsado ese texto → Copiar</b>, vuelve a esta página y <b>pégalo en el cuadro</b> de aquí abajo. Luego pulsa «Guardar y continuar».
+        <div class="ask">📱 En el móvil el ID sale <b>a la derecha</b>: la ventana o la fila de Google es más ancha que la pantalla. <b>Desliza el dedo hacia la derecha</b> para ver el ID entero, hasta el final (<code>.apps.googleusercontent.com</code>).</div>
+        <button class="btn-sm" id="reopen5" style="margin-top:8px">↩ Volver a ver el paso 5</button>
         <div class="ask">¿Cerraste esa ventana? En Google ve a «Credenciales» (menú ☰ → APIs y servicios), pulsa el cliente que creaste y copia el ID de cliente que sale arriba.</div>
         <input class="cid" id="cid" type="text" placeholder="1234567890-abcdefg.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
         <button class="btn" id="saveCid" style="margin-top:10px">Guardar y continuar</button>
@@ -231,6 +233,8 @@ function renderSetup(a) {
   a.querySelector('.steps').insertAdjacentHTML('beforebegin', `<div class="setup-note">ℹ️ Esta página <b>no puede ver</b> lo que haces en Google. Cuando termines cada paso, <b>pulsa tú el botón «Ya lo he hecho»</b>: así se tacha y se abre el siguiente.</div>
     <div class="setup-prog">${nDone >= last ? '¡Casi! Solo falta pegar el ID de cliente' : 'Llevas ' + nDone + ' de ' + last + ' pasos marcados. Ahora: ' + lis[cur].querySelector('.stt').textContent}</div>`
     + (nDone < last ? '<button class="btn2" id="skipAll" style="margin-top:8px">Ya hice todo en Google → ir directo al último paso</button>' : ''));
+  // el paso 5 se tacha al marcarlo; este botón lo vuelve a abrir (sin desmarcarlo) para poder mirarlo otra vez
+  if ($('reopen5')) $('reopen5').onclick = () => { setupOpen = lis.length - 2; renderSetup(a); const s5 = a.querySelectorAll('.steps li')[lis.length - 2]; if (s5) s5.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   if ($('skipAll')) $('skipAll').onclick = () => { setupSave(Array(last).fill(true)); setupOpen = -1; renderSetup(a); const c = a.querySelector('.steps li.cur'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   if (prevCid && $('cid')) $('cid').value = prevCid;
   a.querySelectorAll('[data-done]').forEach(b => b.onclick = () => {
