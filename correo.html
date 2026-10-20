@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.95';
+const VERSION = 'v2.00';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -110,11 +110,11 @@ const TOPICS = [
   { name: 'Seguridad y accesos', q: '("código de verificación" OR "verification code" OR contraseña OR "inicio de sesión" OR "nuevo dispositivo" OR "security alert")' },
   { name: 'Salud', q: '("cita médica" OR clínica OR farmacia OR receta OR hospital OR "resultados de")' }
 ];
-// Todo se busca solo en la bandeja de entrada (in:inbox)
-const SCAN_V = 2; // sube cuando cambia lo que se busca: obliga a repasar de nuevo
-const URGENT_Q = 'in:inbox newer_than:3d is:unread (urgente OR urgent OR "lo antes posible" OR asap OR "último aviso" OR "ultimo aviso" OR vence OR "fecha límite" OR "plazo" OR inmediato OR "cuanto antes")';
-const FACT_Q = 'in:inbox has:attachment newer_than:60d (factura OR invoice OR recibo)';
-const DOCS_Q = 'in:inbox has:attachment newer_than:30d (filename:pdf OR filename:doc OR filename:docx OR filename:xls OR filename:xlsx OR filename:ppt OR filename:pptx) -factura -invoice -recibo';
+// Todo se busca solo en la bandeja de entrada (in:inbox) y nunca en lo que has enviado (-in:sent)
+const SCAN_V = 3; // sube cuando cambia lo que se busca: obliga a repasar de nuevo
+const URGENT_Q = 'in:inbox -in:sent newer_than:3d is:unread (urgente OR urgent OR "lo antes posible" OR asap OR "último aviso" OR "ultimo aviso" OR vence OR "fecha límite" OR "plazo" OR inmediato OR "cuanto antes")';
+const FACT_Q = 'in:inbox -in:sent has:attachment newer_than:60d (factura OR invoice OR recibo)';
+const DOCS_Q = 'in:inbox -in:sent has:attachment newer_than:30d (filename:pdf OR filename:doc OR filename:docx OR filename:xls OR filename:xlsx OR filename:ppt OR filename:pptx) -factura -invoice -recibo';
 
 let st = load(), token = null, tokenExp = 0, tokenClient = null, tab = 'etiquetas', busy = false;
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
@@ -286,7 +286,7 @@ async function startScan() {
       const t = TOPICS[i];
       $('scanTxt').textContent = 'Buscando: ' + t.name;
       $('scanBar').style.width = Math.round((i + 1) / TOPICS.length * 100) + '%';
-      const c = await count('in:inbox newer_than:90d ' + t.q);
+      const c = await count('in:inbox -in:sent newer_than:90d ' + t.q);
       if (c.n >= 3) res.push({ name: t.name, q: t.q, n: c.n, ids: c.ids.slice(0, 2) });
     }
     res.sort((x, y) => y.n - x.n);
@@ -327,25 +327,61 @@ async function applyLabels() {
       let lab = existing.find(l => l.name.toLowerCase() === c.name.toLowerCase());
       if (!lab) lab = await gm('labels', { method: 'POST', body: JSON.stringify({ name: c.name, labelListVisibility: 'labelShow', messageListVisibility: 'show' }) });
       // correos que ya tienes (los más recientes, hasta 500)
-      const ids = (await count('in:inbox ' + c.q)).ids;
+      const ids = (await count('in:inbox -in:sent ' + c.q)).ids;
       for (let i = 0; i < ids.length; i += 500) await gm('messages/batchModify', { method: 'POST', body: JSON.stringify({ ids: ids.slice(i, i + 500), addLabelIds: [lab.id] }) });
       // los nuevos: filtro de Gmail (funciona aunque la app esté cerrada)
       let filtro = true;
-      try { await gm('settings/filters', { method: 'POST', body: JSON.stringify({ criteria: { query: c.q }, action: { addLabelIds: [lab.id] } }) }); } catch (e) { filtro = false; }
+      try { await gm('settings/filters', { method: 'POST', body: JSON.stringify({ criteria: { query: filterQuery(c.q) }, action: { addLabelIds: [lab.id] } }) }); } catch (e) { filtro = false; }
       done.push({ name: c.name, id: lab.id, q: c.q, n: ids.length, filtro });
     }
     st.labels = done; st.lastRun = today(); save(); render(); setTimeout(() => refresh(true), 50);
   } catch (e) { $('err').textContent = e.message; btn.disabled = false; btn.textContent = 'Crear las etiquetas marcadas'; }
   finally { busy = false; }
 }
+// Los filtros de Gmail ignoran lo que envías tú
+const filterQuery = q => '(' + q + ') -from:me';
+async function listAllIds(q, max = 3000) {
+  const ids = []; let token = '';
+  do {
+    const r = await gm('messages?maxResults=500&q=' + encodeURIComponent(q) + (token ? '&pageToken=' + token : ''));
+    (r.messages || []).forEach(m => ids.push(m.id)); token = r.nextPageToken || '';
+  } while (token && ids.length < max);
+  return ids;
+}
+// Quita las etiquetas de la app de los correos enviados y borradores, y rehace los filtros para que ignoren lo que envías tú
+async function cleanSent() {
+  if (busy) return; busy = true;
+  const btn = $('cleanSent'); if (btn) btn.disabled = true;
+  try {
+    let removed = 0, fixed = 0;
+    for (const l of st.labels || []) {
+      if (btn) btn.textContent = 'Limpiando «' + l.name + '»…';
+      const ids = await listAllIds('(in:sent OR in:drafts) label:"' + l.name.replace(/"/g, '') + '"');
+      for (let i = 0; i < ids.length; i += 500) await gm('messages/batchModify', { method: 'POST', body: JSON.stringify({ ids: ids.slice(i, i + 500), removeLabelIds: [l.id] }) });
+      removed += ids.length;
+    }
+    // filtros: solo se tocan los que puso esta app (solo ponen la etiqueta); se borran y se crean otra vez sin lo que envías tú
+    const fl = ((await gm('settings/filters')).filter || []);
+    for (const l of st.labels || []) {
+      const mine = fl.filter(f => f.action && (f.action.addLabelIds || []).includes(l.id) && !f.action.removeLabelIds && !f.action.forward && f.criteria && f.criteria.query === l.q);
+      for (const f of mine) await gm('settings/filters/' + f.id, { method: 'DELETE' });
+      if (mine.length) { await gm('settings/filters', { method: 'POST', body: JSON.stringify({ criteria: { query: filterQuery(l.q) }, action: { addLabelIds: [l.id] } }) }); fixed++; l.filtro = true; }
+    }
+    st.sentCleaned = true; st.cleanInfo = { removed, fixed, at: Date.now() }; save(); render();
+  } catch (e) { const er = $('err'); if (er) er.textContent = e.message; if (btn) { btn.disabled = false; btn.textContent = '🧹 Limpiar mis enviados'; } }
+  finally { busy = false; }
+}
 function renderPanel(a) {
-  a.innerHTML = `${st.lastRun !== today() ? `<div class="card"><p class="big">☀️ Buenos días: ¿repaso tu correo de hoy?</p><button class="btn" id="morning">Repasar mi correo</button></div>` : ''}
+  const needClean = !st.sentCleaned && st.labels && st.labels.length;
+  a.innerHTML = `${needClean ? `<div class="card" style="border-color:rgba(250,204,21,0.6)"><p class="big">🧹 Tus correos enviados</p><p>Las etiquetas que puse antes pudieron caer también en correos que tú has <b>enviado</b>. Pulsa para quitárselas (tus enviados vuelven a quedar solo como «Enviados») y para que los filtros ignoren de ahora en adelante todo lo que envíes tú.</p><button class="btn" id="cleanSent">🧹 Limpiar mis enviados</button><p class="hint" id="errClean" style="color:var(--bad)"></p></div>` : ''}${st.lastRun !== today() ? `<div class="card"><p class="big">☀️ Buenos días: ¿repaso tu correo de hoy?</p><button class="btn" id="morning">Repasar mi correo</button></div>` : ''}
     <div class="tabs"><button class="tab ${tab === 'etiquetas' ? 'on' : ''}" data-t="etiquetas">🏷️ Etiquetas</button><button class="tab ${tab === 'urgentes' ? 'on' : ''}" data-t="urgentes">🚨 Urgentes${st.urgent && st.urgent.length ? ' (' + st.urgent.length + ')' : ''}</button><button class="tab ${tab === 'adjuntos' ? 'on' : ''}" data-t="adjuntos">📎 Adjuntos</button></div>
     <div class="card" id="tabBody"></div>
     <div class="card"><div class="row"><button class="btn-sm" id="again">🔄 Repasar ahora</button><button class="btn-sm" id="resug">🏷️ Sugerir etiquetas otra vez</button><button class="btn-sm" id="off">Desconectar</button></div>
+    ${st.cleanInfo ? `<p class="hint">🧹 Limpieza hecha: quité la etiqueta a ${st.cleanInfo.removed} correos enviados y rehice ${st.cleanInfo.fixed} filtros. Lo que envíes tú ya no se etiqueta.</p>` : ''}
     <p class="hint">Última revisión: ${st.lastCheck ? new Date(st.lastCheck).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }) : '—'}. Mientras esta página esté abierta repaso los urgentes cada 15 minutos.</p>
     <p class="hint" id="err" style="color:var(--bad)"></p></div>`;
   document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  if ($('cleanSent')) $('cleanSent').onclick = cleanSent;
   if ($('morning')) $('morning').onclick = () => refresh(true);
   $('again').onclick = () => refresh(true);
   $('resug').onclick = () => { st.suggest = null; st.labels = null; save(); startScan(); };
@@ -398,8 +434,10 @@ function demoApi(path, opt) {
   const delay = v => new Promise(r => setTimeout(() => r(v), 120));
   const fake = { 'Facturas y pagos': 41, 'Boletines y novedades': 128, 'Compras y envíos': 23, 'Citas y reuniones': 17, 'Redes sociales': 36, 'Seguridad y accesos': 9, 'Formación y cursos': 12, 'Viajes y reservas': 2 };
   const subj = { 'Facturas y pagos': ['Tu factura de octubre', 'Recibo de la cuota'], 'Boletines y novedades': ['Novedades de la semana', '5 ideas para tu negocio'], 'Compras y envíos': ['Tu pedido ha sido enviado', 'En reparto hoy'], 'Citas y reuniones': ['Invitación: reunión del lunes', 'Recordatorio de tu cita'], 'Redes sociales': ['Tienes 3 notificaciones nuevas', 'Alguien comentó tu publicación'] };
+  if (path === 'settings/filters' && !(opt && opt.method)) return delay({ filter: (st.labels || []).map((l, i) => ({ id: 'F' + i, criteria: { query: l.q }, action: { addLabelIds: [l.id] } })) });
   if (path.startsWith('messages?')) {
     const q = decodeURIComponent(path.split('q=')[1] || '');
+    if (q.includes('(in:sent OR in:drafts)')) return delay({ messages: [{ id: 's1' }, { id: 's2' }, { id: 's3' }] });
     if (q.includes('is:unread (urgente')) return delay({ messages: [{ id: 'u1' }, { id: 'u2' }] });
     if (q.includes('has:attachment') && q.includes('-factura')) return delay({ messages: [{ id: 'd1' }] });
     if (q.includes('has:attachment')) return delay({ messages: [{ id: 'f1' }, { id: 'f2' }] });
