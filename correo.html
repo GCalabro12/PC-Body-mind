@@ -59,6 +59,8 @@
   .steps li.done::before { content: "✓"; background: var(--ok); }
   .steps li.cur { background: rgba(167,139,250,0.09); border-radius: 14px; margin: 6px -8px; padding-left: 52px; padding-right: 8px; border-top: 0; }
   .steps li.cur::before { left: 8px; box-shadow: 0 0 0 4px rgba(167,139,250,0.3); }
+  .steps li .sum { color: var(--mut); font-size: 13px; margin-top: 2px; }
+  .steps li.open .sum { display: none; }
   .okk { color: var(--ok); font-size: 12.5px; font-weight: 600; }
   .didit { width: 100%; margin-top: 12px; background: var(--ok); color: #0F172A; padding: 11px 14px; font-size: 15px; }
   .setup-prog { margin-top: 10px; color: var(--acc); font-weight: 700; font-size: 14px; }
@@ -81,7 +83,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.85';
+const VERSION = 'v1.86';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -192,7 +194,8 @@ function renderSetup(a) {
         <code id="origin">https://gcalabro12.github.io</code> <button class="btn-sm" id="copyOrigin">Copiar</button><br>
         Deja vacío «URI de redirección» y pulsa <b>Crear</b>.<br>
         <a class="go" href="${G}apis/credentials/oauthclient" target="_blank" rel="noopener">④ Abrir «Crear ID de cliente» ↗</a></li>
-      <li><b>Copia el ID de cliente.</b> Al crearlo, Google te enseña una ventana con el «ID de cliente»: acaba en <code>.apps.googleusercontent.com</code>. Cópialo y pégalo aquí:
+      <li><b>Pega aquí la llave que te da Google.</b> Al pulsar <b>Crear</b> en el paso 4, Google te enseña una ventana con un texto largo llamado <b>«ID de cliente»</b> (acaba en <code>.apps.googleusercontent.com</code>). <b>Mantén pulsado ese texto → Copiar</b>, vuelve a esta página y <b>pégalo en el cuadro</b> de aquí abajo. Luego pulsa «Guardar y continuar».
+        <div class="ask">¿Cerraste esa ventana? En Google ve a «Credenciales» (menú ☰ → APIs y servicios), pulsa «PC Body-mind web» y copia el ID de cliente que sale arriba.</div>
         <input class="cid" id="cid" type="text" placeholder="1234567890-abcdefg.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
         <button class="btn" id="saveCid" style="margin-top:10px">Guardar y continuar</button>
         <p class="hint" id="err" style="color:var(--bad)"></p>
@@ -210,7 +213,8 @@ function renderSetup(a) {
     const title = (m ? m[1] : 'Paso ' + (i + 1)).replace(/\.$/, ''), rest = m ? m[2] : li.innerHTML;
     const st = i < last && done[i] ? 'done' : i === cur ? 'cur' : 'todo';
     li.className = st + (setupOpen === i ? ' open' : '');
-    li.innerHTML = `<div class="sh" data-i="${i}"><span class="stt">${title}</span>${st === 'done' ? '<span class="okk">✓ hecho</span>' : ''}</div><div class="sb">${rest}`
+    const SUM = ['Crear un proyecto nuevo en Google', 'Activar la API de Gmail', 'Dar permiso a tu propio Gmail', 'Crear la llave de conexión', 'Copiar esa llave y pegarla en esta página'];
+    li.innerHTML = `<div class="sh" data-i="${i}"><span class="stt">${title}</span>${st === 'done' ? '<span class="okk">✓ hecho</span>' : ''}</div>${st === 'todo' && SUM[i] ? `<div class="sum">${SUM[i]} · toca para ver cómo</div>` : ''}<div class="sb">${rest}`
       + (i < last ? (st === 'done' ? `<br><button class="btn-sm" data-undo="${i}">Volver a abrir este paso</button>` : `<button class="didit" data-done="${i}">✓ Ya lo he hecho</button>`) : '') + '</div>';
   });
   const nDone = done.slice(0, last).filter(Boolean).length;
