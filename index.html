@@ -7,11 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PC&Body-mind">
+<meta name="apple-mobile-web-app-title" content="PC Amable">
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.92</title>
+<title>PC Amable v1.93</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -617,7 +617,7 @@
   <div class="splash-bg"></div>
   <div class="splash-glow"></div>
   <div class="logo" id="splashLogo" data-logo></div>
-  <div class="splash-name">PC <b>&amp;</b> Body-mind</div>
+  <div class="splash-name">PC <b>Amable</b></div>
   <div class="sellos">
     <a class="pi-seal" href="https://practicaintegral.club" target="_blank" rel="noopener">by Práctica Integral</a>
     <a class="gp-seal" href="https://practicaintegral.club/grow-panel/" target="_blank" rel="noopener"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="107.5" r="69.1" fill="#f59e0b"/><circle cx="397.2" cy="210.1" r="69.1" fill="#0f766e"/><circle cx="343.3" cy="376.1" r="69.1" fill="#8b5cf6"/><circle cx="168.7" cy="376.1" r="69.1" fill="#3b82f6"/><circle cx="114.8" cy="210.1" r="69.1" fill="#ef4444"/><circle cx="256" cy="256" r="79.4" fill="#6b7280"/></svg>with Grow Panel</a>
@@ -628,7 +628,7 @@
 <div class="wrap view hidden" id="home">
   <div class="home">
     <div class="logo" id="homeLogo" data-logo role="button" tabindex="0" aria-label="Escuchar la banda sonora"></div>
-    <h1 class="home-title">PC <b>&amp;</b> Body-mind</h1>
+    <h1 class="home-title">PC <b>Amable</b></h1>
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
     <div class="focus-row"><button class="quiet-btn" id="quietBtn" aria-pressed="false"></button></div>
     <div class="home-btns">
@@ -1212,7 +1212,7 @@
   </div>
   <div class="scr-pair" id="sPair">
     <h1>🖥️ Sincronizar PC y móvil</h1>
-    <p>En el móvil abre <b>PC &amp; Body-mind</b>, toca <b>🖥️ Sincronizar con el PC</b> y escribe este código:</p>
+    <p>En el móvil abre <b>PC Amable</b>, toca <b>🖥️ Sincronizar con el PC</b> y escribe este código:</p>
     <div class="scr-code" id="sCode">····</div>
     <p style="font-size:16px;color:#94a3b8">Deja esta ventana abierta. El código se mantiene aunque recargues la página.</p>
   </div>
@@ -1221,7 +1221,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.92';
+const VERSION = 'v1.93';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2474,7 +2474,7 @@ async function openPip() {
   }
   window.__pip = w;
   document.querySelectorAll('style').forEach(st => w.document.head.appendChild(st.cloneNode(true)));
-  w.document.title = 'PC & Body-mind';
+  w.document.title = 'PC Amable';
   w.document.body.className = 'screen pip';
   const panel = document.querySelector('.scr-panel'), toast = $('sToast'), cele = $('sCele');
   const home = panel.parentNode, next = panel.nextSibling;
@@ -2498,7 +2498,7 @@ function initScreen() {
   document.body.classList.add('screen');
   $('app').classList.add('hidden');
   $('screen').classList.remove('hidden');
-  document.title = 'PC & Body-mind · pantalla del PC';
+  document.title = 'PC Amable · pantalla del PC';
   $('sPlay').addEventListener('click', () => scrYTReady && scrYT.playVideo());
   document.addEventListener('pointerdown', () => {
     if (scrYTReady && !$('scrVideoBox').classList.contains('off') && scrYT.getPlayerState() !== YT.PlayerState.PLAYING) scrYT.playVideo();
@@ -3671,7 +3671,7 @@ function initShell() {
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.go === 'concentracion') { focusOpen(); return; }
     if (b.dataset.go === 'correo') { // página aparte; dentro de la app de Android la ventana de Google no funciona
-      if (NATIVE) { alert('El gestor de email se usa en el ordenador: abre PC & Body-mind en Chrome o Brave y toca «Gestor de email».'); return; }
+      if (NATIVE) { alert('El gestor de email se usa en el ordenador: abre PC Amable en Chrome o Brave y toca «Gestor de email».'); return; }
       location.href = 'correo.html'; return;
     }
     fromHome = true; location.hash = b.dataset.go;
@@ -3874,6 +3874,6 @@ else if (REMOTE) {
 } else initApp();
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
-<script src="https://gcalabro12.github.io/Grow-Panel/grow-panel-boton.js" data-app="pc-body-mind" data-nombre="PC & Body-mind" defer></script>
+<script src="https://gcalabro12.github.io/Grow-Panel/grow-panel-boton.js" data-app="pc-body-mind" data-nombre="PC Amable" defer></script>
 </body>
 </html>

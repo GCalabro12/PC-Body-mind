@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "PC & Body-mind",
-  "short_name": "PC&Body-mind",
-  "description": "Cuida tu cuerpo, tu mente y tu tiempo: descansos de la vista, bloques de tiempo y pasos",
+  "name": "PC Amable",
+  "short_name": "PC Amable",
+  "description": "Cuida tu cuerpo, tu mente y tu tiempo: pausas activas, pasos y gestor de email",
   "lang": "es",
   "start_url": "./",
   "scope": "./",

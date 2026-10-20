@@ -1,8 +1,8 @@
 {
   "id": "./?pantalla",
-  "name": "PC & Body-mind · Pantalla del PC",
-  "short_name": "PCBM Pantalla",
-  "description": "Pasos, pausa de vista y tarea actual sincronizados con el móvil",
+  "name": "PC Amable · Pantalla del PC",
+  "short_name": "PC Amable Pantalla",
+  "description": "Pasos y pausas de vista sincronizados con el móvil",
   "lang": "es",
   "start_url": "./?pantalla",
   "scope": "./",
