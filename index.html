@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v1.97</title>
+<title>Amable PC v1.98</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -476,7 +476,10 @@
   .scr-desk { margin: 2px 0 4px; }
   .scr-desk.hidden { display: none; }
   .scr-desk .desk-btn { flex: none; padding: 2px 8px; border-radius: 10px; }
-  .scr-desk .desk-btn svg { width: 46px; height: 34px; }
+  .scr-desk .desk-btn svg { width: 60px; height: 45px; }
+  /* el número de pasos y la palabra «pasos» en la misma línea: deja sitio a los muñecos */
+  .scr-stepsrow { display: flex; justify-content: center; align-items: baseline; gap: 0.35em; }
+  .scr-stepsrow .scr-label { margin: 0 !important; }
   .scr-pasos.folded .scr-desk { display: none; }
   .desk-now { font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 4px 0 6px; line-height: 1.45; }
   .desk-now small { display: block; font-weight: 500; color: #94A3B8; font-size: 0.85rem; }
@@ -1156,8 +1159,7 @@
         <button class="scr-ico" id="sSpk" aria-label="Activar o silenciar el sonido del vídeo" title="Sonido del vídeo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <button class="scr-ico" id="sVid2" aria-label="Mostrar u ocultar el vídeo de fondo" title="Vídeo de fondo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><path class="play" d="M10.5 7.5v5l4-2.5z" fill="currentColor" stroke="none"/><path class="cross" d="M3 4l18 12"/></svg></button>
       </div>
-      <div class="scr-steps" id="sSteps">0</div>
-      <div class="scr-label">pasos <span id="sGoal">de 8000</span></div>
+      <div class="scr-stepsrow"><div class="scr-steps" id="sSteps">0</div><div class="scr-label">pasos <span id="sGoal">de 8000</span></div></div>
       <div class="desk-toggle scr-desk hidden" id="sDesk"></div>
       <div class="scr-bar"><div id="sGoalBar"></div></div>
       <div class="scr-block"><span id="sBlockTxt">Bloque 1 · 0 / 2000</span><div class="scr-bar yellow"><div id="sBlockBar"></div></div></div>
@@ -1236,7 +1238,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.97';
+const VERSION = 'v1.98';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
