@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.76</title>
+<title>PC & Body-mind v1.77</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -603,7 +603,7 @@
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
     <button class="quiet-btn" id="quietBtn" aria-pressed="false"></button>
     <div class="home-btns">
-      <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Descansos de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Pausas activas</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3 class="h-row">Bloques de tiempo<span class="blk-left hidden" id="homeBlkLeft" title="Tiempo que falta para terminar el bloque"></span></h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos con mesa elevadora</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn agua" data-go="agua"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -625,7 +625,7 @@
 <div class="wrap view hidden" id="vista">
   <header>
     <button class="back" data-back>← Inicio</button>
-    <h1 class="sky">👁 Vista</h1>
+    <h1 class="sky">👁 Pausas activas</h1>
     <span></span>
   </header>
   <div class="card" style="text-align:center">
@@ -659,6 +659,12 @@
       <div><label for="vRemind">Si no la haces, recordar una vez a los (minutos; 0 = no recordar)</label><input type="number" id="vRemind" min="0" max="30" inputmode="numeric" placeholder="0"></div>
     </div>
     <div class="hint">Regla 20-20-20 de la Academia Americana de Oftalmología: cada 20 minutos, 20 segundos mirando a 20 pies (unos 6 metros).</div>
+    <label class="check" style="margin-top:14px"><input type="checkbox" id="vMoveOn"> 🤸 Pausa de movimiento</label>
+    <div class="row">
+      <div><label for="vMoveEvery">Cada (minutos)</label><input type="number" id="vMoveEvery" min="20" max="240" inputmode="numeric"></div>
+      <div><label for="vMoveDur">Duración (minutos)</label><input type="number" id="vMoveDur" min="1" max="15" inputmode="numeric"></div>
+    </div>
+    <div class="hint">Cuando toca, la pausa de vista se convierte en una pausa de movimiento: estiramientos, manos y muñecas, piernas o caminar (en la mesa elevadora o por casa).</div>
     <button class="btn-outline mt" id="vTest">Probar una pausa ahora</button>
     </details>
   </div>
@@ -1116,7 +1122,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.76';
+const VERSION = 'v1.77';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1125,7 +1131,7 @@ const AGUA_STEP = 0.5; // cada aviso sugiere medio vaso
 const fmtVasos = n => String(n).replace('.', ',');
 const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
-const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0 };
+const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0, moveOn: true, moveEvery: 60, moveDur: 2, lastMove: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
 // ?remoto: la app completa dentro de la pantalla del PC, trabajando con los datos del móvil (no guarda nada en el PC)
@@ -2018,7 +2024,7 @@ function bloqueState() {
 }
 function vistaState() {
   const V = db.vista, now = Date.now();
-  return { active: V.active, left: V.active ? Math.max(0, V.nextAt - now) : 0, every: V.every, dur: V.dur, dist: V.dist,
+  return { active: V.active, left: V.active ? Math.max(0, V.nextAt - now) : 0, every: V.every, dur: vBreakEnd ? vBreakDur : V.dur, dist: V.dist, move: !!vBreakEnd && vBreakMove,
     alerting: vAlerting, breakLeft: vBreakEnd ? Math.max(0, vBreakEnd - now) : 0, act: vBreakEnd ? vBreakAct : '' };
 }
 function bindCast() {
@@ -2202,7 +2208,7 @@ function scrEyeTick() {
   let time, lbl, frac;
   if (v.breakLeft > 0) {
     const left = Math.max(0, v.breakLeft - since);
-    time = mmss(left); lbl = `mirando a ${v.dist} m`; frac = left / (v.dur * 1000);
+    time = mmss(left); lbl = v.move ? 'pausa de movimiento' : `mirando a ${v.dist} m`; frac = left / (v.dur * 1000);
   } else if (v.alerting) {
     time = '¡Ya!'; lbl = 'toca pausa de vista'; frac = 0;
   } else {
@@ -2302,7 +2308,7 @@ function scrData(m) {
       }
       if (m.vista.breakLeft > 0 && m.vista.act && !(scrVista && scrVista.breakLeft > 0 && scrVista.act === m.vista.act)) {
         clearTimeout(toastT);
-        $('sToast').textContent = '👁 Mira a ' + m.vista.dist + ' m · ' + m.vista.act;
+        $('sToast').textContent = (m.vista.move ? '🤸 Pausa de movimiento · ' : '👁 Mira a ' + m.vista.dist + ' m · ') + m.vista.act;
         $('sToast').classList.remove('hidden');
         toastT = setTimeout(() => $('sToast').classList.add('hidden'), Math.max(4000, m.vista.breakLeft));
       }
@@ -2658,12 +2664,21 @@ function vistaStop() {
   if (vAlerting) { vAlerting = false; $('vAlert').classList.add('hidden'); }
   vistaTick(); sendState();
 }
+// ¿La próxima pausa toca de movimiento? (cada «moveEvery» minutos; si no, micropausa de vista)
+function vistaIsMove() {
+  const V = db.vista;
+  if (!V.moveOn) return false;
+  if (!V.lastMove) { V.lastMove = Date.now(); save(); return false; }
+  return Date.now() - V.lastMove >= (V.moveEvery - 1) * 60000;
+}
 function vistaAlert() {
   vAlerting = true;
-  $('vAlertSub').textContent = `Llevas ${db.vista.every} minutos mirando la pantalla`;
+  const move = vistaIsMove();
+  $('vAlertSub').textContent = move ? `Levántate y muévete ${db.vista.moveDur} ${db.vista.moveDur === 1 ? 'minuto' : 'minutos'}` : `Llevas ${db.vista.every} minutos mirando la pantalla`;
+  document.querySelector('#vAlert .cele-title').textContent = move ? 'Pausa de movimiento' : 'Pausa de vista';
   $('vAlert').classList.remove('hidden');
   chime();
-  vAlertSpeak = setTimeout(() => speak('Pausa de vista.'), 1000);
+  vAlertSpeak = setTimeout(() => speak(move ? 'Pausa de movimiento.' : 'Pausa de vista.'), 1000);
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   vistaNotify();
   sendState();
@@ -2678,18 +2693,23 @@ function vistaAlert() {
     vistaNotify(true);
   }, db.vista.remind * 60000);
 }
-// Mientras miras lejos, una actividad que va rotando en orden: respiración → estiramiento → rodillas → ejercicio
-const BREAK_ACTS = [
+// Pausas activas: micropausa (ojos y respiración, mientras miras lejos) y pausa de movimiento (cada hora).
+// En cada tipo, las actividades rotan en orden y cada una tiene 3 variantes.
+const MICRO_ACTS = [
   ['🫁 Respiración', ['inspira en 4 tiempos, aguanta 4 y suelta el aire en 6.', 'respira hondo tres veces, llevando el aire a la tripa.', 'inspira por la nariz y suelta el aire despacio por la boca, tres veces.']],
-  ['🙆 Estiramiento', ['sube los brazos al techo y estira la espalda.', 'inclina la cabeza hacia un hombro y luego hacia el otro.', 'entrelaza las manos detrás de la espalda y abre el pecho.']],
-  ['🦵 Flexiones de rodillas', ['haz 10 sentadillas suaves.', 'flexiona las rodillas despacio 10 veces, con la espalda recta.', 'ponte de puntillas y baja, 10 veces.']],
-  ['💪 Ejercicio', ['gira los hombros hacia atrás 10 veces.', 'marcha en el sitio subiendo las rodillas.', 'haz 10 círculos con los brazos estirados.']]
+  ['👁 Ojos', ['parpadea despacio 10 veces.', 'mira lejos y luego cerca, alternando 5 veces.', 'frota las manos y cúbrete los ojos con las palmas unos segundos.']]
 ];
-let vBreakAct = '';
-function vistaNextAct() {
-  const V = db.vista, n = V.actN || 0;
-  const [title, list] = BREAK_ACTS[n % BREAK_ACTS.length], variant = list[Math.floor(n / BREAK_ACTS.length) % list.length];
-  V.actN = n + 1;
+const MOVE_ACTS = [
+  ['🙆 Estiramiento', ['sube los brazos al techo y estira la espalda; luego inclina la cabeza hacia cada hombro.', 'entrelaza las manos detrás de la espalda y abre el pecho; gira el tronco a cada lado.', 'gira los hombros hacia atrás 10 veces y estira el cuello mirando arriba y abajo.']],
+  ['✋ Manos y muñecas', ['abre y cierra las manos 10 veces y gira las muñecas en los dos sentidos.', 'estira los dedos hacia atrás con la otra mano, 15 segundos cada mano.', 'junta las palmas delante del pecho y bájalas despacio para estirar las muñecas.']],
+  ['🦵 Piernas', ['haz 10 sentadillas suaves.', 'ponte de puntillas y baja, 15 veces.', 'flexiona las rodillas despacio 10 veces, con la espalda recta.']],
+  ['🚶 Caminar', ['camina por casa o en la mesa elevadora hasta que acabe la pausa.', 'marcha en el sitio subiendo las rodillas.', 'sube y baja unas escaleras si tienes cerca.']]
+];
+let vBreakAct = '', vBreakDur = 20, vBreakMove = false;
+function vistaNextAct(move) {
+  const V = db.vista, key = move ? 'moveN' : 'actN', list0 = move ? MOVE_ACTS : MICRO_ACTS, n = V[key] || 0;
+  const [title, list] = list0[n % list0.length], variant = list[Math.floor(n / list0.length) % list.length];
+  V[key] = n + 1;
   return { title, text: variant };
 }
 function vistaBreak() {
@@ -2697,19 +2717,25 @@ function vistaBreak() {
   clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; vistaNotifClose();
   $('vAlert').classList.add('hidden');
   unlockSound();
-  vBreakEnd = Date.now() + V.dur * 1000;
-  $('vBreakMsg').textContent = `Mira al menos a ${V.dist} metros de distancia`;
-  const act = vistaNextAct();
+  const move = vistaIsMove();
+  vBreakMove = move;
+  vBreakDur = move ? V.moveDur * 60 : V.dur;
+  if (move) V.lastMove = Date.now();
+  vBreakEnd = Date.now() + vBreakDur * 1000;
+  $('vBreakMsg').textContent = move ? 'Pausa de movimiento: levántate y muévete' : `Mira al menos a ${V.dist} metros de distancia`;
+  const act = vistaNextAct(move);
   const dk = dayKey();
   if (!V.doneDay || V.doneDay.k !== dk) V.doneDay = { k: dk, n: 0 };
   V.doneDay.n++;
   save();
   vBreakAct = act.title + ': ' + act.text;
-  $('vBreakAct').textContent = 'Mientras tanto · ' + vBreakAct;
+  $('vBreakAct').textContent = (move ? '' : 'Mientras tanto · ') + vBreakAct;
   $('vBreak').classList.remove('hidden');
   vMusicWasPlaying = musicPlaying();
   if (vMusicWasPlaying) yt.pauseVideo();
-  speakDuringBreak(`Mira al menos a ${V.dist} metros de distancia durante ${V.dur} segundos. Mientras tanto, ${act.title.replace(/^\S+\s/, '').toLowerCase()}: ${act.text}`);
+  speakDuringBreak(move
+    ? `Pausa de movimiento de ${V.moveDur} ${V.moveDur === 1 ? 'minuto' : 'minutos'}. ${act.title.replace(/^\S+\s/, '')}: ${act.text}`
+    : `Mira al menos a ${V.dist} metros de distancia durante ${V.dur} segundos. Mientras tanto, ${act.title.replace(/^\S+\s/, '').toLowerCase()}: ${act.text}`);
   startRelax();
   setTimeout(sendState, 50);
   clearInterval(vBreakT);
@@ -2717,8 +2743,8 @@ function vistaBreak() {
   vistaBreakTick();
 }
 function vistaBreakTick() {
-  const total = db.vista.dur * 1000, left = Math.max(0, vBreakEnd - Date.now());
-  $('vBreakCount').textContent = Math.ceil(left / 1000);
+  const total = vBreakDur * 1000, left = Math.max(0, vBreakEnd - Date.now());
+  $('vBreakCount').textContent = left > 60000 ? mmss(left) : Math.ceil(left / 1000);
   const EYE_C = 2 * Math.PI * 78;
   $('vBreakRing').style.strokeDasharray = EYE_C;
   $('vBreakRing').style.strokeDashoffset = EYE_C * (1 - left / total);
@@ -2948,6 +2974,10 @@ function bindVista() {
     } else $(id).value = V[key];
   });
   num('vEvery', 'every', 1, 180); num('vDur', 'dur', 5, 600); num('vDist', 'dist', 1, 50); num('vRemind', 'remind', 0, 30);
+  // pausa de movimiento
+  $('vMoveOn').checked = V.moveOn; $('vMoveEvery').value = V.moveEvery; $('vMoveDur').value = V.moveDur;
+  $('vMoveOn').addEventListener('change', () => { V.moveOn = $('vMoveOn').checked; V.lastMove = Date.now(); save(); });
+  num('vMoveEvery', 'moveEvery', 20, 240); num('vMoveDur', 'moveDur', 1, 15);
   $('vToggle').addEventListener('click', () => db.vista.active ? vistaStop() : vistaStart());
   $('vTest').addEventListener('click', vistaBreak);
   $('vStartBreak').addEventListener('click', vistaBreak);
