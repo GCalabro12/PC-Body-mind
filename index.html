@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v1.96</title>
+<title>Amable PC v1.97</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -307,7 +307,7 @@
     .scr-block { margin: 0; font-size: clamp(10px, 3.6vw, 16px); }
     .scr-task { min-height: 15vh; display: flex; flex-direction: column; justify-content: center; }
     .scr-task-act { font-size: clamp(18px, 9vw, 42px) !important; }
-    .scr-steps { font-size: clamp(24px, min(11vw, 7vh), 64px) !important; }
+    .scr-steps { font-size: clamp(22px, min(8.5vw, 5.5vh), 50px) !important; }
     .scr-salud { order: 4; margin: 0; text-align: left; border: 2px solid rgba(45,212,191,0.55); border-radius: 16px; padding: 0.8vh 36px 0.8vh 4vw; background: rgba(15,23,42,0.6); display: flex; flex-direction: column; gap: 0.4vh; font-size: clamp(11px, 3.8vw, 16px); }
     .scr-salud-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
     .scr-salud b { margin: 0; font-size: 1.35em; }
@@ -465,6 +465,19 @@
   .home-btn.agua:hover { border-color: rgba(45,212,191,0.45); }
   /* Bloques de tiempo y Agua y movimiento se han pasado a Equilibra */
   .home-btn.bloques, .home-btn.agua, #home .tip { display: none !important; }
+  /* Sentado / de pie: dos iconos; el activo en verde y el otro en rojo (móvil, pantalla del PC y ventana flotante) */
+  .desk-toggle { display: flex; gap: 10px; justify-content: center; margin: 6px 0 10px; }
+  .desk-btn { width: auto; flex: 1; max-width: 150px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 10px; border-radius: 14px; background: rgba(239,68,68,0.12); border: 2px solid #EF4444; color: #FCA5A5; font-size: 13px; font-weight: 700; }
+  .desk-btn:hover { background: rgba(239,68,68,0.24); }
+  .desk-btn.on { background: rgba(34,197,94,0.16); border-color: #22C55E; color: #86EFAC; }
+  .desk-btn.on:hover { background: rgba(34,197,94,0.28); }
+  .desk-btn svg { width: 64px; height: 48px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .desk-btn svg .soft { opacity: 0.45; }
+  .scr-desk { margin: 2px 0 4px; }
+  .scr-desk.hidden { display: none; }
+  .scr-desk .desk-btn { flex: none; padding: 2px 8px; border-radius: 10px; }
+  .scr-desk .desk-btn svg { width: 46px; height: 34px; }
+  .scr-pasos.folded .scr-desk { display: none; }
   .desk-now { font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 4px 0 6px; line-height: 1.45; }
   .desk-now small { display: block; font-weight: 500; color: #94A3B8; font-size: 0.85rem; }
   .focus-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -851,6 +864,7 @@
   </div>
   <div class="card hidden" id="deskCard">
     <h2>🧍 Sentado / de pie</h2>
+    <div class="desk-toggle" id="deskToggle"></div>
     <div class="desk-now" id="deskNow"></div>
     <label class="check"><input type="checkbox" id="deskOn"> Avisarme para alternar sentado y de pie</label>
     <label class="check"><input type="checkbox" id="deskMusic"> 🎵 Música: suena de pie y se para al sentarme</label>
@@ -858,7 +872,6 @@
       <div><label for="deskSit">Sentado (minutos)</label><input type="number" id="deskSit" min="5" max="180" inputmode="numeric"></div>
       <div><label for="deskStand">De pie (minutos)</label><input type="number" id="deskStand" min="5" max="180" inputmode="numeric"></div>
     </div>
-    <button class="btn-outline mt" id="deskSwitch">Ya he cambiado</button>
     <div class="hint">¿No es así? <a href="#" class="desk-change">Cambiar respuesta</a></div>
   </div>
   <div class="card hidden" id="walkCard">
@@ -1145,6 +1158,7 @@
       </div>
       <div class="scr-steps" id="sSteps">0</div>
       <div class="scr-label">pasos <span id="sGoal">de 8000</span></div>
+      <div class="desk-toggle scr-desk hidden" id="sDesk"></div>
       <div class="scr-bar"><div id="sGoalBar"></div></div>
       <div class="scr-block"><span id="sBlockTxt">Bloque 1 · 0 / 2000</span><div class="scr-bar yellow"><div id="sBlockBar"></div></div></div>
     </div>
@@ -1222,7 +1236,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.96';
+const VERSION = 'v1.97';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2094,6 +2108,7 @@ function castCommand(m) {
         save(); renderSalud();
       }
       break;
+    case 'deskSit': case 'deskStand': if (desk().has) deskSetMode(m.c === 'deskSit' ? 'sit' : 'stand'); break;
     case 'taskDone': {
       const c = curBlock(); if (c < 0) break;
       const next = dayActs(dayKey(), c).find(a => !a.d);
@@ -2434,6 +2449,14 @@ function scrData(m) {
       scrVista = { ...m.vista, at: Date.now() };
       scrMusicSync(m);
       scrEyeTick();
+    }
+    { // iconos sentado / de pie (solo si tiene mesa elevadora): el activo en verde, el otro en rojo
+      const sd = $('sDesk');
+      if (sd) {
+        if (!sd.firstChild) sd.innerHTML = deskToggleHtml(false, true);
+        sd.classList.toggle('hidden', !m.desk);
+        if (m.desk) deskToggleMark(sd, m.desk.mode);
+      }
     }
     const b = blockInfo(m.steps, m.block);
     $('sBlockTxt').textContent = `Bloque ${b.num} · ${fmt(b.done)} / ${fmt(m.block)}`;
@@ -3020,6 +3043,32 @@ function walkExpected() { const m = nowMin(); return Math.round((db.settings.goa
 // ---------- Mesa elevadora: sentado / de pie (con mesa) o pausas para caminar (sin mesa) ----------
 const DESK_DEF = { has: null, on: true, sit: 30, stand: 30, mode: 'sit', next: 0, music: true };
 const desk = () => (db.settings.desk = { ...DESK_DEF, ...(db.settings.desk || {}) });
+// ---- Iconos sentado / de pie (perfil, esquemáticos) ----
+const DESK_SVG = {
+  sit: '<svg viewBox="0 0 72 52" aria-hidden="true"><path d="M6 18V36H24M15 36V46M9 46H21"/><circle cx="16" cy="10" r="4.5"/><path d="M15 16L13 34H31V46H37M15 19L23 27H38"/><path d="M30 30H68M66 30V46M38 27H50"/><rect x="52" y="10" width="14" height="11" rx="1.5"/><path d="M59 21V30"/></svg>',
+  stand: '<svg viewBox="0 0 72 52" aria-hidden="true"><path class="soft" d="M4 26V38H14M9 38V46M5 46H13"/><circle cx="30" cy="8" r="4.5"/><path d="M30 14V30L37 46H41M30 30L23 40L24 46M30 17L38 24H49"/><path d="M44 26H70M68 26V46M44 23H54"/><rect x="56" y="6" width="14" height="11" rx="1.5"/><path d="M63 17V26"/></svg>'
+};
+// cmd = true → botones para la pantalla del PC (mandan la orden al móvil); si no, botones del móvil
+function deskToggleHtml(labels, cmd) {
+  return ['sit', 'stand'].map(k => {
+    const name = k === 'sit' ? 'Sentado' : 'De pie';
+    return `<button class="desk-btn" data-desk="${k}"${cmd ? ` data-cmd="${k === 'sit' ? 'deskSit' : 'deskStand'}"` : ''} aria-label="${name}" title="${name}">${DESK_SVG[k]}${labels ? `<span>${name}</span>` : ''}</button>`;
+  }).join('');
+}
+function deskToggleMark(root, mode) {
+  root.querySelectorAll('.desk-btn').forEach(b => {
+    const on = b.dataset.desk === mode;
+    b.classList.toggle('on', on); b.classList.toggle('off', !on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+// Cambiar a sentado o de pie (desde el móvil o desde la pantalla del PC)
+function deskSetMode(mode) {
+  const d = desk();
+  if (d.mode === mode) { deskRender(); return; }
+  d.mode = mode; d.next = Date.now() + (mode === 'sit' ? d.sit : d.stand) * 60000;
+  save(); deskMusic(mode); setTimeout(sendState, 80); deskRender();
+}
 // Música con la mesa: de pie suena; al sentarte se para (la de este móvil y, por el estado, la de la pantalla del PC)
 function deskMusic(mode) {
   if (REMOTE || SCREEN || !desk().music) return;
@@ -3033,6 +3082,7 @@ function deskRender() {
   $('walkCard').classList.toggle('hidden', D.has !== false);
   if (D.has === true) {
     const left = D.next ? Math.max(0, Math.ceil((D.next - Date.now()) / 60000)) : (D.mode === 'sit' ? D.sit : D.stand);
+    deskToggleMark($('deskToggle'), D.mode);
     $('deskNow').innerHTML = (D.mode === 'stand' ? '🧍 Ahora: de pie' : '🪑 Ahora: sentado') + (D.on ? `<small>Te aviso para cambiar en ${left} min</small>` : '<small>Avisos de cambio desactivados</small>');
   } else if (D.has === false) {
     const goal = db.settings.goal || 8000, exp = walkExpected(), steps = Math.round(today().steps);
@@ -3068,7 +3118,8 @@ function deskBind() {
     if (v >= 5 && v <= 180) { d[key] = v; d.next = 0; save(); deskTick(); } else $(id).value = d[key];
   });
   n('deskSit', 'sit'); n('deskStand', 'stand');
-  $('deskSwitch').addEventListener('click', () => { const d = desk(); d.mode = d.mode === 'sit' ? 'stand' : 'sit'; d.next = Date.now() + (d.mode === 'sit' ? d.sit : d.stand) * 60000; save(); deskMusic(d.mode); setTimeout(sendState, 80); deskRender(); });
+  $('deskToggle').innerHTML = deskToggleHtml(true, false);
+  $('deskToggle').querySelectorAll('.desk-btn').forEach(b => b.addEventListener('click', () => deskSetMode(b.dataset.desk)));
   $('deskMusic').checked = D.music;
   $('deskMusic').addEventListener('change', () => { desk().music = $('deskMusic').checked; save(); setTimeout(sendState, 80); });
   deskRender();
