@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.91';
+const VERSION = 'v1.92';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -110,9 +110,11 @@ const TOPICS = [
   { name: 'Seguridad y accesos', q: '("código de verificación" OR "verification code" OR contraseña OR "inicio de sesión" OR "nuevo dispositivo" OR "security alert")' },
   { name: 'Salud', q: '("cita médica" OR clínica OR farmacia OR receta OR hospital OR "resultados de")' }
 ];
-const URGENT_Q = 'newer_than:3d is:unread (urgente OR urgent OR "lo antes posible" OR asap OR "último aviso" OR "ultimo aviso" OR vence OR "fecha límite" OR "plazo" OR inmediato OR "cuanto antes")';
-const FACT_Q = 'has:attachment newer_than:60d (factura OR invoice OR recibo)';
-const DOCS_Q = 'has:attachment newer_than:30d (filename:pdf OR filename:doc OR filename:docx OR filename:xls OR filename:xlsx OR filename:ppt OR filename:pptx) -factura -invoice -recibo';
+// Todo se busca solo en la bandeja de entrada (in:inbox)
+const SCAN_V = 2; // sube cuando cambia lo que se busca: obliga a repasar de nuevo
+const URGENT_Q = 'in:inbox newer_than:3d is:unread (urgente OR urgent OR "lo antes posible" OR asap OR "último aviso" OR "ultimo aviso" OR vence OR "fecha límite" OR "plazo" OR inmediato OR "cuanto antes")';
+const FACT_Q = 'in:inbox has:attachment newer_than:60d (factura OR invoice OR recibo)';
+const DOCS_Q = 'in:inbox has:attachment newer_than:30d (filename:pdf OR filename:doc OR filename:docx OR filename:xls OR filename:xlsx OR filename:ppt OR filename:pptx) -factura -invoice -recibo';
 
 let st = load(), token = null, tokenExp = 0, tokenClient = null, tab = 'etiquetas', busy = false;
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
@@ -261,7 +263,7 @@ function renderIntro(a) {
   if (!GOOGLE_CLIENT_ID && !DEMO) return renderSetup(a);
   a.innerHTML = `<div class="card">
     <p class="big">¿Quieres que conecte tu correo para ayudarte a etiquetar tus emails, para que los puedas leer con facilidad y agrupados por temas?</p>
-    <p>Repasaré tus correos de los últimos 3 meses y te sugeriré <b>5 etiquetas</b>. Tú eliges cuáles quieres. Además verás los <b>correos urgentes</b> y los que traen <b>facturas y documentos</b>.</p>
+    <p>Repasaré <b>solo los correos de tu bandeja de entrada</b> de los últimos 3 meses y te sugeriré <b>5 etiquetas</b>. Tú eliges cuáles quieres. Además verás los <b>correos urgentes</b> y los que traen <b>facturas y documentos</b>, también de la bandeja de entrada.</p>
     <button class="btn" id="go">Sí, conectar mi Gmail</button>
     <button class="btn2" onclick="location.href='./#home'">Ahora no</button>
     <p class="hint">🔒 Todo se hace en tu navegador: tus correos no se guardan en ningún servidor. Puedes desconectarlo cuando quieras.</p>
@@ -284,13 +286,13 @@ async function startScan() {
       const t = TOPICS[i];
       $('scanTxt').textContent = 'Buscando: ' + t.name;
       $('scanBar').style.width = Math.round((i + 1) / TOPICS.length * 100) + '%';
-      const c = await count('newer_than:90d -in:chats ' + t.q);
+      const c = await count('in:inbox newer_than:90d ' + t.q);
       if (c.n >= 3) res.push({ name: t.name, q: t.q, n: c.n, ids: c.ids.slice(0, 2) });
     }
     res.sort((x, y) => y.n - x.n);
     const top = res.slice(0, 5);
     for (const s of top) { s.ex = []; for (const id of s.ids) { try { s.ex.push((await headers(id)).subject); } catch (e) {} } }
-    st.suggest = top; st.scanning = false; save(); render();
+    st.suggest = top; st.scanV = SCAN_V; st.scanning = false; save(); render();
   } catch (e) {
     st.scanning = false; if (!st.labels) st.connected = !!token && st.connected; save(); render();
     const er = $('err'); if (er) er.textContent = e.message;
@@ -299,7 +301,7 @@ async function startScan() {
 function renderSuggest(a) {
   const s = st.suggest || [];
   a.innerHTML = `<div class="card"><h2>Te sugiero estas etiquetas</h2>
-    <p>Marca las que quieras (puedes cambiarles el nombre). Pondré la etiqueta a los correos que ya tienes y Gmail se la pondrá solo a los nuevos.</p>
+    <p>Marca las que quieras (puedes cambiarles el nombre). Pondré la etiqueta a los correos que ya tienes <b>en la bandeja de entrada</b>, y Gmail se la pondrá solo a los nuevos que lleguen.</p>
     ${s.length ? s.map((x, i) => `<div class="sug"><input type="checkbox" data-i="${i}" checked aria-label="Usar esta etiqueta">
       <div><input type="text" data-n="${i}" value="${esc(x.name)}" maxlength="40"><div class="ex">${x.ex && x.ex.length ? 'Ej.: ' + x.ex.map(esc).join(' · ') : ''}</div></div>
       <span class="n">${x.n} correos</span></div>`).join('') : '<p class="empty">No he encontrado temas con suficientes correos.</p>'}
@@ -325,7 +327,7 @@ async function applyLabels() {
       let lab = existing.find(l => l.name.toLowerCase() === c.name.toLowerCase());
       if (!lab) lab = await gm('labels', { method: 'POST', body: JSON.stringify({ name: c.name, labelListVisibility: 'labelShow', messageListVisibility: 'show' }) });
       // correos que ya tienes (los más recientes, hasta 500)
-      const ids = (await count('-in:chats ' + c.q)).ids;
+      const ids = (await count('in:inbox ' + c.q)).ids;
       for (let i = 0; i < ids.length; i += 500) await gm('messages/batchModify', { method: 'POST', body: JSON.stringify({ ids: ids.slice(i, i + 500), addLabelIds: [lab.id] }) });
       // los nuevos: filtro de Gmail (funciona aunque la app esté cerrada)
       let filtro = true;
@@ -418,6 +420,8 @@ function demoApi(path, opt) {
   return delay({});
 }
 
+// Sugerencias hechas con la búsqueda anterior (todo el correo): se descartan y se vuelve a preguntar
+if (st.suggest && !st.labels && st.scanV !== SCAN_V) { st.suggest = null; st.connected = false; save(); }
 render();
 if (st.connected && st.labels) { if (DEMO || token) refresh(); }
 setInterval(() => { if (st.connected && st.labels && (token || DEMO)) refresh(); }, 15 * 60e3);
