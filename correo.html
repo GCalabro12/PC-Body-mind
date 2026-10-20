@@ -45,6 +45,16 @@
   .alert { border-left: 4px solid var(--bad); }
   .muted { color: var(--mut); }
   .empty { color: var(--mut); font-size: 14px; padding: 6px 0; }
+  .steps { list-style: none; padding: 0; margin: 12px 0 0; counter-reset: s; }
+  .steps li { counter-increment: s; position: relative; padding: 12px 0 12px 44px; border-top: 1px solid var(--line); color: var(--soft); line-height: 1.5; font-size: 14.5px; }
+  .steps li:first-child { border-top: 0; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 12px; width: 30px; height: 30px; border-radius: 50%; background: var(--acc); color: #0F172A; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .steps b { color: var(--txt); }
+  .steps a.go { display: inline-block; margin-top: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(167,139,250,0.16); border: 1px solid rgba(167,139,250,0.55); color: #DDD6FE; text-decoration: none; font-weight: 700; font-size: 14px; }
+  .steps a.go:hover { background: rgba(167,139,250,0.3); }
+  .steps code { background: #0f172a; border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px; color: var(--ok); font-size: 13px; word-break: break-all; }
+  .steps .ask { margin-top: 6px; color: var(--mut); font-size: 13px; }
+  .cid { width: 100%; background: #0f172a; color: var(--txt); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 14px; margin-top: 8px; }
   .demo { background: rgba(250,204,21,0.12); border: 1px solid rgba(250,204,21,0.5); color: #FDE68A; border-radius: 12px; padding: 8px 12px; font-size: 13px; margin-top: 10px; }
   label.chk { display: flex; gap: 10px; align-items: center; color: var(--soft); margin-top: 10px; }
   label.chk input { width: 20px; height: 20px; accent-color: var(--acc); }
@@ -59,9 +69,10 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.74';
+const VERSION = 'v1.81';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
-const GOOGLE_CLIENT_ID = '';
+// Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
+let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
 const SCOPES = 'https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.settings.basic';
 const API = 'https://gmail.googleapis.com/gmail/v1/users/me/';
 const DEMO = new URLSearchParams(location.search).has('demo');
@@ -97,7 +108,7 @@ function getToken() {
   if (DEMO) { token = 'demo'; tokenExp = Date.now() + 3600e3; return Promise.resolve(token); }
   if (token && Date.now() < tokenExp - 60e3) return Promise.resolve(token);
   return new Promise((resolve, reject) => {
-    if (!GOOGLE_CLIENT_ID) return reject(new Error('Todavía falta conectar la app con Google (un paso de configuración). Mientras tanto puedes verla en modo de prueba: correo.html?demo'));
+    if (!GOOGLE_CLIENT_ID) return reject(new Error('Falta la configuración con Google: sigue la guía de esta página.'));
     if (!window.google || !google.accounts || !google.accounts.oauth2) return reject(new Error('No ha cargado la conexión de Google. Revisa internet y vuelve a intentarlo.'));
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID, scope: SCOPES, hint: st.email || undefined,
@@ -142,16 +153,64 @@ function render() {
   if (!st.labels) return renderScan(a);
   renderPanel(a);
 }
+// Guía paso a paso para conectar la app con Google (se hace una sola vez, unos 10 minutos)
+function renderSetup(a) {
+  const G = 'https://console.cloud.google.com/';
+  a.innerHTML = `<div class="card">
+    <h2>🔧 Antes de empezar: conectar la app con Google</h2>
+    <p>Google exige que el dueño de la app cree una «llave» gratuita para poder leer y etiquetar correos. Se hace <b>una sola vez</b> (unos 10 minutos) y <b>no se paga nada</b>. Pulsa cada botón: te lleva directo a la página de Google que toca.</p>
+    <ol class="steps">
+      <li><b>Crea un proyecto.</b> Entra con tu cuenta de Google. Ponle de nombre <code>PC Body-mind</code> y pulsa <b>Crear</b>.<br>
+        <a class="go" href="${G}projectcreate" target="_blank" rel="noopener">① Abrir «Crear proyecto» ↗</a></li>
+      <li><b>Activa Gmail.</b> Comprueba arriba que el proyecto seleccionado es «PC Body-mind» y pulsa el botón azul <b>Habilitar</b>.<br>
+        <a class="go" href="${G}apis/library/gmail.googleapis.com" target="_blank" rel="noopener">② Abrir «Gmail API» ↗</a></li>
+      <li><b>Pantalla de consentimiento.</b> Es lo que verás tú al dar permiso. Pulsa «Comenzar» y rellena:<br>
+        · Nombre de la app: <code>PC &amp; Body-mind</code> · Correo de asistencia: el tuyo<br>
+        · Público: <b>Externo</b> · Correo de contacto: el tuyo → acepta y <b>Crear</b>.<br>
+        Después, en el menú de la izquierda entra en <b>Público</b> (o «Audience»): déjalo en <b>Prueba / Testing</b> y en <b>Usuarios de prueba → Add users</b> añade <b>tu Gmail</b>.<br>
+        <a class="go" href="${G}apis/credentials/consent" target="_blank" rel="noopener">③ Abrir «Pantalla de consentimiento» ↗</a>
+        <div class="ask">Si Google te pide aceptar las condiciones del proyecto, acepta.</div></li>
+      <li><b>Crea la llave (ID de cliente).</b> Tipo de aplicación: <b>Aplicación web</b>. Nombre: <code>PC Body-mind web</code>. En <b>Orígenes de JavaScript autorizados → Añadir URI</b> pega esta dirección <u>tal cual</u> (sin barra al final):<br>
+        <code id="origin">https://gcalabro12.github.io</code> <button class="btn-sm" id="copyOrigin">Copiar</button><br>
+        Deja vacío «URI de redirección» y pulsa <b>Crear</b>.<br>
+        <a class="go" href="${G}apis/credentials/oauthclient" target="_blank" rel="noopener">④ Abrir «Crear ID de cliente» ↗</a></li>
+      <li><b>Copia el ID de cliente.</b> Al crearlo, Google te enseña una ventana con el «ID de cliente»: acaba en <code>.apps.googleusercontent.com</code>. Cópialo y pégalo aquí:
+        <input class="cid" id="cid" type="text" placeholder="1234567890-abcdefg.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
+        <button class="btn" id="saveCid" style="margin-top:10px">Guardar y continuar</button>
+        <p class="hint" id="err" style="color:var(--bad)"></p>
+        <div class="ask">No es una contraseña: es seguro guardarlo. Solo se guarda en este navegador.</div></li>
+    </ol>
+    <p class="hint">La primera vez que conectes, Google dirá «Google no ha verificado esta aplicación». Es normal (es tu propia app en modo de prueba): pulsa <b>Configuración avanzada → Ir a PC &amp; Body-mind (no seguro)</b> y acepta los permisos.</p>
+    <button class="btn2" onclick="location.href='./#home'">← Volver al inicio</button>
+    <button class="btn2" onclick="location.href='?demo'">Ver cómo funciona con correos de ejemplo</button>
+  </div>`;
+  $('copyOrigin').onclick = async () => {
+    try { await navigator.clipboard.writeText('https://gcalabro12.github.io'); $('copyOrigin').textContent = '✓ Copiado'; }
+    catch (e) { const r = document.createRange(); r.selectNode($('origin')); getSelection().removeAllRanges(); getSelection().addRange(r); $('copyOrigin').textContent = 'Selecciónala y copia'; }
+  };
+  $('saveCid').onclick = () => {
+    const v = $('cid').value.trim().replace(/\s+/g, '');
+    if (!/^[0-9]+-[a-z0-9_]+\.apps\.googleusercontent\.com$/i.test(v)) {
+      $('err').textContent = 'Ese ID no parece correcto: debe acabar en .apps.googleusercontent.com. Cópialo entero desde la ventana de Google (o desde «Credenciales»).';
+      return;
+    }
+    try { localStorage.setItem('pcbm_correo_cid', v); } catch (e) {}
+    GOOGLE_CLIENT_ID = v; render();
+  };
+}
 function renderIntro(a) {
+  if (!GOOGLE_CLIENT_ID && !DEMO) return renderSetup(a);
   a.innerHTML = `<div class="card">
     <p class="big">¿Quieres que conecte tu correo para ayudarte a etiquetar tus emails, para que los puedas leer con facilidad y agrupados por temas?</p>
     <p>Repasaré tus correos de los últimos 3 meses y te sugeriré <b>5 etiquetas</b>. Tú eliges cuáles quieres. Además verás los <b>correos urgentes</b> y los que traen <b>facturas y documentos</b>.</p>
     <button class="btn" id="go">Sí, conectar mi Gmail</button>
     <button class="btn2" onclick="location.href='./#home'">Ahora no</button>
     <p class="hint">🔒 Todo se hace en tu navegador: tus correos no se guardan en ningún servidor. Puedes desconectarlo cuando quieras.</p>
+    ${DEMO ? '' : '<p class="hint"><a href="#" id="resetCid" style="color:var(--mut)">Cambiar el ID de cliente de Google</a></p>'}
     ${DEMO ? '<div class="demo">Modo de prueba: son correos inventados, no se conecta a ningún Gmail.</div>' : ''}
     <p class="hint" id="err" style="color:var(--bad)"></p></div>`;
   $('go').onclick = startScan;
+  if ($('resetCid')) $('resetCid').onclick = e => { e.preventDefault(); try { localStorage.removeItem('pcbm_correo_cid'); } catch (er) {} GOOGLE_CLIENT_ID = ''; render(); };
 }
 function renderScan(a) {
   a.innerHTML = `<div class="card"><h2>Repasando tus correos…</h2><p id="scanTxt">Buscando temas</p><div class="prog"><div id="scanBar"></div></div><p class="hint" id="err" style="color:var(--bad)"></p></div>`;
