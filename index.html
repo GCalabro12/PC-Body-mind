@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.81</title>
+<title>PC & Body-mind v1.82</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -468,10 +468,25 @@
   .desk-now { font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 4px 0 6px; line-height: 1.45; }
   .desk-now small { display: block; font-weight: 500; color: #94A3B8; font-size: 0.85rem; }
   .focus-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-  .focus-btn.on { background: #A78BFA; border-color: #A78BFA; color: #0F172A; }
-  .focus-pick { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
-  .focus-pick.hidden { display: none; }
-  .focus-pick button { width: auto; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.5); color: #DDD6FE; }
+  .home-btn.focus .ico { background: rgba(251,113,133,0.14); }
+  .home-btn.focus .st { color: #FB7185; }
+  .home-btn.focus:hover, .home-btn.focus.on { border-color: rgba(251,113,133,0.65); }
+  .home-btn.focus.on { background: rgba(251,113,133,0.08); }
+  #focusModal { overflow-y: auto; align-items: flex-start; }
+  #focusModal .cele-box { margin: auto; text-align: left; max-width: 420px; }
+  #focusModal .cele-title { text-align: center; }
+  #focusModal label { display: block; margin-top: 12px; color: #CBD5E1; font-size: 0.9rem; }
+  .f-task { display: flex; gap: 8px; align-items: center; }
+  .f-task input { flex: 1; min-width: 0; }
+  .f-mic { flex: none; width: 46px; height: 46px; padding: 0; border-radius: 50%; background: #334155; border: 0; color: #E2E8F0; display: grid; place-items: center; }
+  .f-mic.rec { background: #EF4444; animation: recPulse 1s ease-in-out infinite; }
+  @keyframes recPulse { 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0.25); } }
+  .f-chips { display: flex; gap: 8px; margin-top: 8px; }
+  .f-chips button { width: auto; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; background: rgba(251,113,133,0.15); border: 1px solid rgba(251,113,133,0.5); color: #FECDD3; }
+  #fGo { width: 100%; margin-top: 16px; background: #E11D48; }
+  #fCancel, #fStop2, #fClose { width: 100%; margin-top: 8px; }
+  .f-now { text-align: center; font-size: 1.15rem; font-weight: 700; color: #F8FAFC; margin: 8px 0; line-height: 1.4; }
+  .f-count { text-align: center; font-size: 2.4rem; font-weight: 800; color: #FB7185; font-variant-numeric: tabular-nums; }
   .eq-note { display: block; margin-top: 14px; padding: 12px 14px; border-radius: 16px; border: 1px dashed rgba(74,222,128,0.5); background: rgba(74,222,128,0.07); color: #CBD5E1; font-size: 14px; line-height: 1.45; text-align: center; }
   .eq-note a { color: #4ADE80; font-weight: 700; text-decoration: none; }
   .eq-copy { display: block; width: auto; margin: 10px auto 6px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.55); color: #BBF7D0; }
@@ -612,13 +627,13 @@
     <div class="logo" id="homeLogo" data-logo role="button" tabindex="0" aria-label="Escuchar la banda sonora"></div>
     <h1 class="home-title">PC <b>&amp;</b> Body-mind</h1>
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
-    <div class="focus-row"><button class="quiet-btn" id="quietBtn" aria-pressed="false"></button><button class="quiet-btn focus-btn" id="focusBtn">🎯 Modo concentración</button></div>
-    <div class="focus-pick hidden" id="focusPick"><button data-min="25">25 min</button><button data-min="50">50 min</button><button data-min="90">90 min</button></div>
+    <div class="focus-row"><button class="quiet-btn" id="quietBtn" aria-pressed="false"></button></div>
     <div class="home-btns">
       <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Pausas activas frente al PC</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3 class="h-row">Bloques de tiempo<span class="blk-left hidden" id="homeBlkLeft" title="Tiempo que falta para terminar el bloque"></span></h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos en tu jornada</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn agua" data-go="agua"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn focus" data-go="concentracion"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="none" stroke="#FB7185" stroke-width="5.5"/><circle cx="32" cy="32" r="12" fill="none" stroke="#FB7185" stroke-width="5.5"/><circle cx="32" cy="32" r="3.5" fill="#FB7185"/></svg></span><span><h3>Modo concentración</h3><span class="st" id="homeFocus">Tarea y tiempo, sin avisos</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn correo" data-go="correo"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="15" width="46" height="34" rx="7" fill="none" stroke="#A78BFA" stroke-width="5.5"/><path d="M12 20 L32 35 L52 20" fill="none" stroke="#A78BFA" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><h3>Gestor de email</h3><span class="st" id="homeCorreo">Etiquetas, urgentes y adjuntos</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
@@ -1027,6 +1042,35 @@
 </div>
 
 <!-- Aviso: hora de dormir -->
+<div class="cele hidden" id="focusModal">
+  <div class="cele-box" style="border-color:#FB7185">
+    <div class="cele-title" style="color:#FDA4AF" id="focusTitle">🎯 Modo concentración</div>
+    <div id="focusForm">
+      <label for="fTask">¿Qué vas a hacer?</label>
+      <div class="f-task">
+        <input id="fTask" type="text" maxlength="140" placeholder="Por ejemplo: preparar la sesión del curso" autocomplete="off">
+        <button class="f-mic" id="fMic" aria-label="Dictar con el micrófono"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      </div>
+      <div class="hint" id="fMicHint">Escríbelo o pulsa el micrófono y díctalo.</div>
+      <label for="fMin">¿Cuánto tiempo quieres concentrarte? (minutos)</label>
+      <input id="fMin" type="number" min="5" max="240" inputmode="numeric">
+      <div class="f-chips"><button data-m="25">25</button><button data-m="50">50</button><button data-m="90">90</button></div>
+      <label for="fEvery">¿Cada cuánto te lo recuerdo? (minutos; 0 = no recordar)</label>
+      <input id="fEvery" type="number" min="0" max="120" inputmode="numeric">
+      <div class="hint">Durante la concentración no suena nada más. Solo te diré «ahora estás en…» y lo que hayas escrito.</div>
+      <p class="hint" id="fErr" style="color:#F87171"></p>
+      <button id="fGo">🎯 Empezar a concentrarme</button>
+      <button id="fCancel" class="btn-outline">Cancelar</button>
+    </div>
+    <div id="focusRunning" class="hidden">
+      <div class="f-now" id="fNow"></div>
+      <div class="f-count" id="fCount"></div>
+      <div class="hint" style="text-align:center" id="fNext"></div>
+      <button id="fStop2" style="background:#E11D48">Terminar ahora</button>
+      <button id="fClose" class="btn-outline">Seguir concentrado</button>
+    </div>
+  </div>
+</div>
 <div class="cele hidden" id="infoModal">
   <div class="cele-box" style="border-color:#818CF8">
     <div class="cele-title" style="color:#A5B4FC" id="infoTitle"></div>
@@ -1174,7 +1218,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.81';
+const VERSION = 'v1.82';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1482,7 +1526,8 @@ function speakFlushHeld() {
   next();
   saludTick(); // si tocaba un aviso de agua o movimiento, sale ahora
 }
-const isQuiet = () => !!(db.settings && (db.settings.quiet || (db.settings.focus && db.settings.focus.until > Date.now())));
+let quietBypass = false; // el recordatorio «ahora estás en…» suena aunque la concentración silencie lo demás
+const isQuiet = () => !quietBypass && !!(db.settings && (db.settings.quiet || (db.settings.focus && db.settings.focus.until > Date.now())));
 function speak(text, done) {
   if (REMOTE || isQuiet()) { if (done) setTimeout(done, 50); return; }
   if (vBreakEnd && !speakBypass) { speakHeld.push([text, done]); return; }
@@ -2731,7 +2776,8 @@ function vistaAlert() {
   document.querySelector('#vAlert .cele-title').textContent = move ? 'Pausa de movimiento' : 'Pausa de vista';
   $('vAlert').classList.remove('hidden');
   chime();
-  vAlertSpeak = setTimeout(() => speak(move ? 'Pausa de movimiento.' : 'Pausa de vista.'), 1000);
+  const pre = vAlertPrefix; vAlertPrefix = '';
+  vAlertSpeak = setTimeout(() => speak(pre + (move ? 'Pausa de movimiento.' : 'Pausa de vista.')), 1000);
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   vistaNotify();
   sendState();
@@ -2997,34 +3043,106 @@ function deskBind() {
   deskRender();
 }
 
-// ---------- Modo concentración: sin avisos durante 25 o 50 min; al terminar, pausa activa ----------
+// ---------- Modo concentración: tarea + tiempo + recordatorio; sin avisos; al terminar, pausa activa ----------
 const focusOn = () => !!(db.settings.focus && db.settings.focus.until > Date.now());
-let vForceMove = false;
-function focusStart(min) {
-  speak(`Modo concentración: ${min} minutos sin avisos. Al terminar, pausa activa.`);
-  db.settings.focus = { until: Date.now() + min * 60000, min };
+let vForceMove = false, vAlertPrefix = '', dictTarget = null, fRec = null;
+function focusStart(min, task, every) {
+  const intro = `Modo concentración: ${min} minutos${task ? ' en: ' + task : ''}. Sin avisos.` + (every > 0 ? ` Te lo recordaré cada ${every} minutos.` : '');
+  speak(intro);
+  const now = Date.now();
+  db.settings.focus = { until: now + min * 60000, min, task, every, lastRemind: now };
+  db.settings.focusPref = { min, every };
   save(); focusRender(); quietRender();
-  castSend({ t: 'toast', text: `🎯 Modo concentración: ${min} min sin avisos` });
+  castSend({ t: 'toast', text: `🎯 Concentrado ${min} min` + (task ? ' en: ' + task : '') });
   setTimeout(sendState, 50);
 }
 function focusStop(finished) {
-  if (!db.settings.focus) return;
-  db.settings.focus.until = 0; save(); focusRender(); quietRender();
+  const F = db.settings.focus; if (!F) return;
+  const task = F.task;
+  F.until = 0; save(); focusRender(); quietRender();
   const V = db.vista;
   if (V.active) V.nextAt = Date.now() + V.every * 60000;
-  if (finished) { // fin del bloque de concentración: pausa activa (de movimiento)
-    castSend({ t: 'toast', text: '🎯 Fin de la concentración: toca una pausa activa' });
-    if (!vBreakEnd && !vAlerting) { vForceMove = true; vistaAlert(); }
+  if (finished) { // fin de la concentración: pausa activa (de movimiento)
+    castSend({ t: 'toast', text: '🎯 Fin de la concentración' + (task ? ' en «' + task + '»' : '') + ': toca una pausa activa' });
+    if (!vBreakEnd && !vAlerting) { vForceMove = true; vAlertPrefix = `Has terminado de concentrarte${task ? ' en: ' + task : ''}. `; vistaAlert(); }
   }
   setTimeout(sendState, 50);
 }
-function focusTick() { if (SCREEN || REMOTE) return; const F = db.settings.focus; if (F && F.until && Date.now() >= F.until) focusStop(true); }
+function focusTick() {
+  if (SCREEN || REMOTE) return;
+  const F = db.settings.focus; if (!F || !F.until) return;
+  const now = Date.now();
+  if (now >= F.until) { focusStop(true); return; }
+  if (F.every > 0 && now - (F.lastRemind || 0) >= F.every * 60000 && !vBreakEnd && !vAlerting) {
+    F.lastRemind = now; save();
+    const left = Math.max(1, Math.ceil((F.until - now) / 60000));
+    const text = (F.task ? `Ahora estás en: ${F.task}.` : 'Sigues en modo concentración.') + ` Te quedan ${left} ${left === 1 ? 'minuto' : 'minutos'}.`;
+    quietBypass = true; // este aviso sí suena, aunque la concentración silencie todo lo demás
+    try { chime(); speak(text); } finally { quietBypass = false; }
+    castSend({ t: 'toast', text: '🎯 ' + text });
+  }
+}
 function focusRender() {
-  const b = $('focusBtn'); if (!b) return;
+  const on = focusOn(), F = db.settings.focus || {};
+  const card = document.querySelector('.home-btn.focus');
+  if (card) card.classList.toggle('on', on);
+  if ($('homeFocus')) $('homeFocus').textContent = on ? `🎯 ${F.task ? F.task + ' · ' : ''}${mmss(F.until - Date.now())}` : 'Tarea y tiempo, sin avisos';
+  if (!$('focusModal').classList.contains('hidden') && !$('focusRunning').classList.contains('hidden')) {
+    if (!on) { $('focusModal').classList.add('hidden'); return; }
+    $('fCount').textContent = mmss(F.until - Date.now());
+  }
+}
+function focusOpen() {
+  unlockSound();
+  const F = db.settings.focus || {}, P = db.settings.focusPref || {};
   const on = focusOn();
-  b.classList.toggle('on', on);
-  b.textContent = on ? '🎯 Concentración · ' + mmss(db.settings.focus.until - Date.now()) + ' · terminar' : '🎯 Modo concentración';
-  if (on) $('focusPick').classList.add('hidden');
+  $('focusForm').classList.toggle('hidden', on);
+  $('focusRunning').classList.toggle('hidden', !on);
+  $('focusTitle').textContent = on ? '🎯 Concentrado' : '🎯 Modo concentración';
+  if (on) {
+    $('fNow').textContent = F.task ? 'Ahora estás en: ' + F.task : 'En modo concentración';
+    $('fNext').textContent = F.every > 0 ? `Te lo recuerdo cada ${F.every} min.` : 'Sin recordatorios.';
+    $('fCount').textContent = mmss(F.until - Date.now());
+  } else {
+    $('fTask').value = ''; $('fMin').value = P.min || 25; $('fEvery').value = P.every != null ? P.every : 10;
+    $('fErr').textContent = ''; $('fMicHint').textContent = 'Escríbelo o pulsa el micrófono y díctalo.';
+  }
+  $('focusModal').classList.remove('hidden');
+  if (!on) setTimeout(() => $('fTask').focus(), 100);
+}
+function focusClose() {
+  if (fRec) { try { fRec.stop(); } catch (e) {} fRec = null; }
+  dictTarget = null; $('fMic').classList.remove('rec');
+  $('focusModal').classList.add('hidden');
+}
+function focusSubmit() {
+  const min = Math.round(Number($('fMin').value)), every = Math.round(Number($('fEvery').value || 0));
+  if (!(min >= 5 && min <= 240)) { $('fErr').textContent = 'Pon un tiempo entre 5 y 240 minutos.'; return; }
+  if (!(every >= 0 && every <= 120)) { $('fErr').textContent = 'El recordatorio va de 0 a 120 minutos (0 = no recordar).'; return; }
+  const task = $('fTask').value.trim();
+  focusClose();
+  focusStart(min, task, every);
+}
+// Dictar la tarea con el micrófono (mismo método que antes: dictado de Google en la app Android, Chrome/Edge en el ordenador)
+async function fMicToggle() {
+  const hint = $('fMicHint'), stop = msg => { $('fMic').classList.remove('rec'); if (msg !== undefined) hint.textContent = msg; };
+  if (fRec) { try { fRec.stop(); } catch (e) {} fRec = null; stop(''); return; }
+  if (NATIVE && typeof AndroidPasos.dictate === 'function') { dictTarget = $('fTask'); hint.textContent = 'Habla cuando aparezca la ventana de dictado…'; AndroidPasos.dictate(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (navigator.brave) { stop('Brave no permite dictar por voz en las páginas web: escríbelo, o usa ' + KEYBOARD_MIC + '.'); return; }
+  if (!SR || NATIVE) { stop('Aquí no se puede dictar con este botón: escríbelo, o usa ' + KEYBOARD_MIC + '.'); return; }
+  $('fMic').classList.add('rec'); hint.textContent = 'Pidiendo permiso para el micrófono…';
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) { const st = await navigator.mediaDevices.getUserMedia({ audio: true }); st.getTracks().forEach(t => t.stop()); }
+  } catch (e) { stop('El micrófono está bloqueado. Toca el icono que hay a la izquierda de la dirección → Permisos → Micrófono → Permitir, y vuelve a pulsar el micrófono.'); return; }
+  const base = $('fTask').value.trim(), rec = fRec = new SR();
+  rec.lang = 'es-ES'; rec.interimResults = true; rec.continuous = false;
+  let heard = false;
+  rec.onresult = e => { heard = true; let t = ''; for (const r of e.results) t += r[0].transcript; $('fTask').value = ((base ? base + ' ' : '') + t.trim()).slice(0, 140); };
+  rec.onerror = e => { fRec = null; stop(e.error === 'no-speech' ? 'No te he oído. Pulsa el micrófono y habla cerca.' : e.error === 'network' ? 'El dictado necesita internet. Prueba otra vez o escríbelo.' : e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'Este navegador no deja dictar por voz: escríbelo.' : 'No se pudo dictar (' + e.error + '). Escríbelo.'); };
+  rec.onend = () => { if (fRec === rec) { fRec = null; stop(heard ? 'Listo. Revisa el texto y elige el tiempo.' : undefined); } };
+  hint.textContent = 'Escuchando… habla ahora.';
+  try { rec.start(); } catch (e) { fRec = null; stop('No se pudo empezar a dictar. Escríbelo.'); }
 }
 
 // ---------- Cierre de jornada y ojos de noche ----------
@@ -3320,6 +3438,12 @@ async function bMicToggle() {
 }
 // La app Android devuelve aquí lo dictado
 window.nativeDictation = (text, err) => {
+  if (dictTarget) { // dictado de la tarea del modo concentración
+    const t = dictTarget; dictTarget = null;
+    if (text) { t.value = ((t.value.trim() ? t.value.trim() + ' ' : '') + text).slice(0, 140); $('fMicHint').textContent = 'Listo. Revisa el texto y elige el tiempo.'; }
+    else $('fMicHint').textContent = err || 'No se pudo dictar.';
+    return;
+  }
   if (text) {
     const t = $('bText');
     t.value = (t.value.trim() ? t.value.trim() + ' ' : '') + text;
@@ -3531,6 +3655,7 @@ function initShell() {
   $('verBadge').classList.remove('hidden');
   document.body.classList.add('has-badge');
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.go === 'concentracion') { focusOpen(); return; }
     if (b.dataset.go === 'correo') { // página aparte; dentro de la app de Android la ventana de Google no funciona
       if (NATIVE) { alert('El gestor de email se usa en el ordenador: abre PC & Body-mind en Chrome o Brave y toca «Gestor de email».'); return; }
       location.href = 'correo.html'; return;
@@ -3619,8 +3744,12 @@ function homeOrderInit() {
   quietRender();
   $('quietBtn').addEventListener('click', quietToggle);
   // modo concentración
-  $('focusBtn').addEventListener('click', () => { unlockSound(); if (focusOn()) focusStop(false); else $('focusPick').classList.toggle('hidden'); });
-  document.querySelectorAll('#focusPick [data-min]').forEach(b => b.addEventListener('click', () => focusStart(Number(b.dataset.min))));
+  $('fGo').addEventListener('click', focusSubmit);
+  $('fCancel').addEventListener('click', focusClose);
+  $('fClose').addEventListener('click', focusClose);
+  $('fStop2').addEventListener('click', () => { focusClose(); focusStop(false); });
+  $('fMic').addEventListener('click', fMicToggle);
+  document.querySelectorAll('.f-chips [data-m]').forEach(b => b.addEventListener('click', () => { $('fMin').value = b.dataset.m; }));
   focusRender(); setInterval(() => { focusRender(); if (!REMOTE) focusTick(); }, 1000);
   // mesa elevadora y aviso de fin de jornada
   deskBind();
