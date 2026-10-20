@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.82</title>
+<title>PC & Body-mind v1.83</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -479,7 +479,10 @@
   .f-task { display: flex; gap: 8px; align-items: center; }
   .f-task input { flex: 1; min-width: 0; }
   .f-mic { flex: none; width: 46px; height: 46px; padding: 0; border-radius: 50%; background: #334155; border: 0; color: #E2E8F0; display: grid; place-items: center; }
-  .f-mic.rec { background: #EF4444; animation: recPulse 1s ease-in-out infinite; }
+  .f-mic:hover, .f-mic:active { background: #475569; }
+  .f-mic.rec, .f-mic.rec:hover { background: #EF4444; animation: recPulse 1s ease-in-out infinite; }
+  #fMicHint.warn { background: rgba(250,204,21,0.14); border: 1px solid rgba(250,204,21,0.6); color: #FDE68A; border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.45; margin-top: 8px; }
+  #fMicHint.warn b { color: #FFFBEB; }
   @keyframes recPulse { 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0.25); } }
   .f-chips { display: flex; gap: 8px; margin-top: 8px; }
   .f-chips button { width: auto; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; background: rgba(251,113,133,0.15); border: 1px solid rgba(251,113,133,0.5); color: #FECDD3; }
@@ -1218,7 +1221,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.82';
+const VERSION = 'v1.83';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3105,7 +3108,7 @@ function focusOpen() {
     $('fCount').textContent = mmss(F.until - Date.now());
   } else {
     $('fTask').value = ''; $('fMin').value = P.min || 25; $('fEvery').value = P.every != null ? P.every : 10;
-    $('fErr').textContent = ''; $('fMicHint').textContent = 'Escríbelo o pulsa el micrófono y díctalo.';
+    $('fErr').textContent = ''; $('fMicHint').classList.remove('warn'); $('fMicHint').textContent = 'Escríbelo o pulsa el micrófono y díctalo.';
   }
   $('focusModal').classList.remove('hidden');
   if (!on) setTimeout(() => $('fTask').focus(), 100);
@@ -3125,24 +3128,35 @@ function focusSubmit() {
 }
 // Dictar la tarea con el micrófono (mismo método que antes: dictado de Google en la app Android, Chrome/Edge en el ordenador)
 async function fMicToggle() {
-  const hint = $('fMicHint'), stop = msg => { $('fMic').classList.remove('rec'); if (msg !== undefined) hint.textContent = msg; };
+  const hint = $('fMicHint'), stop = msg => { $('fMic').classList.remove('rec'); hint.classList.remove('warn'); if (msg !== undefined) hint.textContent = msg; };
+  // Sin dictado en la página (Brave, etc.): una web no puede pulsar el micrófono del teclado por ti,
+  // así que se deja el cuadro listo (con el teclado abierto) y se dice exactamente qué tocar.
+  const fallback = () => {
+    $('fMic').classList.remove('rec');
+    const touch = /Android|iPhone|iPad/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
+    const input = $('fTask'); input.focus();
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+    hint.classList.add('warn');
+    hint.innerHTML = touch ? '🎤 Ya puedes dictar: <b>toca el micrófono de tu teclado</b> (en la barra del teclado, arriba del todo) y habla.'
+      : /Mac/i.test(navigator.platform) ? '🎤 Ya puedes dictar: pulsa <b>Fn dos veces</b> (dictado de macOS) y habla.'
+      : '🎤 Ya puedes dictar: pulsa las teclas <b>Windows + H</b> y habla.';
+  };
   if (fRec) { try { fRec.stop(); } catch (e) {} fRec = null; stop(''); return; }
   if (NATIVE && typeof AndroidPasos.dictate === 'function') { dictTarget = $('fTask'); hint.textContent = 'Habla cuando aparezca la ventana de dictado…'; AndroidPasos.dictate(); return; }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (navigator.brave) { stop('Brave no permite dictar por voz en las páginas web: escríbelo, o usa ' + KEYBOARD_MIC + '.'); return; }
-  if (!SR || NATIVE) { stop('Aquí no se puede dictar con este botón: escríbelo, o usa ' + KEYBOARD_MIC + '.'); return; }
+  if (navigator.brave || !SR || NATIVE) { fallback(); return; }
   $('fMic').classList.add('rec'); hint.textContent = 'Pidiendo permiso para el micrófono…';
   try {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) { const st = await navigator.mediaDevices.getUserMedia({ audio: true }); st.getTracks().forEach(t => t.stop()); }
-  } catch (e) { stop('El micrófono está bloqueado. Toca el icono que hay a la izquierda de la dirección → Permisos → Micrófono → Permitir, y vuelve a pulsar el micrófono.'); return; }
+  } catch (e) { fallback(); return; }
   const base = $('fTask').value.trim(), rec = fRec = new SR();
   rec.lang = 'es-ES'; rec.interimResults = true; rec.continuous = false;
   let heard = false;
   rec.onresult = e => { heard = true; let t = ''; for (const r of e.results) t += r[0].transcript; $('fTask').value = ((base ? base + ' ' : '') + t.trim()).slice(0, 140); };
-  rec.onerror = e => { fRec = null; stop(e.error === 'no-speech' ? 'No te he oído. Pulsa el micrófono y habla cerca.' : e.error === 'network' ? 'El dictado necesita internet. Prueba otra vez o escríbelo.' : e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'Este navegador no deja dictar por voz: escríbelo.' : 'No se pudo dictar (' + e.error + '). Escríbelo.'); };
+  rec.onerror = e => { fRec = null; if (e.error === 'no-speech') stop('No te he oído. Pulsa el micrófono y habla cerca.'); else fallback(); };
   rec.onend = () => { if (fRec === rec) { fRec = null; stop(heard ? 'Listo. Revisa el texto y elige el tiempo.' : undefined); } };
   hint.textContent = 'Escuchando… habla ahora.';
-  try { rec.start(); } catch (e) { fRec = null; stop('No se pudo empezar a dictar. Escríbelo.'); }
+  try { rec.start(); } catch (e) { fRec = null; fallback(); }
 }
 
 // ---------- Cierre de jornada y ojos de noche ----------
