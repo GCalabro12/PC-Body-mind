@@ -81,7 +81,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.84';
+const VERSION = 'v1.85';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -175,16 +175,17 @@ function renderSetup(a) {
   const G = 'https://console.cloud.google.com/';
   a.innerHTML = `<div class="card">
     <h2>🔧 Antes de empezar: conectar la app con Google</h2>
-    <p>Google exige que el dueño de la app cree una «llave» gratuita para poder leer y etiquetar correos. Se hace <b>una sola vez</b> (unos 10 minutos) y <b>no se paga nada</b>. Pulsa cada botón: te lleva directo a la página de Google que toca.</p>
+    <p>Google exige que el dueño de la app cree una «llave» gratuita para poder leer y etiquetar correos. Se hace <b>una sola vez</b> (unos 10 minutos) y <b>no se paga nada</b>. Pulsa cada botón: te lleva directo a la página de Google que toca. Es más cómodo hacerlo <b>desde el ordenador</b>, pero también se puede desde el móvil.</p>
     <ol class="steps">
       <li><b>Crea un proyecto.</b> Entra con tu cuenta de Google. Ponle de nombre <code>PC Body-mind</code> y pulsa <b>Crear</b>.<br>
         <a class="go" href="${G}projectcreate" target="_blank" rel="noopener">① Abrir «Crear proyecto» ↗</a></li>
-      <li><b>Activa Gmail.</b> Comprueba arriba que el proyecto seleccionado es «PC Body-mind» y pulsa el botón azul <b>Habilitar</b>.<br>
+      <li><b>Activa Gmail.</b> Pulsa el botón azul <b>Habilitar</b>. Si en vez de «Habilitar» pone <b>Administrar</b>, ya estaba activada: sigue con el siguiente paso.
+        <div class="ask">Google usa el proyecto que acabas de crear. En el móvil el nombre del proyecto no se ve arriba: es normal.</div>
         <a class="go" href="${G}apis/library/gmail.googleapis.com" target="_blank" rel="noopener">② Abrir «Gmail API» ↗</a></li>
       <li><b>Pantalla de consentimiento.</b> Es lo que verás tú al dar permiso. Pulsa «Comenzar» y rellena:<br>
         · Nombre de la app: <code>PC &amp; Body-mind</code> · Correo de asistencia: el tuyo<br>
         · Público: <b>Externo</b> · Correo de contacto: el tuyo → acepta y <b>Crear</b>.<br>
-        Después, en el menú de la izquierda entra en <b>Público</b> (o «Audience»): déjalo en <b>Prueba / Testing</b> y en <b>Usuarios de prueba → Add users</b> añade <b>tu Gmail</b>.<br>
+        Después, en el menú de la izquierda entra en <b>Público</b> (o «Audience»): déjalo en <b>Prueba / Testing</b> y en <b>Usuarios de prueba → Add users</b> añade <b>tu Gmail</b>. (En el móvil, el menú está detrás del botón <b>☰</b> de arriba a la izquierda.)<br>
         <a class="go" href="${G}apis/credentials/consent" target="_blank" rel="noopener">③ Abrir «Pantalla de consentimiento» ↗</a>
         <div class="ask">Si Google te pide aceptar las condiciones del proyecto, acepta.</div></li>
       <li><b>Crea la llave (ID de cliente).</b> Tipo de aplicación: <b>Aplicación web</b>. Nombre: <code>PC Body-mind web</code>. En <b>Orígenes de JavaScript autorizados → Añadir URI</b> pega esta dirección <u>tal cual</u> (sin barra al final):<br>
