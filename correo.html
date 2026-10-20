@@ -62,7 +62,9 @@
   .steps li .sum { color: var(--mut); font-size: 13px; margin-top: 2px; }
   .steps li.open .sum { display: none; }
   .okk { color: var(--ok); font-size: 12.5px; font-weight: 600; }
-  .didit { width: 100%; margin-top: 12px; background: var(--ok); color: #0F172A; padding: 11px 14px; font-size: 15px; }
+  .didit { width: 100%; margin-top: 12px; background: transparent; color: var(--acc); border: 2px dashed var(--acc); padding: 11px 14px; font-size: 15px; }
+  .setup-note { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(250,204,21,0.12); border: 1px solid rgba(250,204,21,0.5); color: #FDE68A; font-size: 14px; line-height: 1.45; }
+  .setup-note b { color: #FFFBEB; }
   .setup-prog { margin-top: 10px; color: var(--acc); font-weight: 700; font-size: 14px; }
   .steps a.go { display: inline-block; margin-top: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(167,139,250,0.16); border: 1px solid rgba(167,139,250,0.55); color: #DDD6FE; text-decoration: none; font-weight: 700; font-size: 14px; }
   .steps a.go:hover { background: rgba(167,139,250,0.3); }
@@ -83,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.86';
+const VERSION = 'v1.87';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -215,10 +217,13 @@ function renderSetup(a) {
     li.className = st + (setupOpen === i ? ' open' : '');
     const SUM = ['Crear un proyecto nuevo en Google', 'Activar la API de Gmail', 'Dar permiso a tu propio Gmail', 'Crear la llave de conexión', 'Copiar esa llave y pegarla en esta página'];
     li.innerHTML = `<div class="sh" data-i="${i}"><span class="stt">${title}</span>${st === 'done' ? '<span class="okk">✓ hecho</span>' : ''}</div>${st === 'todo' && SUM[i] ? `<div class="sum">${SUM[i]} · toca para ver cómo</div>` : ''}<div class="sb">${rest}`
-      + (i < last ? (st === 'done' ? `<br><button class="btn-sm" data-undo="${i}">Volver a abrir este paso</button>` : `<button class="didit" data-done="${i}">✓ Ya lo he hecho</button>`) : '') + '</div>';
+      + (i < last ? (st === 'done' ? `<br><button class="btn-sm" data-undo="${i}">Volver a abrir este paso</button>` : `<button class="didit" data-done="${i}">Ya lo he hecho → marcar y pasar al siguiente</button>`) : '') + '</div>';
   });
   const nDone = done.slice(0, last).filter(Boolean).length;
-  a.querySelector('.steps').insertAdjacentHTML('beforebegin', `<div class="setup-prog">${nDone >= last ? '¡Casi! Solo falta pegar el ID de cliente' : 'Llevas ' + nDone + ' de ' + last + ' pasos en Google. Ahora: ' + lis[cur].querySelector('.stt').textContent}</div>`);
+  a.querySelector('.steps').insertAdjacentHTML('beforebegin', `<div class="setup-note">ℹ️ Esta página <b>no puede ver</b> lo que haces en Google. Cuando termines cada paso, <b>pulsa tú el botón «Ya lo he hecho»</b>: así se tacha y se abre el siguiente.</div>
+    <div class="setup-prog">${nDone >= last ? '¡Casi! Solo falta pegar el ID de cliente' : 'Llevas ' + nDone + ' de ' + last + ' pasos marcados. Ahora: ' + lis[cur].querySelector('.stt').textContent}</div>`
+    + (nDone < last ? '<button class="btn2" id="skipAll" style="margin-top:8px">Ya hice todo en Google → ir directo al último paso</button>' : ''));
+  if ($('skipAll')) $('skipAll').onclick = () => { setupSave([true, true, true, true]); setupOpen = -1; renderSetup(a); const c = a.querySelector('.steps li.cur'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   if (prevCid && $('cid')) $('cid').value = prevCid;
   a.querySelectorAll('[data-done]').forEach(b => b.onclick = () => {
     const d = setupState(); d[b.dataset.done] = true; setupSave(d); setupOpen = -1; renderSetup(a);
