@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.87';
+const VERSION = 'v1.88';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -171,8 +171,9 @@ function render() {
 }
 // Guía paso a paso para conectar la app con Google (se hace una sola vez, unos 10 minutos).
 // Google no deja saber qué ha hecho el usuario, así que cada paso se marca a mano y se guarda.
-function setupState() { try { return JSON.parse(localStorage.getItem('pcbm_correo_pasos')) || []; } catch (e) { return []; } }
-function setupSave(d) { try { localStorage.setItem('pcbm_correo_pasos', JSON.stringify(d)); } catch (e) {} }
+// (clave nueva: al dividir el paso 3 en dos, la numeración de los pasos cambió)
+function setupState() { try { return JSON.parse(localStorage.getItem('pcbm_correo_pasos2')) || []; } catch (e) { return []; } }
+function setupSave(d) { try { localStorage.setItem('pcbm_correo_pasos2', JSON.stringify(d)); } catch (e) {} }
 let setupOpen = -1;
 function renderSetup(a) {
   const prevCid = ($('cid') && $('cid').value) || '';
@@ -186,17 +187,23 @@ function renderSetup(a) {
       <li><b>Activa Gmail.</b> Pulsa el botón azul <b>Habilitar</b>. Si en vez de «Habilitar» pone <b>Administrar</b>, ya estaba activada: sigue con el siguiente paso.
         <div class="ask">Google usa el proyecto que acabas de crear. En el móvil el nombre del proyecto no se ve arriba: es normal.</div>
         <a class="go" href="${G}apis/library/gmail.googleapis.com" target="_blank" rel="noopener">② Abrir «Gmail API» ↗</a></li>
-      <li><b>Pantalla de consentimiento.</b> Es lo que verás tú al dar permiso. Pulsa «Comenzar» y rellena:<br>
-        · Nombre de la app: <code>PC &amp; Body-mind</code> · Correo de asistencia: el tuyo<br>
-        · Público: <b>Externo</b> · Correo de contacto: el tuyo → acepta y <b>Crear</b>.<br>
-        Después, en el menú de la izquierda entra en <b>Público</b> (o «Audience»): déjalo en <b>Prueba / Testing</b> y en <b>Usuarios de prueba → Add users</b> añade <b>tu Gmail</b>. (En el móvil, el menú está detrás del botón <b>☰</b> de arriba a la izquierda.)<br>
-        <a class="go" href="${G}apis/credentials/consent" target="_blank" rel="noopener">③ Abrir «Pantalla de consentimiento» ↗</a>
-        <div class="ask">Si Google te pide aceptar las condiciones del proyecto, acepta.</div></li>
+      <li><b>Crea la pantalla de permisos.</b> Es lo que verás tú al dar permiso. Pulsa <b>Comenzar</b> y rellena solo esto:<br>
+        · Nombre de la app: <code>PC &amp; Body-mind</code><br>
+        · Correo de asistencia: el tuyo<br>
+        · Público: <b>Externo</b><br>
+        · Correo de contacto: el tuyo<br>
+        Acepta las condiciones y pulsa <b>Crear</b>.<br>
+        <a class="go" href="${G}apis/credentials/consent" target="_blank" rel="noopener">③ Abrir «Pantalla de permisos» ↗</a></li>
+      <li><b>Añade tu Gmail como usuario de prueba.</b> Así Google te deja usar tu propia app.<br>
+        · Entra en <b>Público</b> (en el menú ☰ de la izquierda; en el móvil, arriba a la izquierda).<br>
+        · Comprueba que pone <b>Prueba</b> (o «Testing»).<br>
+        · En <b>Usuarios de prueba</b> pulsa <b>Add users</b>, escribe <b>tu Gmail</b> y <b>Guardar</b>.<br>
+        <a class="go" href="${G}auth/audience" target="_blank" rel="noopener">④ Abrir «Público» ↗</a></li>
       <li><b>Crea la llave (ID de cliente).</b> Tipo de aplicación: <b>Aplicación web</b>. Nombre: <code>PC Body-mind web</code>. En <b>Orígenes de JavaScript autorizados → Añadir URI</b> pega esta dirección <u>tal cual</u> (sin barra al final):<br>
         <code id="origin">https://gcalabro12.github.io</code> <button class="btn-sm" id="copyOrigin">Copiar</button><br>
         Deja vacío «URI de redirección» y pulsa <b>Crear</b>.<br>
-        <a class="go" href="${G}apis/credentials/oauthclient" target="_blank" rel="noopener">④ Abrir «Crear ID de cliente» ↗</a></li>
-      <li><b>Pega aquí la llave que te da Google.</b> Al pulsar <b>Crear</b> en el paso 4, Google te enseña una ventana con un texto largo llamado <b>«ID de cliente»</b> (acaba en <code>.apps.googleusercontent.com</code>). <b>Mantén pulsado ese texto → Copiar</b>, vuelve a esta página y <b>pégalo en el cuadro</b> de aquí abajo. Luego pulsa «Guardar y continuar».
+        <a class="go" href="${G}apis/credentials/oauthclient" target="_blank" rel="noopener">⑤ Abrir «Crear ID de cliente» ↗</a></li>
+      <li><b>Pega aquí la llave que te da Google.</b> Al pulsar <b>Crear</b> en el paso 5, Google te enseña una ventana con un texto largo llamado <b>«ID de cliente»</b> (acaba en <code>.apps.googleusercontent.com</code>). <b>Mantén pulsado ese texto → Copiar</b>, vuelve a esta página y <b>pégalo en el cuadro</b> de aquí abajo. Luego pulsa «Guardar y continuar».
         <div class="ask">¿Cerraste esa ventana? En Google ve a «Credenciales» (menú ☰ → APIs y servicios), pulsa «PC Body-mind web» y copia el ID de cliente que sale arriba.</div>
         <input class="cid" id="cid" type="text" placeholder="1234567890-abcdefg.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
         <button class="btn" id="saveCid" style="margin-top:10px">Guardar y continuar</button>
@@ -215,7 +222,7 @@ function renderSetup(a) {
     const title = (m ? m[1] : 'Paso ' + (i + 1)).replace(/\.$/, ''), rest = m ? m[2] : li.innerHTML;
     const st = i < last && done[i] ? 'done' : i === cur ? 'cur' : 'todo';
     li.className = st + (setupOpen === i ? ' open' : '');
-    const SUM = ['Crear un proyecto nuevo en Google', 'Activar la API de Gmail', 'Dar permiso a tu propio Gmail', 'Crear la llave de conexión', 'Copiar esa llave y pegarla en esta página'];
+    const SUM = ['Crear un proyecto nuevo en Google', 'Activar la API de Gmail', 'Preparar la pantalla de permisos', 'Dar de alta tu Gmail como usuario de prueba', 'Crear la llave de conexión', 'Copiar esa llave y pegarla en esta página'];
     li.innerHTML = `<div class="sh" data-i="${i}"><span class="stt">${title}</span>${st === 'done' ? '<span class="okk">✓ hecho</span>' : ''}</div>${st === 'todo' && SUM[i] ? `<div class="sum">${SUM[i]} · toca para ver cómo</div>` : ''}<div class="sb">${rest}`
       + (i < last ? (st === 'done' ? `<br><button class="btn-sm" data-undo="${i}">Volver a abrir este paso</button>` : `<button class="didit" data-done="${i}">Ya lo he hecho → marcar y pasar al siguiente</button>`) : '') + '</div>';
   });
@@ -223,7 +230,7 @@ function renderSetup(a) {
   a.querySelector('.steps').insertAdjacentHTML('beforebegin', `<div class="setup-note">ℹ️ Esta página <b>no puede ver</b> lo que haces en Google. Cuando termines cada paso, <b>pulsa tú el botón «Ya lo he hecho»</b>: así se tacha y se abre el siguiente.</div>
     <div class="setup-prog">${nDone >= last ? '¡Casi! Solo falta pegar el ID de cliente' : 'Llevas ' + nDone + ' de ' + last + ' pasos marcados. Ahora: ' + lis[cur].querySelector('.stt').textContent}</div>`
     + (nDone < last ? '<button class="btn2" id="skipAll" style="margin-top:8px">Ya hice todo en Google → ir directo al último paso</button>' : ''));
-  if ($('skipAll')) $('skipAll').onclick = () => { setupSave([true, true, true, true]); setupOpen = -1; renderSetup(a); const c = a.querySelector('.steps li.cur'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  if ($('skipAll')) $('skipAll').onclick = () => { setupSave(Array(last).fill(true)); setupOpen = -1; renderSetup(a); const c = a.querySelector('.steps li.cur'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   if (prevCid && $('cid')) $('cid').value = prevCid;
   a.querySelectorAll('[data-done]').forEach(b => b.onclick = () => {
     const d = setupState(); d[b.dataset.done] = true; setupSave(d); setupOpen = -1; renderSetup(a);
