@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gestor de email · PC Amable</title>
+<title>Gestor de email · Amable PC</title>
 <meta name="theme-color" content="#0f172a">
 <link rel="icon" href="icon-192.png">
 <style>
@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.94';
+const VERSION = 'v1.95';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -388,7 +388,7 @@ function notify(list) {
   } catch (e) {}
 }
 function disconnect() {
-  if (!confirm('¿Desconectar tu Gmail de PC Amable? Las etiquetas y filtros que ya están en Gmail se quedan.')) return;
+  if (!confirm('¿Desconectar tu Gmail de Amable PC? Las etiquetas y filtros que ya están en Gmail se quedan.')) return;
   try { if (token && window.google && !DEMO) google.accounts.oauth2.revoke(token, () => {}); } catch (e) {}
   token = null; st = {}; save(); render();
 }

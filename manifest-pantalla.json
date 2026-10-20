@@ -1,7 +1,7 @@
 {
   "id": "./?pantalla",
-  "name": "PC Amable · Pantalla del PC",
-  "short_name": "PC Amable Pantalla",
+  "name": "Amable PC · Pantalla del PC",
+  "short_name": "Amable PC Pantalla",
   "description": "Pasos y pausas de vista sincronizados con el móvil",
   "lang": "es",
   "start_url": "./?pantalla",
