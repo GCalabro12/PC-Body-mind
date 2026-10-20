@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.77</title>
+<title>PC & Body-mind v1.78</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -465,6 +465,13 @@
   .home-btn.agua:hover { border-color: rgba(45,212,191,0.45); }
   /* Bloques de tiempo y Agua y movimiento se han pasado a Equilibra */
   .home-btn.bloques, .home-btn.agua, #home .tip { display: none !important; }
+  .desk-now { font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 4px 0 6px; line-height: 1.45; }
+  .desk-now small { display: block; font-weight: 500; color: #94A3B8; font-size: 0.85rem; }
+  .focus-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .focus-btn.on { background: #A78BFA; border-color: #A78BFA; color: #0F172A; }
+  .focus-pick { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+  .focus-pick.hidden { display: none; }
+  .focus-pick button { width: auto; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.5); color: #DDD6FE; }
   .eq-note { display: block; margin-top: 14px; padding: 12px 14px; border-radius: 16px; border: 1px dashed rgba(74,222,128,0.5); background: rgba(74,222,128,0.07); color: #CBD5E1; font-size: 14px; line-height: 1.45; text-align: center; }
   .eq-note a { color: #4ADE80; font-weight: 700; text-decoration: none; }
   .eq-note a:hover { text-decoration: underline; }
@@ -601,7 +608,8 @@
     <div class="logo" id="homeLogo" data-logo role="button" tabindex="0" aria-label="Escuchar la banda sonora"></div>
     <h1 class="home-title">PC <b>&amp;</b> Body-mind</h1>
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
-    <button class="quiet-btn" id="quietBtn" aria-pressed="false"></button>
+    <div class="focus-row"><button class="quiet-btn" id="quietBtn" aria-pressed="false"></button><button class="quiet-btn focus-btn" id="focusBtn">🎯 Modo concentración</button></div>
+    <div class="focus-pick hidden" id="focusPick"><button data-min="25">25 min</button><button data-min="50">50 min</button><button data-min="90">90 min</button></div>
     <div class="home-btns">
       <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Pausas activas</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3 class="h-row">Bloques de tiempo<span class="blk-left hidden" id="homeBlkLeft" title="Tiempo que falta para terminar el bloque"></span></h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -665,6 +673,12 @@
       <div><label for="vMoveDur">Duración (minutos)</label><input type="number" id="vMoveDur" min="1" max="15" inputmode="numeric"></div>
     </div>
     <div class="hint">Cuando toca, la pausa de vista se convierte en una pausa de movimiento: estiramientos, manos y muñecas, piernas o caminar (en la mesa elevadora o por casa).</div>
+    <label class="check" style="margin-top:14px"><input type="checkbox" id="deOn"> 🌇 Cierre de jornada (resumen del día y «apaga el ordenador»)</label>
+    <label class="check"><input type="checkbox" id="niOn"> 🌙 Ojos de noche (recordar poner la pantalla en modo noche, con f.lux)</label>
+    <div class="row">
+      <div><label for="deTime">Cierre de jornada a las</label><input type="time" id="deTime"></div>
+      <div><label for="niTime">Ojos de noche a las</label><input type="time" id="niTime"></div>
+    </div>
     <button class="btn-outline mt" id="vTest">Probar una pausa ahora</button>
     </details>
   </div>
@@ -804,6 +818,29 @@
     <span class="date" id="dateTxt"></span>
   </header>
 
+  <!-- Mesa elevadora: primero se pregunta; con mesa → sentado / de pie; sin mesa → pausas para caminar -->
+  <div class="card hidden" id="deskAsk">
+    <h2>🪑 ¿Tienes mesa elevadora?</h2>
+    <p class="note">Si la tienes, puedes estar de pie o caminar mientras trabajas, y te aviso para alternar sentado y de pie. Si no, te propongo pausas para caminar hasta tu meta de pasos.</p>
+    <div class="row"><div><button class="btn-sky" id="deskYes">Sí, tengo</button></div><div><button class="btn-outline" id="deskNo">No tengo</button></div></div>
+  </div>
+  <div class="card hidden" id="deskCard">
+    <h2>🧍 Sentado / de pie</h2>
+    <div class="desk-now" id="deskNow"></div>
+    <label class="check"><input type="checkbox" id="deskOn"> Avisarme para alternar sentado y de pie</label>
+    <div class="row">
+      <div><label for="deskSit">Sentado (minutos)</label><input type="number" id="deskSit" min="5" max="180" inputmode="numeric"></div>
+      <div><label for="deskStand">De pie (minutos)</label><input type="number" id="deskStand" min="5" max="180" inputmode="numeric"></div>
+    </div>
+    <button class="btn-outline mt" id="deskSwitch">Ya he cambiado</button>
+    <div class="hint">¿No es así? <a href="#" class="desk-change">Cambiar respuesta</a></div>
+  </div>
+  <div class="card hidden" id="walkCard">
+    <h2>🚶 Pausas para caminar</h2>
+    <div class="desk-now" id="walkPlan"></div>
+    <div class="hint">En las pausas de movimiento te propondré caminar los pasos que te falten para ir al día con tu meta. ¿Tienes mesa elevadora? <a href="#" class="desk-change">Cambiar respuesta</a></div>
+  </div>
+
   <div class="card">
     <div class="ring-box">
       <svg width="240" height="240" viewBox="0 0 240 240">
@@ -868,7 +905,7 @@
 
   <div class="card">
     <label class="check" style="margin:0"><input type="checkbox" id="aWalkOn"> 🚶 Recordarme caminar si voy atrasado</label>
-    <div class="hint">A las 11:00 si no llevo 2.000 pasos · a las 13:00, 4.000 · a las 16:00, 6.000 · a las 18:00, 8.000</div>
+    <div class="hint">A las 11:00 si no llevo la cuarta parte de mi meta · a las 13:00, la mitad · a las 16:00, tres cuartos · a las 18:00, la meta entera (con 8.000: 2.000, 4.000, 6.000 y 8.000)</div>
   </div>
   <div class="card">
     <details>
@@ -983,6 +1020,14 @@
 </div>
 
 <!-- Aviso: hora de dormir -->
+<div class="cele hidden" id="infoModal">
+  <div class="cele-box" style="border-color:#818CF8">
+    <div class="cele-title" style="color:#A5B4FC" id="infoTitle"></div>
+    <div class="cele-sub" id="infoSub"></div>
+    <div id="infoExtra" style="margin-bottom:14px"></div>
+    <button id="infoOk" style="background:#4F46E5">Vale</button>
+  </div>
+</div>
 <div class="cele hidden" id="bSleep">
   <div class="cele-box" style="border-color:#818CF8">
     <div class="cele-art"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L26 122"/><path d="M158 104 L174 122"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="26" cy="122" r="7" fill="#4ADE80"/><circle cx="174" cy="122" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><path d="M76 96 Q84 88 92 96" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/><path d="M108 96 Q116 88 124 96" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg></div>
@@ -1122,7 +1167,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.77';
+const VERSION = 'v1.78';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1430,7 +1475,7 @@ function speakFlushHeld() {
   next();
   saludTick(); // si tocaba un aviso de agua o movimiento, sale ahora
 }
-const isQuiet = () => !!(db.settings && db.settings.quiet);
+const isQuiet = () => !!(db.settings && (db.settings.quiet || (db.settings.focus && db.settings.focus.until > Date.now())));
 function speak(text, done) {
   if (REMOTE || isQuiet()) { if (done) setTimeout(done, 50); return; }
   if (vBreakEnd && !speakBypass) { speakHeld.push([text, done]); return; }
@@ -2528,7 +2573,7 @@ function showView() {
   ['home', 'vista', 'bloques', 'app', 'pc', 'agua'].forEach(v => $(v).classList.toggle('hidden', v !== id));
   if (id === 'agua') renderSalud();
   if (id === 'home') { fromHome = false; renderHome(); $('pausiTip').textContent = pausiNewTip(); }
-  if (id === 'app') render();
+  if (id === 'app') { render(); deskRender(); }
   if (id === 'bloques') { bloquesReset(); renderBloques(true); }
   window.scrollTo(0, 0);
 }
@@ -2667,6 +2712,7 @@ function vistaStop() {
 // ¿La próxima pausa toca de movimiento? (cada «moveEvery» minutos; si no, micropausa de vista)
 function vistaIsMove() {
   const V = db.vista;
+  if (vForceMove) return true; // al terminar el modo concentración
   if (!V.moveOn) return false;
   if (!V.lastMove) { V.lastMove = Date.now(); save(); return false; }
   return Date.now() - V.lastMove >= (V.moveEvery - 1) * 60000;
@@ -2718,12 +2764,20 @@ function vistaBreak() {
   $('vAlert').classList.add('hidden');
   unlockSound();
   const move = vistaIsMove();
+  vForceMove = false;
   vBreakMove = move;
   vBreakDur = move ? V.moveDur * 60 : V.dur;
   if (move) V.lastMove = Date.now();
   vBreakEnd = Date.now() + vBreakDur * 1000;
   $('vBreakMsg').textContent = move ? 'Pausa de movimiento: levántate y muévete' : `Mira al menos a ${V.dist} metros de distancia`;
-  const act = vistaNextAct(move);
+  let act = vistaNextAct(move);
+  // sin mesa elevadora: la pausa de movimiento es para caminar los pasos que faltan para ir al día
+  if (move && desk().has === false) {
+    const behind = walkExpected() - Math.round(today().steps), canDo = V.moveDur * 100;
+    act = { title: '🚶 Caminar', text: behind > 0
+      ? `camina unos ${fmt(Math.min(behind, canDo))} pasos: vas ${fmt(behind)} por detrás de tu meta de ${fmt(db.settings.goal || 8000)}.`
+      : 'camina un poco para mantener el ritmo: vas al día con tu meta de pasos.' };
+  }
   const dk = dayKey();
   if (!V.doneDay || V.doneDay.k !== dk) V.doneDay = { k: dk, n: 0 };
   V.doneDay.n++;
@@ -2764,7 +2818,7 @@ function vistaBreakEnd(done) {
   sendState();
 }
 function vistaSnooze() {
-  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; vistaNotifClose();
+  clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; vistaNotifClose(); vForceMove = false;
   $('vAlert').classList.add('hidden');
   db.vista.nextAt = Date.now() + 5 * 60000; save();
   vistaTick();
@@ -2881,8 +2935,121 @@ function battTick() {
   if (conn && conn.open) sendState(); // la pantalla del PC da el aviso
   else speak(battLowMsg(b.level));
 }
-// Recordatorio para caminar: 2.000 pasos a las 11, 4.000 a las 13, 6.000 a las 16 y 8.000 a las 18
-const WALK_CHECKS = [[660, 2000], [780, 4000], [960, 6000], [1080, 8000]];
+// Recordatorio para caminar: a las 11, 13, 16 y 18 h, la cuarta parte, la mitad, tres cuartos y toda tu meta de pasos
+const WALK_CHECKS = [[660, 0.25], [780, 0.5], [960, 0.75], [1080, 1]];
+const walkGoalAt = f => Math.round((db.settings.goal || 8000) * f / 100) * 100;
+// Pasos que «tocaría» llevar ahora para ir al día (de 9:00 a 18:00, repartido)
+function walkExpected() { const m = nowMin(); return Math.round((db.settings.goal || 8000) * Math.min(1, Math.max(0, (m - 540) / 540))); }
+
+// ---------- Mesa elevadora: sentado / de pie (con mesa) o pausas para caminar (sin mesa) ----------
+const DESK_DEF = { has: null, on: true, sit: 30, stand: 30, mode: 'sit', next: 0 };
+const desk = () => (db.settings.desk = { ...DESK_DEF, ...(db.settings.desk || {}) });
+function deskRender() {
+  if (SCREEN || !$('deskAsk')) return;
+  const D = desk();
+  $('deskAsk').classList.toggle('hidden', D.has !== null);
+  $('deskCard').classList.toggle('hidden', D.has !== true);
+  $('walkCard').classList.toggle('hidden', D.has !== false);
+  if (D.has === true) {
+    const left = D.next ? Math.max(0, Math.ceil((D.next - Date.now()) / 60000)) : (D.mode === 'sit' ? D.sit : D.stand);
+    $('deskNow').innerHTML = (D.mode === 'stand' ? '🧍 Ahora: de pie' : '🪑 Ahora: sentado') + (D.on ? `<small>Te aviso para cambiar en ${left} min</small>` : '<small>Avisos de cambio desactivados</small>');
+  } else if (D.has === false) {
+    const goal = db.settings.goal || 8000, exp = walkExpected(), steps = Math.round(today().steps);
+    $('walkPlan').innerHTML = `Tu meta: ${fmt(goal)} pasos al día` + (exp > 0 ? `<small>Para ir al día deberías llevar unos ${fmt(exp)}; llevas ${fmt(steps)}.${steps < exp ? ' Te faltan ' + fmt(exp - steps) + '.' : ' ¡Vas bien!'}</small>` : '<small>A partir de las 9:00 te digo cuántos pasos llevar para ir al día.</small>');
+  }
+}
+function deskTick() {
+  if (SCREEN || REMOTE) return;
+  const D = desk();
+  if (!D.has || !D.on || !inHours() || vBreakEnd || vAlerting) { deskRender(); return; }
+  const now = Date.now();
+  if (!D.next) { D.next = now + (D.mode === 'sit' ? D.sit : D.stand) * 60000; save(); deskRender(); return; }
+  if (now < D.next) { deskRender(); return; }
+  D.mode = D.mode === 'sit' ? 'stand' : 'sit';
+  D.next = now + (D.mode === 'sit' ? D.sit : D.stand) * 60000;
+  save();
+  const text = D.mode === 'stand' ? 'Hora de ponerte de pie: sube la mesa y camina un poco mientras trabajas.' : 'Hora de sentarte: baja la mesa y descansa las piernas.';
+  chime(); setTimeout(() => speak(text), 900);
+  castSend({ t: 'toast', text: (D.mode === 'stand' ? '🧍 ' : '🪑 ') + text });
+  deskRender();
+}
+function deskBind() {
+  if (!$('deskAsk')) return;
+  const D = desk();
+  $('deskOn').checked = D.on; $('deskSit').value = D.sit; $('deskStand').value = D.stand;
+  $('deskYes').addEventListener('click', () => { const d = desk(); d.has = true; d.next = 0; save(); deskTick(); });
+  $('deskNo').addEventListener('click', () => { const d = desk(); d.has = false; save(); deskRender(); });
+  document.querySelectorAll('.desk-change').forEach(a => a.addEventListener('click', e => { e.preventDefault(); desk().has = null; save(); deskRender(); }));
+  $('deskOn').addEventListener('change', () => { const d = desk(); d.on = $('deskOn').checked; d.next = 0; save(); deskTick(); });
+  const n = (id, key) => $(id).addEventListener('change', () => {
+    const v = Math.round(Number($(id).value)), d = desk();
+    if (v >= 5 && v <= 180) { d[key] = v; d.next = 0; save(); deskTick(); } else $(id).value = d[key];
+  });
+  n('deskSit', 'sit'); n('deskStand', 'stand');
+  $('deskSwitch').addEventListener('click', () => { const d = desk(); d.mode = d.mode === 'sit' ? 'stand' : 'sit'; d.next = Date.now() + (d.mode === 'sit' ? d.sit : d.stand) * 60000; save(); deskRender(); });
+  deskRender();
+}
+
+// ---------- Modo concentración: sin avisos durante 25 o 50 min; al terminar, pausa activa ----------
+const focusOn = () => !!(db.settings.focus && db.settings.focus.until > Date.now());
+let vForceMove = false;
+function focusStart(min) {
+  speak(`Modo concentración: ${min} minutos sin avisos. Al terminar, pausa activa.`);
+  db.settings.focus = { until: Date.now() + min * 60000, min };
+  save(); focusRender(); quietRender();
+  castSend({ t: 'toast', text: `🎯 Modo concentración: ${min} min sin avisos` });
+  setTimeout(sendState, 50);
+}
+function focusStop(finished) {
+  if (!db.settings.focus) return;
+  db.settings.focus.until = 0; save(); focusRender(); quietRender();
+  const V = db.vista;
+  if (V.active) V.nextAt = Date.now() + V.every * 60000;
+  if (finished) { // fin del bloque de concentración: pausa activa (de movimiento)
+    castSend({ t: 'toast', text: '🎯 Fin de la concentración: toca una pausa activa' });
+    if (!vBreakEnd && !vAlerting) { vForceMove = true; vistaAlert(); }
+  }
+  setTimeout(sendState, 50);
+}
+function focusTick() { if (SCREEN || REMOTE) return; const F = db.settings.focus; if (F && F.until && Date.now() >= F.until) focusStop(true); }
+function focusRender() {
+  const b = $('focusBtn'); if (!b) return;
+  const on = focusOn();
+  b.classList.toggle('on', on);
+  b.textContent = on ? '🎯 Concentración · ' + mmss(db.settings.focus.until - Date.now()) + ' · terminar' : '🎯 Modo concentración';
+  if (on) $('focusPick').classList.add('hidden');
+}
+
+// ---------- Cierre de jornada y ojos de noche ----------
+const DAYEND_DEF = { on: true, time: '19:00', done: '', nightOn: true, nightTime: '20:30', nightDone: '' };
+const dayEnd = () => (db.settings.dayEnd = { ...DAYEND_DEF, ...(db.settings.dayEnd || {}) });
+const toMin = t => { const [h, m] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+const infoQueue = [];
+function infoModal(title, sub, extraHtml) {
+  if (!$('infoModal').classList.contains('hidden')) { infoQueue.push([title, sub, extraHtml]); return; } // si ya hay uno, sale después
+  $('infoTitle').textContent = title; $('infoSub').textContent = sub;
+  $('infoExtra').innerHTML = extraHtml || '';
+  $('infoModal').classList.remove('hidden');
+}
+function dayEndTick() {
+  if (SCREEN || REMOTE) return;
+  const E = dayEnd(), k = dayKey(), m = nowMin();
+  if (E.on && E.done !== k && m >= toMin(E.time) && m - toMin(E.time) <= 120) {
+    E.done = k; save();
+    const vd = db.vista.doneDay && db.vista.doneDay.k === k ? db.vista.doneDay.n : 0, d = today(), st = dayStats(d);
+    const sub = `Hoy: ${vd} ${vd === 1 ? 'pausa activa' : 'pausas activas'} y ${fmt(d.steps)} pasos (${st.km} km). Guarda tu trabajo y apaga el ordenador.`;
+    infoModal('🌇 Fin de la jornada', sub);
+    chime(); setTimeout(() => speak('Fin de la jornada. ' + sub), 900);
+    castSend({ t: 'toast', text: '🌇 Fin de la jornada · ' + sub });
+  }
+  if (E.nightOn && E.nightDone !== k && m >= toMin(E.nightTime) && m - toMin(E.nightTime) <= 120) {
+    E.nightDone = k; save();
+    const sub = 'Pon la pantalla del ordenador en modo noche: descansas la vista y duermes mejor. Te recomiendo f.lux, gratis: cambia el color de la pantalla según la hora.';
+    infoModal('🌙 Ojos de noche', sub, '<a class="btn-link" href="https://justgetflux.com/" target="_blank" rel="noopener">Descargar f.lux</a><div class="hint">En Windows también puedes usar la «Luz nocturna»: Configuración → Sistema → Pantalla.</div>');
+    chime(); setTimeout(() => speak('Ojos de noche: pon la pantalla en modo noche. Te recomiendo f.lux.'), 900);
+    castSend({ t: 'toast', text: '🌙 Ojos de noche: pon la pantalla en modo noche (f.lux o la «Luz nocturna» de Windows)' });
+  }
+}
 function walkTick() {
   if (SCREEN || REMOTE) return;
   const A = db.alerts; if (!A.walkOn) return;
@@ -2892,7 +3059,7 @@ function walkTick() {
   WALK_CHECKS.forEach(([t], i) => { if (m >= t) idx = i; });
   if (idx < 0 || idx + 1 <= A.walkDone.n) return;
   A.walkDone.n = idx + 1; save(); // solo el último punto pasado; los anteriores ya no tocan
-  const [t, goal] = WALK_CHECKS[idx], steps = Math.round(today().steps);
+  const [t, f] = WALK_CHECKS[idx], goal = walkGoalAt(f), steps = Math.round(today().steps);
   if (m - t > 60 || steps >= goal) return; // si abres la app mucho más tarde, o ya llegaste, no avisa
   const text = `Son las ${hm(t)} y llevas ${fmt(steps)} pasos. Te faltan ${fmt(goal - steps)} para los ${fmt(goal)}. Es buen momento para empezar a caminar.`;
   chime();
@@ -2901,8 +3068,9 @@ function walkTick() {
 }
 function saludTick() {
   if (REMOTE) return;
-  if (isQuiet()) return;
-  battTick(); walkTick(); return; // agua, movimiento y Pausi ahora están en Equilibra; aquí quedan la batería y el aviso para caminar
+  focusTick();
+  if (isQuiet()) { deskRender(); return; }
+  battTick(); walkTick(); deskTick(); dayEndTick(); return; // agua y movimiento están en Equilibra; aquí: batería, caminar, mesa elevadora y cierre de jornada
   if (isQuiet()) { // en pausa: sin avisos; los relojes siguen corriendo
     const S0 = db.salud, n0 = Date.now();
     if (S0.aguaOn && n0 >= S0.aguaNext) S0.aguaNext = n0 + S0.aguaMin * 60000;
@@ -2978,6 +3146,13 @@ function bindVista() {
   $('vMoveOn').checked = V.moveOn; $('vMoveEvery').value = V.moveEvery; $('vMoveDur').value = V.moveDur;
   $('vMoveOn').addEventListener('change', () => { V.moveOn = $('vMoveOn').checked; V.lastMove = Date.now(); save(); });
   num('vMoveEvery', 'moveEvery', 20, 240); num('vMoveDur', 'moveDur', 1, 15);
+  // cierre de jornada y ojos de noche
+  const E = dayEnd();
+  $('deOn').checked = E.on; $('niOn').checked = E.nightOn; $('deTime').value = E.time; $('niTime').value = E.nightTime;
+  $('deOn').addEventListener('change', () => { dayEnd().on = $('deOn').checked; save(); });
+  $('niOn').addEventListener('change', () => { dayEnd().nightOn = $('niOn').checked; save(); });
+  $('deTime').addEventListener('change', () => { if ($('deTime').value) { const e = dayEnd(); e.time = $('deTime').value; e.done = ''; save(); } });
+  $('niTime').addEventListener('change', () => { if ($('niTime').value) { const e = dayEnd(); e.nightTime = $('niTime').value; e.nightDone = ''; save(); } });
   $('vToggle').addEventListener('click', () => db.vista.active ? vistaStop() : vistaStart());
   $('vTest').addEventListener('click', vistaBreak);
   $('vStartBreak').addEventListener('click', vistaBreak);
@@ -3408,13 +3583,13 @@ function homeBlkTick() {
 }
 // Pausa / play de todos los avisos (los pasos se siguen contando)
 function quietRender() {
-  const q = isQuiet(), b = $('quietBtn'); if (!b) return;
+  const q = !!db.settings.quiet, b = $('quietBtn'); if (!b) return;
   b.classList.toggle('on', q);
   b.setAttribute('aria-pressed', q ? 'true' : 'false');
   b.textContent = q ? '▶ Avisos en pausa · tocar para activarlos' : '⏸ Pausar avisos y voces';
 }
 function quietToggle() {
-  db.settings.quiet = !isQuiet();
+  db.settings.quiet = !db.settings.quiet;
   const now = Date.now();
   if (db.settings.quiet) {
     try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
@@ -3436,6 +3611,13 @@ function homeOrderInit() {
   gpSoon(); setInterval(gpSoon, 60000);
   quietRender();
   $('quietBtn').addEventListener('click', quietToggle);
+  // modo concentración
+  $('focusBtn').addEventListener('click', () => { unlockSound(); if (focusOn()) focusStop(false); else $('focusPick').classList.toggle('hidden'); });
+  document.querySelectorAll('#focusPick [data-min]').forEach(b => b.addEventListener('click', () => focusStart(Number(b.dataset.min))));
+  focusRender(); setInterval(() => { focusRender(); if (!REMOTE) focusTick(); }, 1000);
+  // mesa elevadora y aviso de fin de jornada
+  deskBind();
+  $('infoOk').addEventListener('click', () => { $('infoModal').classList.add('hidden'); if (infoQueue.length) infoModal(...infoQueue.shift()); });
   homeBlkTick(); setInterval(homeBlkTick, 1000);
   const box = document.querySelector('.home-btns'); if (!box) return;
   const order = (db.settings && db.settings.homeOrder) || [];
