@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC & Body-mind v1.74</title>
+<title>PC & Body-mind v1.75</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -341,7 +341,8 @@
     .scr-ctrl #sPip:hover { background: #FDE047; }
     .pip #sFull { display: none; }
     /* sonido, volumen y vídeo ya están junto a los pasos: aquí no se repiten */
-    .scr-ctrl #sSound, .scr-ctrl .scr-vol, .scr-ctrl #sVideoBtn { display: none; }
+    /* Pasos y Agua y movimiento están ahora en Equilibra: fuera de la pantalla del PC (el sonido y el vídeo vuelven al recuadro de controles) */
+    #screen .scr-pasos, #screen .scr-stats, #sSalud, #sPausi { display: none !important; }
     .scr-ctrl #sFull { order: 1; } .scr-ctrl #sPip { order: 2; } .scr-ctrl #sRemote { order: 3; } .pip #sRemote { display: none; } .scr-ctrl #sPlay { display: none !important; }
     .scr-ctrl .scr-conn { order: 4; flex-basis: 100%; text-align: center; background: transparent; padding: 2px 0 0; }
     .scr-toast { left: 3vw; right: 3vw; bottom: 9vh; text-align: center; border-right: 0; border-left: 6px solid #4ade80; font-size: clamp(14px, 5vw, 22px); }
@@ -461,6 +462,11 @@
   .home-btn.agua .ico { background: rgba(45,212,191,0.14); }
   .home-btn.agua .st { color: #2DD4BF; }
   .home-btn.agua:hover { border-color: rgba(45,212,191,0.45); }
+  /* Pasos y Agua y movimiento se han pasado a Equilibra */
+  .home-btn.pasos, .home-btn.agua, #home .tip { display: none !important; }
+  .eq-note { display: block; margin-top: 14px; padding: 12px 14px; border-radius: 16px; border: 1px dashed rgba(74,222,128,0.5); background: rgba(74,222,128,0.07); color: #CBD5E1; font-size: 14px; line-height: 1.45; text-align: center; }
+  .eq-note a { color: #4ADE80; font-weight: 700; text-decoration: none; }
+  .eq-note a:hover { text-decoration: underline; }
   .home-btn.correo .ico { background: rgba(167,139,250,0.14); }
   .home-btn.correo .st { color: #A78BFA; }
   .home-btn.correo:hover { border-color: rgba(167,139,250,0.45); }
@@ -603,6 +609,7 @@
       <button class="home-btn correo" data-go="correo"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="15" width="46" height="34" rx="7" fill="none" stroke="#A78BFA" stroke-width="5.5"/><path d="M12 20 L32 35 L52 20" fill="none" stroke="#A78BFA" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><h3>Gestor de email</h3><span class="st" id="homeCorreo">Etiquetas, urgentes y adjuntos</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <button class="home-link" data-go="pc">🖥️ Sincronizar con el PC <span id="homePc"></span></button>
+    <div class="eq-note">👣 Pasos y 💧 Agua y movimiento ahora están en <a href="https://gcalabro12.github.io/Equilibra/" target="_blank" rel="noopener">Equilibra →</a><br><a href="https://github.com/GCalabro12/Equilibra-Android/releases/latest/download/Equilibra.apk" target="_blank" rel="noopener">📲 Descargar la app de Equilibra para Android</a></div>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
     <div class="seal-wrap">
       <div class="sellos">
@@ -1108,7 +1115,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.74';
+const VERSION = 'v1.75';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1165,7 +1172,7 @@ function gpBuild(o) { // o = { steps, vdone, tdone, ttotal, block, act, quiet }
   if (o.quiet) { estado = 'pausa'; mensaje = 'Avisos en pausa · ' + mensaje; }
   if (mensaje.length > 90) mensaje = mensaje.slice(0, 89) + '…';
   return { estado, mensaje, cifras: [
-    { valor: fmt(o.steps || 0), etiqueta: Math.round(o.steps || 0) === 1 ? 'paso hoy' : 'pasos hoy' },
+    { valor: o.left != null ? o.left + ' min' : '–', etiqueta: 'quedan del bloque' },
     { valor: o.vdone || 0, etiqueta: (o.vdone || 0) === 1 ? 'descanso vista' : 'descansos vista' },
     { valor: (o.tdone || 0) + '/' + (o.ttotal || 0), etiqueta: (o.ttotal || 0) === 1 ? 'tarea' : 'tareas' }
   ], version: VERSION };
@@ -1173,7 +1180,7 @@ function gpBuild(o) { // o = { steps, vdone, tdone, ttotal, block, act, quiet }
 function gpLocal() { // la app (móvil) con sus propios datos
   const c = curBlock(), acts = c >= 0 ? dayActs(dayKey(), c) : [], next = acts.find(a => !a.d), st = dayStatsB(dayKey());
   const vd = db.vista.doneDay && db.vista.doneDay.k === dayKey() ? db.vista.doneDay.n : 0;
-  return gpBuild({ steps: today().steps, vdone: vd, tdone: st.done, ttotal: st.t,
+  return gpBuild({ left: c >= 0 ? BLOCKS[c].end - nowMin() : null, vdone: vd, tdone: st.done, ttotal: st.t,
     block: c >= 0 ? `${hm(BLOCKS[c].start)} – ${hm(BLOCKS[c].end)}` : '', act: next ? next.t : '', quiet: isQuiet() });
 }
 function gpSoon() {
@@ -1306,7 +1313,7 @@ function addSteps(n, activeMs) {
 let nativeLast = null, nativeCfg = '';
 function syncNative() {
   if (!NATIVE) return;
-  const cfg = JSON.stringify({ goal: db.settings.goal, ...db.alerts, ...(isQuiet() ? { voice: false, blockOn: false } : {}) });
+  const cfg = JSON.stringify({ goal: db.settings.goal, ...db.alerts, voice: false, blockOn: false }); // sin avisos de pasos (están en Equilibra)
   if (cfg === nativeCfg) return;
   nativeCfg = cfg;
   try { AndroidPasos.setConfig(cfg); } catch (e) {}
@@ -1483,7 +1490,7 @@ function celebrate(n, k, goalHit, silent) {
 
 // Qué hacer al pasar de «before» a «after» pasos: avisos, bloques y meta
 function reactToSteps(before, after, silent) {
-  if (isQuiet()) return;
+  return; // los avisos de pasos ahora los da Equilibra
   const A = db.alerts, goal = db.settings.goal;
   const goalHit = before < goal && after >= goal;
   if (goalHit && navigator.vibrate && !silent) navigator.vibrate([150, 80, 150]);
@@ -2506,7 +2513,8 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.se
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><g transform="translate(256 256) scale(0.84) translate(-256 -262)"><g fill="none" stroke="#38BDF8" stroke-width="30" stroke-linecap="round"><rect x="84" y="150" width="344" height="236" rx="60"/><path d="M256 386 L256 420 M204 424 L308 424"/></g><circle cx="256" cy="148" r="56" fill="#0F172A"/><circle cx="256" cy="148" r="68" fill="#FACC15" opacity=".14"/><g fill="none" stroke="#4ADE80" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"><path d="M178 200 L256 252 L334 200"/><path d="M256 252 L256 298"/><path d="M222 352 L256 298 L290 352"/></g><circle cx="256" cy="148" r="40" fill="#FACC15"/></g></svg>`;
 
 // ---------- Navegación: inicio y secciones ----------
-const VIEWS = { '': 'home', vista: 'vista', bloques: 'bloques', pasos: 'app', pc: 'pc', agua: 'agua' };
+// Pasos y Agua y movimiento se han pasado a Equilibra (20/10/2026): sus direcciones llevan al inicio
+const VIEWS = { '': 'home', vista: 'vista', bloques: 'bloques', pasos: 'home', pc: 'pc', agua: 'home' };
 let fromHome = false;
 function showView() {
   const id = VIEWS[location.hash.replace('#', '')] || 'home';
@@ -2865,7 +2873,8 @@ function walkTick() {
   castSend({ t: 'toast', text: '🚶 ' + text });
 }
 function saludTick() {
-  if (REMOTE) { if (!$('agua').classList.contains('hidden')) renderSalud(); return; }
+  if (REMOTE) return;
+  battTick(); return; // agua, movimiento, caminar y Pausi ahora están en Equilibra; aquí solo queda el aviso de batería
   if (isQuiet()) { // en pausa: sin avisos; los relojes siguen corriendo
     const S0 = db.salud, n0 = Date.now();
     if (S0.aguaOn && n0 >= S0.aguaNext) S0.aguaNext = n0 + S0.aguaMin * 60000;
@@ -3462,7 +3471,7 @@ function initApp() {
       if (!running && M.auto) musicPause();
     }
   });
-  if (!REMOTE && (db.running || db.settings.autoStart)) start(false); // empieza a contar solo al abrir la app
+  // los pasos ahora se cuentan en Equilibra: aquí ya no se empieza a contar
 }
 
 if (SCREEN) initScreen();
