@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>PC Amable v1.93</title>
+<title>PC Amable v1.94</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -643,7 +643,7 @@
     <div class="eq-note">💧 Agua y movimiento y ⏱ Bloques de tiempo ahora están en <a href="https://gcalabro12.github.io/Equilibra/" target="_blank" rel="noopener">Equilibra →</a><br><a href="https://github.com/GCalabro12/Equilibra-Android/releases/latest/download/Equilibra.apk" target="_blank" rel="noopener">📲 Descargar la app de Equilibra para Android</a>
       <button class="eq-copy" id="eqCopy">📋 Copiar mis bloques para Equilibra</button>
       <textarea class="eq-json hidden" id="eqJson" readonly aria-label="Tus bloques para pegar en Equilibra"></textarea>
-      <div class="eq-hint" id="eqHint">Abre Equilibra → Ajustes → Bloques de PC &amp; Body-mind → pega y toca Traer.</div></div>
+      <div class="eq-hint" id="eqHint">Abre Equilibra → Ajustes → Bloques de PC Amable → pega el texto y toca «Traer el texto pegado».</div></div>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
     <div class="seal-wrap">
       <div class="sellos">
@@ -1221,7 +1221,7 @@
 </div>
 
 <script>
-const VERSION = 'v1.93';
+const VERSION = 'v1.94';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3770,7 +3770,7 @@ function homeOrderInit() {
   // pasar los bloques y tareas a Equilibra (portapapeles; si falla, cuadro de texto para copiar a mano)
   $('eqCopy').addEventListener('click', async () => {
     const json = JSON.stringify(db.bloques);
-    const manual = () => { const t = $('eqJson'); t.value = json; t.classList.remove('hidden'); t.focus(); t.select(); $('eqHint').textContent = 'Selecciona todo el texto, cópialo y pégalo en Equilibra → Ajustes → Bloques de PC & Body-mind → Traer.'; };
+    const manual = () => { const t = $('eqJson'); t.value = json; t.classList.remove('hidden'); t.focus(); t.select(); $('eqHint').textContent = 'Selecciona todo el texto, cópialo y pégalo en Equilibra → Ajustes → Bloques de PC Amable → «Traer el texto pegado».'; };
     try {
       if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('sin portapapeles');
       await navigator.clipboard.writeText(json);
