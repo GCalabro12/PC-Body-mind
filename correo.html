@@ -50,6 +50,18 @@
   .steps li:first-child { border-top: 0; }
   .steps li::before { content: counter(s); position: absolute; left: 0; top: 12px; width: 30px; height: 30px; border-radius: 50%; background: var(--acc); color: #0F172A; font-weight: 800; display: flex; align-items: center; justify-content: center; }
   .steps b { color: var(--txt); }
+  .steps li .sh { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--txt); min-height: 30px; cursor: pointer; font-size: 15.5px; }
+  .steps li.cur .sh { cursor: default; color: #fff; }
+  .steps li .sb { display: none; margin-top: 6px; }
+  .steps li.cur .sb, .steps li.open .sb { display: block; }
+  .steps li.todo { opacity: 0.6; }
+  .steps li.done .stt { text-decoration: line-through; color: var(--mut); }
+  .steps li.done::before { content: "✓"; background: var(--ok); }
+  .steps li.cur { background: rgba(167,139,250,0.09); border-radius: 14px; margin: 6px -8px; padding-left: 52px; padding-right: 8px; border-top: 0; }
+  .steps li.cur::before { left: 8px; box-shadow: 0 0 0 4px rgba(167,139,250,0.3); }
+  .okk { color: var(--ok); font-size: 12.5px; font-weight: 600; }
+  .didit { width: 100%; margin-top: 12px; background: var(--ok); color: #0F172A; padding: 11px 14px; font-size: 15px; }
+  .setup-prog { margin-top: 10px; color: var(--acc); font-weight: 700; font-size: 14px; }
   .steps a.go { display: inline-block; margin-top: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(167,139,250,0.16); border: 1px solid rgba(167,139,250,0.55); color: #DDD6FE; text-decoration: none; font-weight: 700; font-size: 14px; }
   .steps a.go:hover { background: rgba(167,139,250,0.3); }
   .steps code { background: #0f172a; border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px; color: var(--ok); font-size: 13px; word-break: break-all; }
@@ -69,7 +81,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.81';
+const VERSION = 'v1.84';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -153,8 +165,13 @@ function render() {
   if (!st.labels) return renderScan(a);
   renderPanel(a);
 }
-// Guía paso a paso para conectar la app con Google (se hace una sola vez, unos 10 minutos)
+// Guía paso a paso para conectar la app con Google (se hace una sola vez, unos 10 minutos).
+// Google no deja saber qué ha hecho el usuario, así que cada paso se marca a mano y se guarda.
+function setupState() { try { return JSON.parse(localStorage.getItem('pcbm_correo_pasos')) || []; } catch (e) { return []; } }
+function setupSave(d) { try { localStorage.setItem('pcbm_correo_pasos', JSON.stringify(d)); } catch (e) {} }
+let setupOpen = -1;
 function renderSetup(a) {
+  const prevCid = ($('cid') && $('cid').value) || '';
   const G = 'https://console.cloud.google.com/';
   a.innerHTML = `<div class="card">
     <h2>🔧 Antes de empezar: conectar la app con Google</h2>
@@ -184,6 +201,26 @@ function renderSetup(a) {
     <button class="btn2" onclick="location.href='./#home'">← Volver al inicio</button>
     <button class="btn2" onclick="location.href='?demo'">Ver cómo funciona con correos de ejemplo</button>
   </div>`;
+  // cada paso: título (con ✓ y tachado si está hecho), cuerpo solo en el paso actual y botón «Ya lo he hecho»
+  const done = setupState(), lis = [...a.querySelectorAll('.steps li')], last = lis.length - 1;
+  let cur = lis.findIndex((l, i) => i < last && !done[i]); if (cur < 0) cur = last;
+  lis.forEach((li, i) => {
+    const m = li.innerHTML.match(/^\s*<b>(.*?)<\/b>([\s\S]*)$/);
+    const title = (m ? m[1] : 'Paso ' + (i + 1)).replace(/\.$/, ''), rest = m ? m[2] : li.innerHTML;
+    const st = i < last && done[i] ? 'done' : i === cur ? 'cur' : 'todo';
+    li.className = st + (setupOpen === i ? ' open' : '');
+    li.innerHTML = `<div class="sh" data-i="${i}"><span class="stt">${title}</span>${st === 'done' ? '<span class="okk">✓ hecho</span>' : ''}</div><div class="sb">${rest}`
+      + (i < last ? (st === 'done' ? `<br><button class="btn-sm" data-undo="${i}">Volver a abrir este paso</button>` : `<button class="didit" data-done="${i}">✓ Ya lo he hecho</button>`) : '') + '</div>';
+  });
+  const nDone = done.slice(0, last).filter(Boolean).length;
+  a.querySelector('.steps').insertAdjacentHTML('beforebegin', `<div class="setup-prog">${nDone >= last ? '¡Casi! Solo falta pegar el ID de cliente' : 'Llevas ' + nDone + ' de ' + last + ' pasos en Google. Ahora: ' + lis[cur].querySelector('.stt').textContent}</div>`);
+  if (prevCid && $('cid')) $('cid').value = prevCid;
+  a.querySelectorAll('[data-done]').forEach(b => b.onclick = () => {
+    const d = setupState(); d[b.dataset.done] = true; setupSave(d); setupOpen = -1; renderSetup(a);
+    const c = a.querySelector('.steps li.cur'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  a.querySelectorAll('[data-undo]').forEach(b => b.onclick = () => { const d = setupState(); d[b.dataset.undo] = false; setupSave(d); setupOpen = -1; renderSetup(a); });
+  a.querySelectorAll('.sh').forEach(h => h.onclick = () => { const i = Number(h.dataset.i); if (i === cur) return; setupOpen = setupOpen === i ? -1 : i; renderSetup(a); });
   $('copyOrigin').onclick = async () => {
     try { await navigator.clipboard.writeText('https://gcalabro12.github.io'); $('copyOrigin').textContent = '✓ Copiado'; }
     catch (e) { const r = document.createRange(); r.selectNode($('origin')); getSelection().removeAllRanges(); getSelection().addRange(r); $('copyOrigin').textContent = 'Selecciónala y copia'; }
