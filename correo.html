@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestor de email · PC & Body-mind</title>
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root { --bg: #0f172a; --card: #1E293B; --line: #334155; --txt: #F8FAFC; --mut: #94A3B8; --soft: #CBD5E1; --acc: #A78BFA; --ok: #4ADE80; --warn: #FACC15; --bad: #F87171; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--txt); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { padding: 0 16px 40px; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 0 6px; }
+  header h1 { flex: 1; text-align: center; font-size: 22px; margin: 0; color: var(--acc); }
+  .back { color: #0F172A; background: var(--acc); text-decoration: none; font-weight: 700; font-size: 14px; padding: 8px 14px; border-radius: 999px; }
+  .ver { color: #64748b; font-size: 12px; }
+  .card { background: var(--card); border: 1px solid rgba(248,250,252,0.06); border-radius: 20px; padding: 18px; margin-top: 14px; }
+  .card h2 { font-size: 17px; margin: 0 0 8px; }
+  p { line-height: 1.5; color: var(--soft); margin: 8px 0; }
+  .big { font-size: 18px; color: var(--txt); }
+  .hint { color: var(--mut); font-size: 13px; line-height: 1.45; }
+  button { font: inherit; cursor: pointer; border-radius: 14px; border: 0; padding: 12px 16px; font-weight: 700; }
+  .btn { background: var(--acc); color: #0F172A; width: 100%; font-size: 16px; }
+  .btn2 { background: transparent; color: var(--soft); border: 1px solid var(--line); width: 100%; margin-top: 8px; }
+  .btn-sm { background: transparent; color: var(--soft); border: 1px solid var(--line); padding: 6px 12px; font-size: 13px; border-radius: 999px; font-weight: 600; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 6px; margin-top: 14px; }
+  .tab { flex: 1; background: var(--card); color: var(--soft); border: 1px solid var(--line); padding: 10px 6px; font-size: 14px; border-radius: 12px; }
+  .tab.on { background: var(--acc); color: #0F172A; border-color: var(--acc); }
+  .sug { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: start; padding: 12px 0; border-top: 1px solid var(--line); }
+  .sug:first-of-type { border-top: 0; }
+  .sug input[type=checkbox] { width: 22px; height: 22px; margin-top: 4px; accent-color: var(--acc); }
+  .sug input[type=text] { width: 100%; background: #0f172a; color: var(--txt); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; font: inherit; font-weight: 700; }
+  .sug .n { color: var(--acc); font-weight: 800; white-space: nowrap; margin-top: 8px; }
+  .ex { color: var(--mut); font-size: 12.5px; margin-top: 4px; line-height: 1.35; }
+  .mail { display: block; text-decoration: none; color: inherit; padding: 10px 0; border-top: 1px solid var(--line); }
+  .mail:first-child { border-top: 0; }
+  .mail b { display: block; color: var(--txt); font-size: 14.5px; }
+  .mail span { color: var(--mut); font-size: 13px; }
+  .tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: rgba(167,139,250,0.14); color: #DDD6FE; font-size: 13.5px; margin: 4px 4px 0 0; }
+  .prog { height: 8px; border-radius: 99px; background: rgba(255,255,255,0.1); overflow: hidden; margin-top: 12px; }
+  .prog > div { height: 100%; width: 0; background: var(--acc); transition: width .3s; }
+  .alert { border-left: 4px solid var(--bad); }
+  .muted { color: var(--mut); }
+  .empty { color: var(--mut); font-size: 14px; padding: 6px 0; }
+  .demo { background: rgba(250,204,21,0.12); border: 1px solid rgba(250,204,21,0.5); color: #FDE68A; border-radius: 12px; padding: 8px 12px; font-size: 13px; margin-top: 10px; }
+  label.chk { display: flex; gap: 10px; align-items: center; color: var(--soft); margin-top: 10px; }
+  label.chk input { width: 20px; height: 20px; accent-color: var(--acc); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><a class="back" href="./#home">← Inicio</a><h1>✉️ Gestor de email</h1><span class="ver" id="ver"></span></header>
+  <div id="app"></div>
+</div>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+// Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
+// Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
+const VERSION = 'v1.74';
+// ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
+const GOOGLE_CLIENT_ID = '';
+const SCOPES = 'https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.settings.basic';
+const API = 'https://gmail.googleapis.com/gmail/v1/users/me/';
+const DEMO = new URLSearchParams(location.search).has('demo');
+const KEY = 'pcbm_correo_v1';
+const $ = id => document.getElementById(id);
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+document.getElementById('ver').textContent = VERSION;
+
+// Temas que se buscan para sugerir etiquetas (búsqueda de Gmail)
+const TOPICS = [
+  { name: 'Facturas y pagos', q: '(factura OR facturas OR invoice OR recibo OR "justificante de pago" OR "comprobante de pago")' },
+  { name: 'Compras y envíos', q: '(pedido OR envío OR "en reparto" OR shipped OR tracking OR "número de seguimiento")' },
+  { name: 'Bancos y finanzas', q: '(transferencia OR extracto OR bizum OR "cargo en tu cuenta" OR "movimiento en tu cuenta" OR "tu banco")' },
+  { name: 'Redes sociales', q: 'from:(facebookmail.com OR instagram.com OR linkedin.com OR x.com OR twitter.com OR tiktok.com OR youtube.com OR pinterest.com)' },
+  { name: 'Boletines y novedades', q: '(unsubscribe OR "darse de baja" OR "darte de baja" OR "cancelar la suscripción" OR newsletter)' },
+  { name: 'Viajes y reservas', q: '(reserva OR vuelo OR hotel OR booking OR billete OR "check-in" OR renfe OR ryanair OR airbnb)' },
+  { name: 'Citas y reuniones', q: '(cita OR reunión OR invitación OR "zoom.us" OR "meet.google.com" OR "teams.microsoft.com")' },
+  { name: 'Formación y cursos', q: '(curso OR webinar OR formación OR taller OR masterclass)' },
+  { name: 'Seguridad y accesos', q: '("código de verificación" OR "verification code" OR contraseña OR "inicio de sesión" OR "nuevo dispositivo" OR "security alert")' },
+  { name: 'Salud', q: '("cita médica" OR clínica OR farmacia OR receta OR hospital OR "resultados de")' }
+];
+const URGENT_Q = 'newer_than:3d is:unread (urgente OR urgent OR "lo antes posible" OR asap OR "último aviso" OR "ultimo aviso" OR vence OR "fecha límite" OR "plazo" OR inmediato OR "cuanto antes")';
+const FACT_Q = 'has:attachment newer_than:60d (factura OR invoice OR recibo)';
+const DOCS_Q = 'has:attachment newer_than:30d (filename:pdf OR filename:doc OR filename:docx OR filename:xls OR filename:xlsx OR filename:ppt OR filename:pptx) -factura -invoice -recibo';
+
+let st = load(), token = null, tokenExp = 0, tokenClient = null, tab = 'etiquetas', busy = false;
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+const today = () => new Date().toISOString().slice(0, 10);
+
+// ---------- Conexión con Google ----------
+function getToken() {
+  if (DEMO) { token = 'demo'; tokenExp = Date.now() + 3600e3; return Promise.resolve(token); }
+  if (token && Date.now() < tokenExp - 60e3) return Promise.resolve(token);
+  return new Promise((resolve, reject) => {
+    if (!GOOGLE_CLIENT_ID) return reject(new Error('Todavía falta conectar la app con Google (un paso de configuración). Mientras tanto puedes verla en modo de prueba: correo.html?demo'));
+    if (!window.google || !google.accounts || !google.accounts.oauth2) return reject(new Error('No ha cargado la conexión de Google. Revisa internet y vuelve a intentarlo.'));
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID, scope: SCOPES, hint: st.email || undefined,
+      callback: r => {
+        if (r.error) return reject(new Error(r.error === 'access_denied' ? 'No se ha dado permiso' : r.error));
+        token = r.access_token; tokenExp = Date.now() + (Number(r.expires_in) || 3600) * 1000; resolve(token);
+      },
+      error_callback: e => reject(new Error(e && e.type === 'popup_closed' ? 'Se cerró la ventana de Google' : 'No se pudo abrir la ventana de Google'))
+    });
+    tokenClient.requestAccessToken({ prompt: st.connected ? '' : 'consent' });
+  });
+}
+async function gm(path, opt = {}) {
+  if (DEMO) return demoApi(path, opt);
+  const t = await getToken();
+  const r = await fetch(API + path, { ...opt, headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json', ...(opt.headers || {}) } });
+  if (r.status === 401) { token = null; throw new Error('La conexión con Google ha caducado: vuelve a pulsar'); }
+  if (!r.ok) { let m = r.status; try { m = (await r.json()).error.message; } catch (e) {} throw new Error('Gmail: ' + m); }
+  return r.status === 204 ? {} : r.json();
+}
+const count = async q => { const r = await gm('messages?maxResults=500&q=' + encodeURIComponent(q)); return { n: (r.messages || []).length >= 500 ? (r.resultSizeEstimate || 500) : (r.messages || []).length, ids: (r.messages || []).map(m => m.id) }; };
+async function headers(id) {
+  const m = await gm('messages/' + id + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date');
+  const h = n => ((m.payload && m.payload.headers) || []).find(x => x.name.toLowerCase() === n.toLowerCase());
+  const from = (h('From') && h('From').value || '').replace(/<.*>/, '').replace(/"/g, '').trim();
+  return { id, thread: m.threadId, from, subject: (h('Subject') && h('Subject').value) || '(sin asunto)', date: Number(m.internalDate) || 0 };
+}
+async function listMails(q, max) {
+  const r = await gm('messages?maxResults=' + max + '&q=' + encodeURIComponent(q));
+  const out = [];
+  for (const m of (r.messages || []).slice(0, max)) { try { out.push(await headers(m.id)); } catch (e) {} }
+  return out;
+}
+const openLink = m => 'https://mail.google.com/mail/u/0/#all/' + (m.thread || m.id);
+const fdate = t => t ? new Date(t).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
+
+// ---------- Pantallas ----------
+function render() {
+  const a = $('app');
+  if (!st.connected && !st.scanning) return renderIntro(a);
+  if (st.suggest && !st.labels) return renderSuggest(a);
+  if (!st.labels) return renderScan(a);
+  renderPanel(a);
+}
+function renderIntro(a) {
+  a.innerHTML = `<div class="card">
+    <p class="big">¿Quieres que conecte tu correo para ayudarte a etiquetar tus emails, para que los puedas leer con facilidad y agrupados por temas?</p>
+    <p>Repasaré tus correos de los últimos 3 meses y te sugeriré <b>5 etiquetas</b>. Tú eliges cuáles quieres. Además verás los <b>correos urgentes</b> y los que traen <b>facturas y documentos</b>.</p>
+    <button class="btn" id="go">Sí, conectar mi Gmail</button>
+    <button class="btn2" onclick="location.href='./#home'">Ahora no</button>
+    <p class="hint">🔒 Todo se hace en tu navegador: tus correos no se guardan en ningún servidor. Puedes desconectarlo cuando quieras.</p>
+    ${DEMO ? '<div class="demo">Modo de prueba: son correos inventados, no se conecta a ningún Gmail.</div>' : ''}
+    <p class="hint" id="err" style="color:var(--bad)"></p></div>`;
+  $('go').onclick = startScan;
+}
+function renderScan(a) {
+  a.innerHTML = `<div class="card"><h2>Repasando tus correos…</h2><p id="scanTxt">Buscando temas</p><div class="prog"><div id="scanBar"></div></div><p class="hint" id="err" style="color:var(--bad)"></p></div>`;
+}
+async function startScan() {
+  if (busy) return; busy = true;
+  try {
+    await getToken();
+    st.connected = true; st.scanning = true; save(); render();
+    const res = [];
+    for (let i = 0; i < TOPICS.length; i++) {
+      const t = TOPICS[i];
+      $('scanTxt').textContent = 'Buscando: ' + t.name;
+      $('scanBar').style.width = Math.round((i + 1) / TOPICS.length * 100) + '%';
+      const c = await count('newer_than:90d -in:chats ' + t.q);
+      if (c.n >= 3) res.push({ name: t.name, q: t.q, n: c.n, ids: c.ids.slice(0, 2) });
+    }
+    res.sort((x, y) => y.n - x.n);
+    const top = res.slice(0, 5);
+    for (const s of top) { s.ex = []; for (const id of s.ids) { try { s.ex.push((await headers(id)).subject); } catch (e) {} } }
+    st.suggest = top; st.scanning = false; save(); render();
+  } catch (e) {
+    st.scanning = false; if (!st.labels) st.connected = !!token && st.connected; save(); render();
+    const er = $('err'); if (er) er.textContent = e.message;
+  } finally { busy = false; }
+}
+function renderSuggest(a) {
+  const s = st.suggest || [];
+  a.innerHTML = `<div class="card"><h2>Te sugiero estas etiquetas</h2>
+    <p>Marca las que quieras (puedes cambiarles el nombre). Pondré la etiqueta a los correos que ya tienes y Gmail se la pondrá solo a los nuevos.</p>
+    ${s.length ? s.map((x, i) => `<div class="sug"><input type="checkbox" data-i="${i}" checked aria-label="Usar esta etiqueta">
+      <div><input type="text" data-n="${i}" value="${esc(x.name)}" maxlength="40"><div class="ex">${x.ex && x.ex.length ? 'Ej.: ' + x.ex.map(esc).join(' · ') : ''}</div></div>
+      <span class="n">${x.n} correos</span></div>`).join('') : '<p class="empty">No he encontrado temas con suficientes correos.</p>'}
+    <button class="btn" id="ok">Crear las etiquetas marcadas</button>
+    <button class="btn2" id="skip">No quiero etiquetas, solo urgentes y adjuntos</button>
+    <p class="hint" id="err" style="color:var(--bad)"></p></div>`;
+  $('ok').onclick = applyLabels;
+  $('skip').onclick = () => { st.labels = []; save(); render(); setTimeout(() => refresh(true), 50); };
+}
+async function applyLabels() {
+  if (busy) return; busy = true;
+  const chosen = [];
+  document.querySelectorAll('.sug').forEach(row => {
+    const i = Number(row.querySelector('[data-i]').dataset.i);
+    if (row.querySelector('[data-i]').checked) chosen.push({ ...st.suggest[i], name: row.querySelector('[data-n]').value.trim() || st.suggest[i].name });
+  });
+  const btn = $('ok'); btn.disabled = true;
+  try {
+    const existing = ((await gm('labels')).labels || []);
+    const done = [];
+    for (const c of chosen) {
+      btn.textContent = 'Creando «' + c.name + '»…';
+      let lab = existing.find(l => l.name.toLowerCase() === c.name.toLowerCase());
+      if (!lab) lab = await gm('labels', { method: 'POST', body: JSON.stringify({ name: c.name, labelListVisibility: 'labelShow', messageListVisibility: 'show' }) });
+      // correos que ya tienes (los más recientes, hasta 500)
+      const ids = (await count('-in:chats ' + c.q)).ids;
+      for (let i = 0; i < ids.length; i += 500) await gm('messages/batchModify', { method: 'POST', body: JSON.stringify({ ids: ids.slice(i, i + 500), addLabelIds: [lab.id] }) });
+      // los nuevos: filtro de Gmail (funciona aunque la app esté cerrada)
+      let filtro = true;
+      try { await gm('settings/filters', { method: 'POST', body: JSON.stringify({ criteria: { query: c.q }, action: { addLabelIds: [lab.id] } }) }); } catch (e) { filtro = false; }
+      done.push({ name: c.name, id: lab.id, q: c.q, n: ids.length, filtro });
+    }
+    st.labels = done; st.lastRun = today(); save(); render(); setTimeout(() => refresh(true), 50);
+  } catch (e) { $('err').textContent = e.message; btn.disabled = false; btn.textContent = 'Crear las etiquetas marcadas'; }
+  finally { busy = false; }
+}
+function renderPanel(a) {
+  a.innerHTML = `${st.lastRun !== today() ? `<div class="card"><p class="big">☀️ Buenos días: ¿repaso tu correo de hoy?</p><button class="btn" id="morning">Repasar mi correo</button></div>` : ''}
+    <div class="tabs"><button class="tab ${tab === 'etiquetas' ? 'on' : ''}" data-t="etiquetas">🏷️ Etiquetas</button><button class="tab ${tab === 'urgentes' ? 'on' : ''}" data-t="urgentes">🚨 Urgentes${st.urgent && st.urgent.length ? ' (' + st.urgent.length + ')' : ''}</button><button class="tab ${tab === 'adjuntos' ? 'on' : ''}" data-t="adjuntos">📎 Adjuntos</button></div>
+    <div class="card" id="tabBody"></div>
+    <div class="card"><div class="row"><button class="btn-sm" id="again">🔄 Repasar ahora</button><button class="btn-sm" id="resug">🏷️ Sugerir etiquetas otra vez</button><button class="btn-sm" id="off">Desconectar</button></div>
+    <p class="hint">Última revisión: ${st.lastCheck ? new Date(st.lastCheck).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }) : '—'}. Mientras esta página esté abierta repaso los urgentes cada 15 minutos.</p>
+    <p class="hint" id="err" style="color:var(--bad)"></p></div>`;
+  document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  if ($('morning')) $('morning').onclick = () => refresh(true);
+  $('again').onclick = () => refresh(true);
+  $('resug').onclick = () => { st.suggest = null; st.labels = null; save(); startScan(); };
+  $('off').onclick = disconnect;
+  const b = $('tabBody');
+  if (tab === 'etiquetas') {
+    b.innerHTML = st.labels.length ? `<h2>Tus etiquetas</h2>${st.labels.map(l => `<span class="tag">🏷️ ${esc(l.name)} · ${l.n}</span>`).join('')}
+      <p class="hint">${st.labels.every(l => l.filtro) ? 'Gmail pone estas etiquetas solo a los correos nuevos, cada día, aunque no abras la app.' : 'Las etiquetas sin filtro se repasan cuando abres esta página.'}</p>` : '<p class="empty">No has elegido etiquetas. Pulsa «Sugerir etiquetas otra vez» cuando quieras.</p>';
+  } else if (tab === 'urgentes') {
+    const u = st.urgent || [];
+    b.innerHTML = `<h2>Correos urgentes sin leer (3 últimos días)</h2>` + (u.length ? u.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">Nada urgente. 🌿</p>');
+  } else {
+    const f = st.fact || [], d = st.docs || [];
+    b.innerHTML = `<h2>🧾 Facturas (60 días)</h2>` + (f.length ? f.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">No hay facturas recientes.</p>')
+      + `<h2 style="margin-top:16px">📄 Otros documentos (30 días)</h2>` + (d.length ? d.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">No hay documentos recientes.</p>');
+  }
+}
+// Repaso: urgentes, facturas y documentos (y aviso si hay urgentes nuevos)
+async function refresh(user) {
+  if (busy || !st.connected) return;
+  busy = true;
+  try {
+    if (!user && !token && !DEMO) return; // sin permiso vigente no abre ventanas solo
+    const u = await listMails(URGENT_Q, 10);
+    const seen = new Set(st.seenUrgent || []), nuevos = u.filter(m => !seen.has(m.id));
+    st.urgent = u; st.seenUrgent = [...seen, ...nuevos.map(m => m.id)].slice(-200);
+    st.fact = await listMails(FACT_Q, 12);
+    st.docs = await listMails(DOCS_Q, 12);
+    st.lastCheck = Date.now(); st.lastRun = today(); save();
+    if (nuevos.length) notify(nuevos);
+  } catch (e) { const er = $('err'); if (er) er.textContent = e.message; }
+  finally { busy = false; render(); }
+}
+function notify(list) {
+  const title = list.length === 1 ? '🚨 Correo urgente' : `🚨 ${list.length} correos urgentes`;
+  const body = list.slice(0, 3).map(m => m.from + ': ' + m.subject).join('\n');
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body, icon: 'icon-192.png' });
+    else if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  } catch (e) {}
+}
+function disconnect() {
+  if (!confirm('¿Desconectar tu Gmail de PC & Body-mind? Las etiquetas y filtros que ya están en Gmail se quedan.')) return;
+  try { if (token && window.google && !DEMO) google.accounts.oauth2.revoke(token, () => {}); } catch (e) {}
+  token = null; st = {}; save(); render();
+}
+
+// ---------- Modo de prueba (sin Gmail): correos inventados ----------
+function demoApi(path, opt) {
+  const delay = v => new Promise(r => setTimeout(() => r(v), 120));
+  const fake = { 'Facturas y pagos': 41, 'Boletines y novedades': 128, 'Compras y envíos': 23, 'Citas y reuniones': 17, 'Redes sociales': 36, 'Seguridad y accesos': 9, 'Formación y cursos': 12, 'Viajes y reservas': 2 };
+  const subj = { 'Facturas y pagos': ['Tu factura de octubre', 'Recibo de la cuota'], 'Boletines y novedades': ['Novedades de la semana', '5 ideas para tu negocio'], 'Compras y envíos': ['Tu pedido ha sido enviado', 'En reparto hoy'], 'Citas y reuniones': ['Invitación: reunión del lunes', 'Recordatorio de tu cita'], 'Redes sociales': ['Tienes 3 notificaciones nuevas', 'Alguien comentó tu publicación'] };
+  if (path.startsWith('messages?')) {
+    const q = decodeURIComponent(path.split('q=')[1] || '');
+    if (q.includes('is:unread (urgente')) return delay({ messages: [{ id: 'u1' }, { id: 'u2' }] });
+    if (q.includes('has:attachment') && q.includes('-factura')) return delay({ messages: [{ id: 'd1' }] });
+    if (q.includes('has:attachment')) return delay({ messages: [{ id: 'f1' }, { id: 'f2' }] });
+    const t = TOPICS.find(t => q.includes(t.q));
+    const n = t ? (fake[t.name] || 0) : 0;
+    return delay({ messages: Array.from({ length: Math.min(n, 500) }, (_, i) => ({ id: (t ? t.name : 'x') + '#' + i })), resultSizeEstimate: n });
+  }
+  if (path.startsWith('messages/batchModify') || path.startsWith('settings/filters')) return delay({});
+  if (path === 'labels' && (!opt || !opt.method)) return delay({ labels: [] });
+  if (path === 'labels') return delay({ id: 'L' + Math.random().toString(36).slice(2, 6), name: JSON.parse(opt.body).name });
+  if (path.startsWith('messages/')) {
+    const id = decodeURIComponent(path.slice(9).split('?')[0]);
+    const map = { u1: ['Hacienda', 'URGENTE: último aviso para presentar el modelo'], u2: ['Cliente Ana', 'Necesito la propuesta lo antes posible'], f1: ['Iberdrola', 'Tu factura de luz'], f2: ['Movistar', 'Factura de octubre'], d1: ['Gestoría', 'Contrato para revisar (PDF)'] };
+    if (map[id]) return delay({ id, threadId: id, internalDate: String(Date.now() - 3600e3), payload: { headers: [{ name: 'From', value: map[id][0] }, { name: 'Subject', value: map[id][1] }] } });
+    const name = id.split('#')[0], k = Number(id.split('#')[1]) || 0;
+    return delay({ id, threadId: id, internalDate: String(Date.now()), payload: { headers: [{ name: 'From', value: 'Demo' }, { name: 'Subject', value: (subj[name] || ['Correo de ejemplo'])[k % 2] || 'Correo' }] } });
+  }
+  return delay({});
+}
+
+render();
+if (st.connected && st.labels) { if (DEMO || token) refresh(); }
+setInterval(() => { if (st.connected && st.labels && (token || DEMO)) refresh(); }, 15 * 60e3);
+</script>
+</body>
+</html>
