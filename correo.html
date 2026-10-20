@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.89';
+const VERSION = 'v1.90';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -182,13 +182,13 @@ function renderSetup(a) {
     <h2>🔧 Antes de empezar: conectar la app con Google</h2>
     <p>Google exige que el dueño de la app cree una «llave» gratuita para poder leer y etiquetar correos. Se hace <b>una sola vez</b> (unos 10 minutos) y <b>no se paga nada</b>. Pulsa cada botón: te lleva directo a la página de Google que toca. Es más cómodo hacerlo <b>desde el ordenador</b>, pero también se puede desde el móvil.</p>
     <ol class="steps">
-      <li><b>Crea un proyecto.</b> Entra con tu cuenta de Google. Ponle de nombre <code>PC Body-mind</code> y pulsa <b>Crear</b>.<br>
+      <li><b>Crea un proyecto.</b> Entra con tu cuenta de Google. Ponle <b>el nombre que quieras</b> (por ejemplo «Correo»; da igual) y pulsa <b>Crear</b>.<br>
         <a class="go" href="${G}projectcreate" target="_blank" rel="noopener">① Abrir «Crear proyecto» ↗</a></li>
       <li><b>Activa Gmail.</b> Pulsa el botón azul <b>Habilitar</b>. Si en vez de «Habilitar» pone <b>Administrar</b>, ya estaba activada: sigue con el siguiente paso.
         <div class="ask">Google usa el proyecto que acabas de crear. En el móvil el nombre del proyecto no se ve arriba: es normal.</div>
         <a class="go" href="${G}apis/library/gmail.googleapis.com" target="_blank" rel="noopener">② Abrir «Gmail API» ↗</a></li>
       <li><b>Crea la pantalla de permisos.</b> Es lo que verás tú al dar permiso. Pulsa <b>Comenzar</b> y rellena solo esto:<br>
-        · Nombre de la app: <code>PC &amp; Body-mind</code><br>
+        · Nombre de la app: <b>el que quieras</b> (da igual)<br>
         · Correo de asistencia: el tuyo<br>
         · Público: <b>Externo</b><br>
         · Correo de contacto: el tuyo<br>
@@ -199,19 +199,19 @@ function renderSetup(a) {
         · Comprueba que pone <b>Prueba</b> (o «Testing»).<br>
         · En <b>Usuarios de prueba</b> pulsa <b>Add users</b>, escribe <b>tu Gmail</b> y <b>Guardar</b>.<br>
         <a class="go" href="${G}auth/audience" target="_blank" rel="noopener">④ Abrir «Público» ↗</a></li>
-      <li><b>Crea la llave (ID de cliente).</b> Tipo de aplicación: <b>Aplicación web</b>. Nombre: <code>PC Body-mind web</code>. En <b>Orígenes de JavaScript autorizados → Añadir URI</b> pega esta dirección <u>tal cual</u> (sin barra al final):<br>
+      <li><b>Crea la llave (ID de cliente).</b> Tipo de aplicación: <b>Aplicación web</b>. Nombre: <b>el que quieras</b> (da igual). Lo <u>único que hay que copiar exacto</u> es esta dirección: en <b>Orígenes de JavaScript autorizados → Añadir URI</b> pégala tal cual (sin barra al final):<br>
         <code id="origin">https://gcalabro12.github.io</code> <button class="btn-sm" id="copyOrigin">Copiar</button><br>
         Deja vacío «URI de redirección» y pulsa <b>Crear</b>.<br>
         <a class="go" href="${G}auth/clients/create" target="_blank" rel="noopener">⑤ Abrir «Crear cliente» ↗</a>
         <div class="ask">📱 ¿La página de Google sale cortada o sin el botón «Crear cliente»? Es que la consola de Google está pensada para el ordenador. Prueba una de estas dos cosas: <b>(a)</b> en el menú ⋮ de Brave marca <b>«Sitio de escritorio»</b> y recarga; <b>(b)</b> en la lista «Clientes», toca los <b>tres puntos ⋮</b> que hay junto al título y elige <b>«Crear cliente»</b>. Lo más fácil es hacer solo este paso desde el ordenador.</div></li>
       <li><b>Pega aquí la llave que te da Google.</b> Al pulsar <b>Crear</b> en el paso 5, Google te enseña una ventana con un texto largo llamado <b>«ID de cliente»</b> (acaba en <code>.apps.googleusercontent.com</code>). <b>Mantén pulsado ese texto → Copiar</b>, vuelve a esta página y <b>pégalo en el cuadro</b> de aquí abajo. Luego pulsa «Guardar y continuar».
-        <div class="ask">¿Cerraste esa ventana? En Google ve a «Credenciales» (menú ☰ → APIs y servicios), pulsa «PC Body-mind web» y copia el ID de cliente que sale arriba.</div>
+        <div class="ask">¿Cerraste esa ventana? En Google ve a «Credenciales» (menú ☰ → APIs y servicios), pulsa el cliente que creaste y copia el ID de cliente que sale arriba.</div>
         <input class="cid" id="cid" type="text" placeholder="1234567890-abcdefg.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
         <button class="btn" id="saveCid" style="margin-top:10px">Guardar y continuar</button>
         <p class="hint" id="err" style="color:var(--bad)"></p>
         <div class="ask">No es una contraseña: es seguro guardarlo. Solo se guarda en este navegador.</div></li>
     </ol>
-    <p class="hint">La primera vez que conectes, Google dirá «Google no ha verificado esta aplicación». Es normal (es tu propia app en modo de prueba): pulsa <b>Configuración avanzada → Ir a PC &amp; Body-mind (no seguro)</b> y acepta los permisos.</p>
+    <p class="hint">La primera vez que conectes, Google dirá «Google no ha verificado esta aplicación». Es normal (es tu propia app en modo de prueba): pulsa <b>Configuración avanzada → Ir a (el nombre que le pusiste) (no seguro)</b> y acepta los permisos.</p>
     <button class="btn2" onclick="location.href='./#home'">← Volver al inicio</button>
     <button class="btn2" onclick="location.href='?demo'">Ver cómo funciona con correos de ejemplo</button>
   </div>`;
