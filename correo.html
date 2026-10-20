@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v1.88';
+const VERSION = 'v1.89';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -202,7 +202,8 @@ function renderSetup(a) {
       <li><b>Crea la llave (ID de cliente).</b> Tipo de aplicación: <b>Aplicación web</b>. Nombre: <code>PC Body-mind web</code>. En <b>Orígenes de JavaScript autorizados → Añadir URI</b> pega esta dirección <u>tal cual</u> (sin barra al final):<br>
         <code id="origin">https://gcalabro12.github.io</code> <button class="btn-sm" id="copyOrigin">Copiar</button><br>
         Deja vacío «URI de redirección» y pulsa <b>Crear</b>.<br>
-        <a class="go" href="${G}apis/credentials/oauthclient" target="_blank" rel="noopener">⑤ Abrir «Crear ID de cliente» ↗</a></li>
+        <a class="go" href="${G}auth/clients/create" target="_blank" rel="noopener">⑤ Abrir «Crear cliente» ↗</a>
+        <div class="ask">📱 ¿La página de Google sale cortada o sin el botón «Crear cliente»? Es que la consola de Google está pensada para el ordenador. Prueba una de estas dos cosas: <b>(a)</b> en el menú ⋮ de Brave marca <b>«Sitio de escritorio»</b> y recarga; <b>(b)</b> en la lista «Clientes», toca los <b>tres puntos ⋮</b> que hay junto al título y elige <b>«Crear cliente»</b>. Lo más fácil es hacer solo este paso desde el ordenador.</div></li>
       <li><b>Pega aquí la llave que te da Google.</b> Al pulsar <b>Crear</b> en el paso 5, Google te enseña una ventana con un texto largo llamado <b>«ID de cliente»</b> (acaba en <code>.apps.googleusercontent.com</code>). <b>Mantén pulsado ese texto → Copiar</b>, vuelve a esta página y <b>pégalo en el cuadro</b> de aquí abajo. Luego pulsa «Guardar y continuar».
         <div class="ask">¿Cerraste esa ventana? En Google ve a «Credenciales» (menú ☰ → APIs y servicios), pulsa «PC Body-mind web» y copia el ID de cliente que sale arriba.</div>
         <input class="cid" id="cid" type="text" placeholder="1234567890-abcdefg.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
