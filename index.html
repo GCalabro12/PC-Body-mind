@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.02</title>
+<title>Amable PC v2.03</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1255,7 +1255,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.02';
+const VERSION = 'v2.03';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1568,9 +1568,16 @@ let quietBypass = false; // el recordatorio «ahora estás en…» suena aunque 
 const focusLong = () => { const F = db.settings && db.settings.focus; return !!(F && F.until > Date.now() && F.min > 25 && !db.settings.quiet); };
 const vistaBusy = () => { try { return vAlerting || !!vBreakEnd; } catch (e) { return false; } };
 const isQuiet = () => !quietBypass && !!(db.settings && (db.settings.quiet || (db.settings.focus && db.settings.focus.until > Date.now() && !(focusLong() && vistaBusy()))));
-function speak(text, done) {
+// Con el PC conectado, la voz y los avisos suenan en el PC; el móvil solo habla de los pasos y el paseo (phone = true), porque vas caminando
+const pcLinked = () => !SCREEN && !REMOTE && !!(conn && conn.open);
+function speak(text, done, phone) {
   if (REMOTE || isQuiet()) { if (done) setTimeout(done, 50); return; }
   if (vBreakEnd && !speakBypass) { speakHeld.push([text, done]); return; }
+  if (!phone && pcLinked()) {
+    castSend({ t: 'say', text });
+    if (done) setTimeout(done, 1500 + text.length * 75);
+    return;
+  }
   if (NATIVE) { // en la app Android habla el teléfono (también con la pantalla apagada)
     if (musicPlaying()) { yt.setVolume(Math.round(M.vol * 0.25)); ducked = true; }
     try { AndroidPasos.speak(text); } catch (e) {}
@@ -1613,7 +1620,7 @@ function announce(n, goalHit, silent) {
   if (goalHit) text += ' ¡Has cumplido la meta del día!';
   if (!silent) {
     playSound();
-    setTimeout(() => speak(text.trim()), 650);
+    setTimeout(() => speak(text.trim(), null, true), 650);
   }
   castSend({ t: 'announce', n, goalHit });
 }
@@ -1629,7 +1636,7 @@ function celebrate(n, k, goalHit, silent) {
   const text = `¡Enhorabuena! Ya has alcanzado ${n} pasos. Bloque ${k} completado.` + (goalHit ? ' ¡Y has cumplido la meta del día!' : '');
   if (silent) { setTimeout(startCelebrationSong, 2200 + text.length * 75); return; } // espera a que acabe la voz del teléfono
   playSound();
-  setTimeout(() => speak(text, startCelebrationSong), 650);
+  setTimeout(() => speak(text, startCelebrationSong, true), 650);
 }
 
 // Qué hacer al pasar de «before» a «after» pasos: avisos, bloques y meta
@@ -1911,7 +1918,7 @@ function bindAlerts() {
     if (v && !parseYouTube(v)) { alert('No reconozco ese enlace de YouTube.'); $('aCelUrl').value = A.celUrl; return; }
     A.celUrl = v; save();
   });
-  $('aTest').addEventListener('click', () => { unlockSound(); playSound(); setTimeout(() => speak(`Llevas ${A.every} pasos.`), 650); });
+  $('aTest').addEventListener('click', () => { unlockSound(); playSound(); setTimeout(() => speak(`Llevas ${A.every} pasos.`, null, true), 650); });
   $('aTestCele').addEventListener('click', () => { unlockSound(); celebrate(A.block, 1, false); });
   $('celeStop').addEventListener('click', stopCelebration);
 }
@@ -2424,8 +2431,9 @@ function scrRemoteSend() {
 }
 // Aviso hablado que llega del móvil: suena en el altavoz del PC (baja el vídeo mientras habla)
 function scrSay(text) {
+  if (!text) return;
   quietBypass = true;
-  try { chime(); speak(text); } finally { quietBypass = false; }
+  try { speak(text); } finally { quietBypass = false; }
   try {
     if (scrYTReady && !scrYT.isMuted()) {
       const vol = Number($('sVol').value) || 60;
@@ -2438,12 +2446,13 @@ function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'db') { scrRemoteDb = m.db; scrRemoteSend(); return; }
   if (m.t === 'state' && m.gp) { const g = { ...m.gp, version: m.gp.version || VERSION }; gpSend(g); }
+  if (m.t === 'say') { scrSay(String(m.text || '')); return; }
+  if (m.t === 'chime') { quietBypass = true; try { chime(); } finally { quietBypass = false; } return; }
   if (m.t === 'toast') {
     clearTimeout(toastT);
     $('sToast').textContent = String(m.text || '');
     $('sToast').classList.remove('hidden');
     toastT = setTimeout(() => $('sToast').classList.add('hidden'), 15000);
-    if (m.say) scrSay(String(m.say));
     return;
   }
   if (m.t === 'state') {
@@ -2803,8 +2812,9 @@ function runSplash() {
 // ---------- Descansos de la vista (regla 20-20-20) ----------
 let vAlertSpeak = null, vAlerting = false, vBreakEnd = 0, vBreakT = null, vReminder = null, vMusicWasPlaying = false;
 const mmss = ms => { const t = Math.ceil(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
-function chime() {
+function chime(phone) {
   if (isQuiet()) return;
+  if (!phone && pcLinked()) { castSend({ t: 'chime' }); return; }
   const c = audio(); if (!c) return;
   const t = c.currentTime + 0.02;
   ['E5', 'G5', 'C6'].forEach((n, i) => tone(NOTE(n), t + i * 0.28, 1.4, 'sine', 0.22));
@@ -3216,12 +3226,9 @@ function focusTick() {
     F.lastRemind = now; save();
     const left = Math.max(1, Math.ceil((F.until - now) / 60000));
     const text = (F.task ? `Ahora estás en: ${F.task}.` : 'Sigues en modo concentración.') + ` Te quedan ${left} ${left === 1 ? 'minuto' : 'minutos'}.`;
-    if (conn && conn.open) { // con el PC conectado, el aviso suena en el altavoz del PC y no en el del móvil
-      castSend({ t: 'toast', text: '🎯 ' + text, say: text });
-    } else {
-      quietBypass = true; // este aviso sí suena, aunque la concentración silencie todo lo demás
-      try { chime(); speak(text); } finally { quietBypass = false; }
-    }
+    quietBypass = true; // este aviso sí suena, aunque la concentración silencie todo lo demás
+    try { chime(); speak(text); } finally { quietBypass = false; } // con el PC conectado suena allí
+    castSend({ t: 'toast', text: '🎯 ' + text });
   }
 }
 function focusRender() {
@@ -3340,8 +3347,8 @@ function walkTick() {
   const [t, f] = WALK_CHECKS[idx], goal = walkGoalAt(f), steps = Math.round(today().steps);
   if (m - t > 60 || steps >= goal) return; // si abres la app mucho más tarde, o ya llegaste, no avisa
   const text = `Son las ${hm(t)} y llevas ${fmt(steps)} pasos. Te faltan ${fmt(goal - steps)} para los ${fmt(goal)}. Es buen momento para empezar a caminar.`;
-  chime();
-  setTimeout(() => speak(text), 900);
+  chime(true);
+  setTimeout(() => speak(text, null, true), 900);
   castSend({ t: 'toast', text: '🚶 ' + text });
 }
 function saludTick() {
