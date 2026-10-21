@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.01</title>
+<title>Amable PC v2.02</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1255,7 +1255,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.01';
+const VERSION = 'v2.02';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2422,6 +2422,18 @@ function scrRemoteSend() {
   const f = $('sRemoteFrame');
   if (scrRemoteDb && f && f.contentWindow) f.contentWindow.postMessage({ t: 'db', db: scrRemoteDb }, '*');
 }
+// Aviso hablado que llega del móvil: suena en el altavoz del PC (baja el vídeo mientras habla)
+function scrSay(text) {
+  quietBypass = true;
+  try { chime(); speak(text); } finally { quietBypass = false; }
+  try {
+    if (scrYTReady && !scrYT.isMuted()) {
+      const vol = Number($('sVol').value) || 60;
+      scrYT.setVolume(Math.max(5, Math.round(vol * 0.25)));
+      setTimeout(() => { try { scrYT.setVolume(Number($('sVol').value) || vol); } catch (e) {} }, 2500 + text.length * 80);
+    }
+  } catch (e) {}
+}
 function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'db') { scrRemoteDb = m.db; scrRemoteSend(); return; }
@@ -2431,6 +2443,7 @@ function scrData(m) {
     $('sToast').textContent = String(m.text || '');
     $('sToast').classList.remove('hidden');
     toastT = setTimeout(() => $('sToast').classList.add('hidden'), 15000);
+    if (m.say) scrSay(String(m.say));
     return;
   }
   if (m.t === 'state') {
@@ -2596,6 +2609,7 @@ function initScreen() {
     $('sSound').textContent = (on ? '🔊' : '🔇') + ' Sonido del vídeo';
     $('sSpk').classList.toggle('muted', !on);
   };
+  document.addEventListener('pointerdown', unlockSound, { once: true }); // el navegador solo deja hablar tras un toque
   $('sVol').value = scrVol; $('sVolVal').textContent = scrVol; $('sVol2').value = scrVol;
   $('sVol2').addEventListener('input', () => { $('sVol').value = $('sVol2').value; $('sVol').dispatchEvent(new Event('input')); });
   $('sSpk').addEventListener('click', () => {
@@ -3202,9 +3216,12 @@ function focusTick() {
     F.lastRemind = now; save();
     const left = Math.max(1, Math.ceil((F.until - now) / 60000));
     const text = (F.task ? `Ahora estás en: ${F.task}.` : 'Sigues en modo concentración.') + ` Te quedan ${left} ${left === 1 ? 'minuto' : 'minutos'}.`;
-    quietBypass = true; // este aviso sí suena, aunque la concentración silencie todo lo demás
-    try { chime(); speak(text); } finally { quietBypass = false; }
-    castSend({ t: 'toast', text: '🎯 ' + text });
+    if (conn && conn.open) { // con el PC conectado, el aviso suena en el altavoz del PC y no en el del móvil
+      castSend({ t: 'toast', text: '🎯 ' + text, say: text });
+    } else {
+      quietBypass = true; // este aviso sí suena, aunque la concentración silencie todo lo demás
+      try { chime(); speak(text); } finally { quietBypass = false; }
+    }
   }
 }
 function focusRender() {
