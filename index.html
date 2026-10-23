@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.06</title>
+<title>Amable PC v2.07</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -967,6 +967,12 @@
     <div class="hint">A las 11:00 si no llevo la cuarta parte de mi meta · a las 13:00, la mitad · a las 16:00, tres cuartos · a las 18:00, la meta entera (con 8.000: 2.000, 4.000, 6.000 y 8.000)</div>
   </div>
   <div class="card">
+    <label class="check" style="margin:0"><input type="checkbox" id="aRestOn"> 🪑 Descansar al acabar cada bloque de pasos</label>
+    <label for="aRestMin">Descanso (minutos)</label>
+    <input type="number" id="aRestMin" min="5" max="240" step="5" inputmode="numeric">
+    <div class="hint">Al completar cada bloque (con 2.000 pasos por bloque: 2.000, 4.000, 6.000 y 8.000) te digo que te sientes y descanses ese tiempo. Cuando pasa, te aviso de caminar el siguiente bloque. Así hasta tu meta del día. El tamaño del bloque se cambia más abajo.</div>
+  </div>
+  <div class="card">
     <details>
     <summary>🔔 Avisos de voz</summary>
     <label class="check"><input type="checkbox" id="aVoice"> Sonido + voz que diga «llevas … pasos»</label>
@@ -1264,7 +1270,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.06';
+const VERSION = 'v2.07';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1274,7 +1280,7 @@ const fmtVasos = n => String(n).replace('.', ',');
 const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0, moveOn: true, moveEvery: 60, moveDur: 2, lastMove: 0 };
-const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null };
+const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null, restOn: true, restMin: 60, rest: null };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
 // ?remoto: la app completa dentro de la pantalla del PC, trabajando con los datos del móvil (no guarda nada en el PC)
 const REMOTE = !SCREEN && new URLSearchParams(location.search).has('remoto');
@@ -1927,6 +1933,12 @@ function bindAlerts() {
   $('aBlockOn').addEventListener('change', () => { A.blockOn = $('aBlockOn').checked; save(); });
   $('aWalkOn').checked = A.walkOn;
   $('aWalkOn').addEventListener('change', () => { A.walkOn = $('aWalkOn').checked; save(); unlockSound(); });
+  $('aRestOn').checked = A.restOn; $('aRestMin').value = A.restMin;
+  $('aRestOn').addEventListener('change', () => { A.restOn = $('aRestOn').checked; save(); unlockSound(); });
+  $('aRestMin').addEventListener('change', () => {
+    const v = Math.round(Number($('aRestMin').value));
+    if (v >= 5 && v <= 240) { A.restMin = v; save(); } else $('aRestMin').value = A.restMin;
+  });
   $('aBlock').addEventListener('change', () => {
     const v = Math.round(Number($('aBlock').value));
     if (v >= 500 && v <= 20000) { A.block = v; save(); render(); } else $('aBlock').value = A.block;
@@ -2792,7 +2804,7 @@ function renderHome() {
     ? 'Próxima pausa en ' + Math.max(1, Math.ceil(left / 60000)) + ' min'
     : 'Regla 20-20-20 · sin activar';
   $('homeVistaBar').style.width = V.active ? Math.min(100, (1 - left / (V.every * 60000)) * 100) + '%' : '0';
-  $('homeSteps').textContent = fmt(today().steps) + ' pasos hoy';
+  $('homeSteps').textContent = fmt(today().steps) + ' pasos hoy' + restStatus();
   const hs = saludToday();
   $('homeAgua').textContent = `${fmtVasos(hs.agua)}/${db.salud.aguaGoal} vasos · ${hs.mov} ${hs.mov === 1 ? 'pausa activa' : 'pausas activas'}`;
   $('homeBloques').textContent = bloquesHome();
@@ -3364,6 +3376,41 @@ function dayEndTick() {
     castSend({ t: 'toast', text: '🌙 Ojos de noche: pon la pantalla en modo noche (f.lux o la «Luz nocturna» de Windows)' });
   }
 }
+// Descanso entre bloques de pasos: al completar cada bloque (hasta la meta) te sientas restMin minutos y luego caminas el siguiente
+function restTick() {
+  if (SCREEN || REMOTE) return;
+  const A = db.alerts; if (!A.restOn || isQuiet()) return; // en silencio se espera: se detecta al salir
+  const day = dayKey(), steps = Math.round(today().steps), B = A.block, goal = db.settings.goal || 8000, now = Date.now();
+  if (!A.rest || A.rest.k !== day) { A.rest = { k: day, n: Math.floor(steps / B), until: 0, next: 0 }; save(); return; } // lo ya pasado antes de abrir no cuenta
+  const R = A.rest, n = Math.floor(steps / B);
+  if (n > R.n) {
+    R.n = n;
+    if (n * B <= goal) {
+      const last = (n + 1) * B > goal; // último bloque de la meta: no hay siguiente
+      R.next = last ? 0 : (n + 1) * B;
+      R.until = last ? 0 : now + A.restMin * 60000;
+      save();
+      const text = last ? '¡Meta cumplida! Siéntate y descansa, te lo has ganado.' : `Siéntate y descansa ${A.restMin} minutos.`;
+      setTimeout(() => { chime(); speak(text); }, A.blockOn ? 8000 : 800); // después de la celebración del bloque
+      castSend({ t: 'toast', text: '🪑 ' + text });
+    } else save();
+  }
+  if (R.until && now >= R.until) {
+    R.until = 0; save();
+    if (steps < R.next) {
+      const text = `Ya has descansado. Camina otros ${fmt(B)} pasos, hasta los ${fmt(R.next)}.`;
+      chime(); speak(text);
+      castSend({ t: 'toast', text: '🚶 ' + text });
+    }
+  }
+}
+// «🪑 descanso hasta las 14:35» o «🚶 camina hasta 4.000», para la tarjeta de pasos
+function restStatus() {
+  const A = db.alerts, R = A.rest; if (!A.restOn || !R || R.k !== dayKey()) return '';
+  if (R.until > Date.now()) { const d = new Date(R.until); return ` · 🪑 descanso hasta las ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; }
+  if (R.next && today().steps < R.next) return ` · 🚶 camina hasta ${fmt(R.next)}`;
+  return '';
+}
 function walkTick() {
   if (SCREEN || REMOTE) return;
   const A = db.alerts; if (!A.walkOn) return;
@@ -3425,6 +3472,7 @@ function bindSalud() {
   $('hAlertDone').addEventListener('click', () => saludAnswer(true));
   $('hAlertSnooze').addEventListener('click', () => saludAnswer(false));
   setInterval(saludTick, 20000);
+  setInterval(restTick, 3000);
   // Pausi
   const P = db.pausi;
   $('pausiOn').checked = P.voiceOn; $('pausiEvery').value = P.every;
