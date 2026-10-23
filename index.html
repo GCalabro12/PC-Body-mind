@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.05</title>
+<title>Amable PC v2.06</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -147,6 +147,10 @@
   .scr-vol input { width: clamp(80px, 16vw, 170px); }
   .scr-vol span:last-child { min-width: 2.2em; text-align: right; }
   .scr-pair { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(15,23,42,0.9); padding: 24px; }
+  /* aviso grande, rojo y parpadeante mientras el móvil no está conectado */
+  .scr-nolink { order: -1; flex: 0 0 auto; background: #DC2626; color: #fff; font-weight: 900; text-align: center; font-size: clamp(22px, 3.2vw, 44px); line-height: 1.15; padding: 1.2vh 10px; border-radius: 14px; border: 3px solid #FCA5A5; animation: nolink-blink 1s steps(2, start) infinite; }
+  .scr-nolink small { display: block; font-size: 0.45em; font-weight: 700; margin-top: 4px; }
+  @keyframes nolink-blink { 50% { background: #7F1D1D; border-color: #DC2626; } }
   .scr-pair h1 { font-size: clamp(28px, 4vw, 56px); }
   /* botón amarillo de la ventana flotante, abajo del todo, antes de conectar el móvil */
   #sPairPip { position: absolute; bottom: 4vh; left: 50%; transform: translateX(-50%); width: auto; max-width: calc(100% - 32px); background: #FACC15; border: 2px solid #FACC15; color: #0F172A; font-weight: 800; font-size: clamp(16px, 1.6vw, 24px); padding: 0.6em 1.4em; border-radius: 14px; cursor: pointer; white-space: nowrap; }
@@ -1163,6 +1167,7 @@
   <div class="scr-video" id="scrVideoBox"><div id="scrVideo"></div></div>
   <div class="scr-shade"></div>
   <div class="scr-panel">
+    <div class="scr-nolink hidden" id="sNoLink">📵 FALTA CONECTAR<br>CON EL MÓVIL<small id="sNoLinkCode"></small></div>
     <div class="scr-focus hidden" id="sFocus" data-box="concentracion">
       <button class="scr-fold" data-fold="concentracion" aria-label="Plegar o desplegar">▴</button>
       <div class="sf-title">🎯 Modo concentración</div>
@@ -1259,7 +1264,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.05';
+const VERSION = 'v2.06';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2389,8 +2394,15 @@ function scrFocusTick() {
   $('sFocusCount').textContent = mmss(left);
   $('sFocusHint').textContent = f.min > 25 ? 'Sin avisos; solo las pausas de vista' : 'Sin avisos hasta que termine';
 }
+function scrNoLinkTick() {
+  const b = $('sNoLink'); if (!b) return;
+  const alive = scrLink && scrLink.open && Date.now() - scrLinkAt < 25000;
+  b.classList.toggle('hidden', !!alive);
+  if (!alive) $('sNoLinkCode').textContent = 'Código ' + (scrCodeNow || lsGet('pasos_pantalla_code') || '');
+}
 function scrEyeTick() {
   scrFocusTick();
+  scrNoLinkTick();
   scrSaludTick();
   if (Date.now() - scrPausiAt > 5 * 60000) scrPausiNext(false); // Pausi cambia de consejo cada 5 minutos
   const v = scrVista;
