@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.04</title>
+<title>Amable PC v2.05</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -148,6 +148,9 @@
   .scr-vol span:last-child { min-width: 2.2em; text-align: right; }
   .scr-pair { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(15,23,42,0.9); padding: 24px; }
   .scr-pair h1 { font-size: clamp(28px, 4vw, 56px); }
+  /* botón amarillo de la ventana flotante, abajo del todo, antes de conectar el móvil */
+  #sPairPip { position: absolute; bottom: 4vh; left: 50%; transform: translateX(-50%); width: auto; max-width: calc(100% - 32px); background: #FACC15; border: 2px solid #FACC15; color: #0F172A; font-weight: 800; font-size: clamp(16px, 1.6vw, 24px); padding: 0.6em 1.4em; border-radius: 14px; cursor: pointer; white-space: nowrap; }
+  #sPairPip:hover { background: #FDE047; border-color: #FDE047; }
   .scr-pair p { color: #cbd5e1; font-size: clamp(16px, 1.8vw, 26px); max-width: 900px; line-height: 1.5; }
   .scr-code { font-size: clamp(72px, 13vw, 200px); font-weight: 800; letter-spacing: 0.15em; color: #4ade80; font-variant-numeric: tabular-nums; margin: 2vh 0; }
   .scr-cele { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); background: rgba(15,23,42,0.93); border: 4px solid #facc15; border-radius: 2rem; padding: 4vh 5vw; text-align: center; animation: scrPop 0.5s ease; }
@@ -1249,13 +1252,14 @@
     <p>En el móvil abre <b>Amable PC</b>, toca <b>🖥️ Ver pantalla del móvil en el PC</b> y escribe este código:</p>
     <div class="scr-code" id="sCode">····</div>
     <p style="font-size:16px;color:#94a3b8">Deja esta ventana abierta. El código se mantiene aunque recargues la página.</p>
+    <button id="sPairPip" class="hidden">🗗 Ventana flotante</button>
   </div>
   <div class="scr-cele hidden" id="sCele"></div>
   <div class="scr-toast hidden" id="sToast"></div>
 </div>
 
 <script>
-const VERSION = 'v2.04';
+const VERSION = 'v2.05';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2604,13 +2608,13 @@ async function openPip() {
   // la ventana principal queda oculta y el navegador frena sus relojes: la cuenta atrás la lleva la ventana flotante
   w.setInterval(() => { try { scrEyeTick(); } catch (e) {} }, 500);
   w.document.body.appendChild(box);
-  $('sPip').textContent = '🗗 Cerrar ventana flotante';
+  $('sPip').textContent = $('sPairPip').textContent = '🗗 Cerrar ventana flotante';
   w.addEventListener('pagehide', () => {
     if (pipUpdPending) setTimeout(checkUpdate, 300);
     home.insertBefore(panel, next);
     home.append(toast, cele);
     window.__pip = null;
-    $('sPip').textContent = '🗗 Ventana flotante';
+    $('sPip').textContent = $('sPairPip').textContent = '🗗 Ventana flotante';
   });
 }
 function initScreen() {
@@ -2672,6 +2676,8 @@ function initScreen() {
   if ('documentPictureInPicture' in window) {
     $('sPip').classList.remove('hidden');
     $('sPip').addEventListener('click', openPip);
+    $('sPairPip').classList.remove('hidden'); // también antes de conectar el móvil
+    $('sPairPip').addEventListener('click', openPip);
   }
   setInterval(scrEyeTick, 500);
   scrFoldInit();
