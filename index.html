@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.10</title>
+<title>Amable PC v2.11</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -669,7 +669,7 @@
     <div class="focus-row"><button class="quiet-btn" id="quietBtn" aria-pressed="false"></button></div>
     <button class="home-link" data-go="pc">🖥️ Ver pantalla del móvil en el PC <span id="homePc"></span></button>
     <div class="home-btns">
-      <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Pausas activas frente al PC</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Pausa de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3 class="h-row">Bloques de tiempo<span class="blk-left hidden" id="homeBlkLeft" title="Tiempo que falta para terminar el bloque"></span></h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos en tu jornada</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn agua" data-go="agua"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -694,7 +694,7 @@
 <div class="wrap view hidden" id="vista">
   <header>
     <button class="back" data-back>← Inicio</button>
-    <h1 class="sky">👁 Pausas activas frente al PC</h1>
+    <h1 class="sky">👁 Pausa de la vista</h1>
     <span></span>
   </header>
   <div class="card" style="text-align:center">
@@ -1289,7 +1289,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.10';
+const VERSION = 'v2.11';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2836,13 +2836,18 @@ const PAUSI_TIPS = [
   'haz diez sentadillas suaves y vuelve con más energía.',
   'sube y baja unas escaleras: tu cuerpo te lo agradecerá.'
 ];
-function renderHome() {
-  const V = db.vista;
-  const left = Math.max(0, V.nextAt - Date.now());
-  $('homeVista').textContent = V.active
-    ? 'Próxima pausa en ' + Math.max(1, Math.ceil(left / 60000)) + ' min'
+// Tarjeta de la pausa de la vista en el inicio: cuenta atrás con minutos y segundos, igual que en la ventana flotante
+function homeVistaRender() {
+  const V = db.vista, now = Date.now();
+  const left = Math.max(0, V.nextAt - now);
+  $('homeVista').textContent = vBreakEnd ? 'Pausa en curso · ' + mmss(vBreakEnd - now)
+    : vAlerting ? '¡Toca la pausa ahora!'
+    : V.active ? 'Próxima pausa en ' + mmss(left)
     : 'Regla 20-20-20 · sin activar';
   $('homeVistaBar').style.width = V.active ? Math.min(100, (1 - left / (V.every * 60000)) * 100) + '%' : '0';
+}
+function renderHome() {
+  homeVistaRender();
   $('homeSteps').textContent = fmt(today().steps) + ' pasos hoy' + restStatus();
   const hs = saludToday();
   $('homeAgua').textContent = `${fmtVasos(hs.agua)}/${db.salud.aguaGoal} vasos · ${hs.mov} ${hs.mov === 1 ? 'pausa activa' : 'pausas activas'}`;
@@ -4142,6 +4147,7 @@ function initApp() {
   renderButton();
   drawSignal();
   setInterval(render, 30000); // cambio de día a medianoche
+  setInterval(() => { if (!$('home').classList.contains('hidden')) homeVistaRender(); }, 1000);
   $('apkLink').href = APK_URL;
   if (!NATIVE && /Android/i.test(navigator.userAgent)) $('apkCard').classList.remove('hidden');
   if (NATIVE) { initNative(); return; }
