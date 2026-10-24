@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.11</title>
+<title>Amable PC v2.12</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -643,6 +643,12 @@
   .break-act:empty { display: none; }
   .break-skip { position: absolute; bottom: 5vh; left: 50%; transform: translateX(-50%); width: auto; background: rgba(15,23,42,0.6); border: 1px solid #475569; color: #F8FAFC; padding: 0.8rem 2.2rem; border-radius: 999px; font-size: 1rem; }
   .break-skip:hover { background: rgba(30,41,59,0.9); }
+  /* Inicio: el título de cada tarjeta lleva el color de la tarjeta y el texto de debajo va en blanco */
+  #home .home-btn.vista { --c: #38BDF8; } #home .home-btn.bloques { --c: #FACC15; } #home .home-btn.pasos { --c: #4ADE80; }
+  #home .home-btn.agua { --c: #2DD4BF; } #home .home-btn.focus { --c: #FB7185; } #home .home-btn.correo { --c: #A78BFA; }
+  #home .home-btn h3 { color: var(--c); }
+  #home .home-btn .st { color: #F8FAFC; }
+  #home .home-btn .st::before { background: var(--c); }
 </style>
 </head>
 <body>
@@ -1289,7 +1295,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.11';
+const VERSION = 'v2.12';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
