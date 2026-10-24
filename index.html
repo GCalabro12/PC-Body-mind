@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.09</title>
+<title>Amable PC v2.10</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -438,6 +438,9 @@
   .home-btn.pasos .ico { background: rgba(74,222,128,0.14); }
   .home-btn.pasos .st { color: #4ADE80; }
   .home-btn.pasos:hover { border-color: rgba(74,222,128,0.45); }
+  .desk-by { margin: 10px 0 4px; padding: 10px 12px; border: 1px solid #334155; border-radius: 14px; }
+  .desk-by-title { font-weight: 700; margin-bottom: 6px; color: #e2e8f0; }
+  .desk-by.off-min .rmin, .desk-by.off-steps .rsteps { opacity: 0.4; }
   .home-link { width: 100%; margin-top: 18px; background: transparent; border: 1px dashed #38BDF8; color: #38BDF8; border-radius: 18px; padding: 0.85rem; font-size: 0.95rem; font-weight: 700; animation: pcbm-text-in 0.6s var(--ease-out) 0.45s both; }
   .home-link:hover { background: rgba(56,189,248,0.08); }
   .home-link span { color: #4ADE80; font-weight: 600; }
@@ -886,11 +889,21 @@
     <h2>🧍 Sentado / de pie</h2>
     <div class="desk-toggle" id="deskToggle"></div>
     <div class="desk-now" id="deskNow"></div>
-    <label class="check"><input type="checkbox" id="deskOn"> Avisarme para alternar sentado y de pie</label>
     <label class="check"><input type="checkbox" id="deskMusic"> 🎵 Música: suena de pie y se para al sentarme</label>
-    <div class="row">
-      <div><label for="deskSit">Sentado (minutos)</label><input type="number" id="deskSit" min="5" max="180" inputmode="numeric"></div>
-      <div><label for="deskStand">De pie (minutos)</label><input type="number" id="deskStand" min="5" max="180" inputmode="numeric"></div>
+    <label class="check"><input type="checkbox" id="deskOn"> Avisarme para alternar sentado y de pie</label>
+    <div class="desk-by" id="deskBy">
+      <div class="desk-by-title">¿Cómo quieres que te avise?</div>
+      <label class="check"><input type="radio" name="deskBy" id="deskByMin" value="min"> ⏱ Cada cierto tiempo</label>
+      <div class="row rmin">
+        <div><label for="deskSit">Sentado (minutos)</label><input type="number" id="deskSit" min="5" max="180" inputmode="numeric"></div>
+        <div><label for="deskStand">De pie (minutos)</label><input type="number" id="deskStand" min="5" max="180" inputmode="numeric"></div>
+      </div>
+      <label class="check"><input type="radio" name="deskBy" id="deskBySteps" value="steps"> 👣 Cada cierto número de pasos</label>
+      <div class="row rsteps">
+        <div><label for="deskStepsN">De pie: caminar (pasos)</label><input type="number" id="deskStepsN" min="500" max="20000" step="500" inputmode="numeric"></div>
+        <div><label for="deskSit2">Después, sentado (minutos)</label><input type="number" id="deskSit2" min="5" max="180" inputmode="numeric"></div>
+      </div>
+      <div class="hint">Con los pasos, al caminar esa cantidad estando de pie te aviso para sentarte, y pasados los minutos de descanso, para volver a caminar. Al elegir pasos se desactiva el tiempo de pie, y al elegir tiempo se desactivan los pasos.</div>
     </div>
     <div class="hint">¿No es así? <a href="#" class="desk-change">Cambiar respuesta</a></div>
   </div>
@@ -970,7 +983,7 @@
     <label class="check" style="margin:0"><input type="checkbox" id="aRestOn"> 🪑 Descansar al acabar cada bloque de pasos</label>
     <label for="aRestMin">Descanso (minutos)</label>
     <input type="number" id="aRestMin" min="5" max="240" step="5" inputmode="numeric">
-    <div class="hint">Al completar cada bloque (con 2.000 pasos por bloque: 2.000, 4.000, 6.000 y 8.000) te digo que te sientes y descanses ese tiempo. Cuando pasa, te aviso de caminar el siguiente bloque. Así hasta tu meta del día. El tamaño del bloque se cambia más abajo.</div>
+    <div class="hint">Al completar cada bloque (con 2.000 pasos por bloque: 2.000, 4.000, 6.000 y 8.000) te digo que te sientes y descanses ese tiempo. Cuando pasa, te aviso de caminar el siguiente bloque. Así hasta tu meta del día. El tamaño del bloque se cambia más abajo. Si en «Sentado / de pie» eliges avisar por pasos, ese aviso sustituye a este.</div>
   </div>
   <div class="card">
     <label class="check" style="margin:0"><input type="checkbox" id="aStillOn"> 🚶 Avisarme si dejo de caminar</label>
@@ -1276,7 +1289,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.09';
+const VERSION = 'v2.10';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3175,7 +3188,7 @@ const walkGoalAt = f => Math.round((db.settings.goal || 8000) * f / 100) * 100;
 function walkExpected() { const m = nowMin(); return Math.round((db.settings.goal || 8000) * Math.min(1, Math.max(0, (m - 540) / 540))); }
 
 // ---------- Mesa elevadora: sentado / de pie (con mesa) o pausas para caminar (sin mesa) ----------
-const DESK_DEF = { has: null, on: true, sit: 30, stand: 30, mode: 'sit', next: 0, music: true };
+const DESK_DEF = { has: null, on: true, sit: 30, stand: 30, mode: 'sit', next: 0, music: true, by: 'min', steps: 2000, base: null };
 const desk = () => (db.settings.desk = { ...DESK_DEF, ...(db.settings.desk || {}) });
 // ---- Iconos sentado / de pie (perfil, esquemáticos) ----
 const DESK_SVG = {
@@ -3200,7 +3213,9 @@ function deskToggleMark(root, mode) {
 function deskSetMode(mode) {
   const d = desk();
   if (d.mode === mode) { deskRender(); return; }
-  d.mode = mode; d.next = Date.now() + (mode === 'sit' ? d.sit : d.stand) * 60000;
+  d.mode = mode;
+  if (d.by === 'steps' && mode === 'stand') { d.next = 0; d.base = Math.round(today().steps); }
+  else { d.next = Date.now() + (mode === 'sit' ? d.sit : d.stand) * 60000; d.base = null; }
   save(); deskMusic(mode); setTimeout(sendState, 80); deskRender();
 }
 // Música con la mesa: de pie suena; al sentarte se para (la de este móvil y, por el estado, la de la pantalla del PC)
@@ -3216,8 +3231,13 @@ function deskRender() {
   $('walkCard').classList.toggle('hidden', D.has !== false);
   if (D.has === true) {
     const left = D.next ? Math.max(0, Math.ceil((D.next - Date.now()) / 60000)) : (D.mode === 'sit' ? D.sit : D.stand);
+    const stepsLeft = D.base == null ? D.steps : Math.max(0, D.steps - (Math.round(today().steps) - D.base));
     deskToggleMark($('deskToggle'), D.mode);
-    $('deskNow').innerHTML = (D.mode === 'stand' ? '🧍 Ahora: de pie' : '🪑 Ahora: sentado') + (D.on ? `<small>Te aviso para cambiar en ${left} min</small>` : '<small>Avisos de cambio desactivados</small>');
+    $('deskNow').innerHTML = (D.mode === 'stand' ? '🧍 Ahora: de pie' : '🪑 Ahora: sentado') + (!D.on ? '<small>Avisos de cambio desactivados</small>'
+      : D.by === 'steps' && D.mode === 'stand' ? `<small>Te aviso al caminar ${fmt(stepsLeft)} pasos más</small>`
+      : `<small>Te aviso para cambiar en ${left} min</small>`);
+    $('deskBy').classList.toggle('off-min', D.by === 'steps');
+    $('deskBy').classList.toggle('off-steps', D.by !== 'steps');
   } else if (D.has === false) {
     const goal = db.settings.goal || 8000, exp = walkExpected(), steps = Math.round(today().steps);
     $('walkPlan').innerHTML = `Tu meta: ${fmt(goal)} pasos al día` + (exp > 0 ? `<small>Para ir al día deberías llevar unos ${fmt(exp)}; llevas ${fmt(steps)}.${steps < exp ? ' Te faltan ' + fmt(exp - steps) + '.' : ' ¡Vas bien!'}</small>` : '<small>A partir de las 9:00 te digo cuántos pasos llevar para ir al día.</small>');
@@ -3227,14 +3247,23 @@ function deskTick() {
   if (SCREEN || REMOTE) return;
   const D = desk();
   if (!D.has || !D.on || !inHours() || vBreakEnd || vAlerting) { deskRender(); return; }
-  const now = Date.now();
-  if (!D.next) { D.next = now + (D.mode === 'sit' ? D.sit : D.stand) * 60000; save(); deskRender(); return; }
-  if (now < D.next) { deskRender(); return; }
-  D.mode = D.mode === 'sit' ? 'stand' : 'sit';
-  D.next = now + (D.mode === 'sit' ? D.sit : D.stand) * 60000;
-  save();
+  const now = Date.now(), byS = D.by === 'steps', steps = Math.round(today().steps);
+  let text;
+  if (byS && D.mode === 'stand') { // de pie, por pasos: se cambia al caminar los pasos elegidos
+    if (D.base == null || steps < D.base) { D.base = steps; save(); }
+    if (steps - D.base < D.steps) { deskRender(); return; }
+    D.mode = 'sit'; D.base = null; D.next = now + D.sit * 60000; save();
+    text = `Has caminado ${fmt(D.steps)} pasos. Siéntate y descansa ${D.sit} minutos.`;
+  } else {
+    if (!D.next) { D.next = now + (D.mode === 'sit' ? D.sit : D.stand) * 60000; save(); deskRender(); return; }
+    if (now < D.next) { deskRender(); return; }
+    D.mode = D.mode === 'sit' ? 'stand' : 'sit';
+    if (byS && D.mode === 'stand') { D.next = 0; D.base = steps; text = `Ya has descansado. Ponte de pie y camina otros ${fmt(D.steps)} pasos.`; }
+    else { D.next = now + (D.mode === 'sit' ? D.sit : D.stand) * 60000; D.base = null; }
+    save();
+  }
   deskMusic(D.mode); setTimeout(sendState, 80);
-  const text = D.mode === 'stand' ? 'Hora de ponerte de pie: sube la mesa y camina un poco mientras trabajas.' : 'Hora de sentarte: baja la mesa y descansa las piernas.';
+  if (!text) text = D.mode === 'stand' ? 'Hora de ponerte de pie: sube la mesa y camina un poco mientras trabajas.' : 'Hora de sentarte: baja la mesa y descansa las piernas.';
   chime(); setTimeout(() => speak(text), 900);
   castSend({ t: 'toast', text: (D.mode === 'stand' ? '🧍 ' : '🪑 ') + text });
   deskRender();
@@ -3243,6 +3272,22 @@ function deskBind() {
   if (!$('deskAsk')) return;
   const D = desk();
   $('deskOn').checked = D.on; $('deskSit').value = D.sit; $('deskStand').value = D.stand;
+  $('deskSit2').value = D.sit; $('deskStepsN').value = D.steps;
+  $('deskByMin').checked = D.by !== 'steps'; $('deskBySteps').checked = D.by === 'steps';
+  const setBy = () => {
+    const d = desk(), steps = $('deskBySteps').checked;
+    d.by = steps ? 'steps' : 'min'; d.next = 0; d.base = null;
+    $('deskSit').disabled = $('deskStand').disabled = steps;
+    $('deskStepsN').disabled = $('deskSit2').disabled = !steps;
+    save(); deskTick(); deskRender();
+  };
+  $('deskByMin').addEventListener('change', setBy); $('deskBySteps').addEventListener('change', setBy);
+  $('deskSit').disabled = $('deskStand').disabled = D.by === 'steps';
+  $('deskStepsN').disabled = $('deskSit2').disabled = D.by !== 'steps';
+  $('deskStepsN').addEventListener('change', () => {
+    const v = Math.round(Number($('deskStepsN').value)), d = desk();
+    if (v >= 500 && v <= 20000) { d.steps = v; d.base = null; save(); deskTick(); deskRender(); } else $('deskStepsN').value = d.steps;
+  });
   $('deskYes').addEventListener('click', () => { const d = desk(); d.has = true; d.next = 0; save(); deskTick(); });
   $('deskNo').addEventListener('click', () => { const d = desk(); d.has = false; save(); deskRender(); });
   document.querySelectorAll('.desk-change').forEach(a => a.addEventListener('click', e => { e.preventDefault(); desk().has = null; save(); deskRender(); }));
@@ -3252,6 +3297,11 @@ function deskBind() {
     if (v >= 5 && v <= 180) { d[key] = v; d.next = 0; save(); deskTick(); } else $(id).value = d[key];
   });
   n('deskSit', 'sit'); n('deskStand', 'stand');
+  $('deskSit2').addEventListener('change', () => {
+    const v = Math.round(Number($('deskSit2').value)), d = desk();
+    if (v >= 5 && v <= 180) { d.sit = v; $('deskSit').value = v; d.next = 0; save(); deskTick(); } else $('deskSit2').value = d.sit;
+  });
+  $('deskSit').addEventListener('change', () => { $('deskSit2').value = desk().sit; });
   $('deskToggle').innerHTML = deskToggleHtml(true, false);
   $('deskToggle').querySelectorAll('.desk-btn').forEach(b => b.addEventListener('click', () => deskSetMode(b.dataset.desk)));
   $('deskMusic').checked = D.music;
@@ -3422,6 +3472,7 @@ function stillTick() {
 // Descanso entre bloques de pasos: al completar cada bloque (hasta la meta) te sientas restMin minutos y luego caminas el siguiente
 function restTick() {
   if (SCREEN || REMOTE) return;
+  const Dk = desk(); if (Dk.has && Dk.on && Dk.by === 'steps') return; // el aviso por pasos de Sentado / de pie ya hace este trabajo
   const A = db.alerts; if (!A.restOn || isQuiet()) return; // en silencio se espera: se detecta al salir
   const day = dayKey(), steps = Math.round(today().steps), B = A.block, goal = db.settings.goal || 8000, now = Date.now();
   if (!A.rest || A.rest.k !== day) { A.rest = { k: day, n: Math.floor(steps / B), until: 0, next: 0 }; save(); return; } // lo ya pasado antes de abrir no cuenta
