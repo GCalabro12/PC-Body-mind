@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.12</title>
+<title>Amable PC v2.13</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -995,6 +995,9 @@
     <label class="check" style="margin:0"><input type="checkbox" id="aStillOn"> 🚶 Avisarme si dejo de caminar</label>
     <label for="aStillSec">Segundos parado antes de avisar</label>
     <input type="number" id="aStillSec" min="20" max="600" step="10" inputmode="numeric">
+    <label for="aStandNag">De pie y sin avanzar: repetir cada (minutos, 0 = no)</label>
+    <input type="number" id="aStandNag" min="0" max="30" inputmode="numeric">
+    <div class="hint">Si estás de pie con el aviso por pasos y no caminas, te lo repito cada ese tiempo hasta que camines.</div>
     <div class="hint">Si llevas un rato caminando y te paras ese tiempo (60 segundos = 1 minuto), una voz dice «Recuerda seguir caminando». Mientras habla, la música se pausa y después vuelve. No avisa durante tus descansos, en silencio ni en modo concentración.</div>
   </div>
   <div class="card">
@@ -1295,7 +1298,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.12';
+const VERSION = 'v2.13';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1305,7 +1308,7 @@ const fmtVasos = n => String(n).replace('.', ',');
 const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0, moveOn: true, moveEvery: 60, moveDur: 2, lastMove: 0 };
-const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null, restOn: true, restMin: 60, rest: null, stillOn: true, stillSec: 60 };
+const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null, restOn: true, restMin: 60, rest: null, stillOn: true, stillSec: 60, standNag: 2 };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
 // ?remoto: la app completa dentro de la pantalla del PC, trabajando con los datos del móvil (no guarda nada en el PC)
 const REMOTE = !SCREEN && new URLSearchParams(location.search).has('remoto');
@@ -1961,7 +1964,11 @@ function bindAlerts() {
   $('aBlockOn').addEventListener('change', () => { A.blockOn = $('aBlockOn').checked; save(); });
   $('aWalkOn').checked = A.walkOn;
   $('aWalkOn').addEventListener('change', () => { A.walkOn = $('aWalkOn').checked; save(); unlockSound(); });
-  $('aStillOn').checked = A.stillOn; $('aStillSec').value = A.stillSec;
+  $('aStillOn').checked = A.stillOn; $('aStillSec').value = A.stillSec; $('aStandNag').value = A.standNag;
+  $('aStandNag').addEventListener('change', () => {
+    const v = Math.round(Number($('aStandNag').value));
+    if (v >= 0 && v <= 30) { A.standNag = v; save(); } else $('aStandNag').value = A.standNag;
+  });
   $('aStillOn').addEventListener('change', () => { A.stillOn = $('aStillOn').checked; save(); unlockSound(); });
   $('aStillSec').addEventListener('change', () => {
     const v = Math.round(Number($('aStillSec').value));
@@ -3464,12 +3471,27 @@ function dayEndTick() {
   }
 }
 // «Recuerda seguir caminando»: si llevabas un rato caminando y te paras el tiempo elegido, una voz te lo dice (y la música se pausa mientras habla)
-let stillRun = 0, stillLast = null, stillMoveAt = 0;
+let stillRun = 0, stillLast = null, stillMoveAt = 0, standNagAt = 0, stillMode = null, stillModeAt = 0;
 function stillTick() {
   if (SCREEN || REMOTE) return;
   const A = db.alerts, steps = Math.round(today().steps), now = Date.now();
   if (stillLast === null || steps < stillLast) { stillLast = steps; stillMoveAt = now; stillRun = 0; return; }
   if (steps > stillLast) { stillRun += steps - stillLast; stillLast = steps; stillMoveAt = now; return; }
+  // De pie por pasos: si los pasos no avanzan, avisa cada standNag minutos hasta que camines
+  const D = desk();
+  if (D.mode !== stillMode) { stillMode = D.mode; stillModeAt = now; }
+  if (A.standNag > 0 && D.has && D.on && D.by === 'steps' && D.mode === 'stand') {
+    const every = A.standNag * 60000;
+    if (now - Math.max(stillMoveAt, standNagAt, stillModeAt) >= every && !isQuiet() && !vBreakEnd && !vAlerting && inHours()) {
+      standNagAt = now;
+      const left = D.base == null ? D.steps : Math.max(0, D.steps - (steps - D.base));
+      const text = `Sigues de pie y no avanzas. Camina: te faltan ${fmt(left)} pasos para sentarte.`;
+      speak(text, null, true);
+      castSend({ t: 'toast', text: '🚶 ' + text });
+    }
+    stillRun = 0;
+    return; // este aviso sustituye al de «Recuerda seguir caminando»
+  }
   if (!A.stillOn) { stillRun = 0; return; }
   const gap = now - stillMoveAt, need = (A.stillSec || 60) * 1000;
   if (gap < need) return;
