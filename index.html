@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.08</title>
+<title>Amable PC v2.09</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -973,6 +973,12 @@
     <div class="hint">Al completar cada bloque (con 2.000 pasos por bloque: 2.000, 4.000, 6.000 y 8.000) te digo que te sientes y descanses ese tiempo. Cuando pasa, te aviso de caminar el siguiente bloque. Así hasta tu meta del día. El tamaño del bloque se cambia más abajo.</div>
   </div>
   <div class="card">
+    <label class="check" style="margin:0"><input type="checkbox" id="aStillOn"> 🚶 Avisarme si dejo de caminar</label>
+    <label for="aStillSec">Segundos parado antes de avisar</label>
+    <input type="number" id="aStillSec" min="20" max="600" step="10" inputmode="numeric">
+    <div class="hint">Si llevas un rato caminando y te paras ese tiempo (60 segundos = 1 minuto), una voz dice «Recuerda seguir caminando». Mientras habla, la música se pausa y después vuelve. No avisa durante tus descansos, en silencio ni en modo concentración.</div>
+  </div>
+  <div class="card">
     <details>
     <summary>🔔 Avisos de voz</summary>
     <label class="check"><input type="checkbox" id="aVoice"> Sonido + voz que diga «llevas … pasos»</label>
@@ -1270,7 +1276,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.08';
+const VERSION = 'v2.09';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1280,7 +1286,7 @@ const fmtVasos = n => String(n).replace('.', ',');
 const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
 const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0, moveOn: true, moveEvery: 60, moveDur: 2, lastMove: 0 };
-const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null, restOn: true, restMin: 60, rest: null };
+const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null, restOn: true, restMin: 60, rest: null, stillOn: true, stillSec: 60 };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
 // ?remoto: la app completa dentro de la pantalla del PC, trabajando con los datos del móvil (no guarda nada en el PC)
 const REMOTE = !SCREEN && new URLSearchParams(location.search).has('remoto');
@@ -1577,7 +1583,7 @@ function speakDuringBreak(text, done) { speakBypass = true; try { speak(text, do
 function speakFlushHeld() {
   if (vBreakEnd) return;
   const q = speakHeld; speakHeld = [];
-  const next = () => { const it = q.shift(); if (it) speak(it[0], () => { if (it[1]) it[1](); setTimeout(next, 400); }); };
+  const next = () => { const it = q.shift(); if (it) speak(it[0], () => { if (it[1]) it[1](); setTimeout(next, 400); }, it[2]); };
   next();
   saludTick(); // si tocaba un aviso de agua o movimiento, sale ahora
 }
@@ -1590,14 +1596,17 @@ const isQuiet = () => !quietBypass && !!(db.settings && (db.settings.quiet || (d
 const pcLinked = () => !SCREEN && !REMOTE && !!(conn && conn.open);
 // APK nuevo: sabe callarse cuando el PC está conectado (el JS se lo avisa cada 5 s; si el aviso caduca, vuelve a hablar el móvil)
 const NATIVE_PC = NATIVE && typeof window.AndroidPasos.pcLink === 'function';
-function speak(text, done) {
+// pause = true: mientras habla se pausa la música (la del móvil y la del PC) y después vuelve
+function speak(text, done, pause) {
   if (REMOTE || isQuiet()) { if (done) setTimeout(done, 50); return; }
-  if (vBreakEnd && !speakBypass) { speakHeld.push([text, done]); return; }
+  if (vBreakEnd && !speakBypass) { speakHeld.push([text, done, pause]); return; }
   if (pcLinked()) {
-    castSend({ t: 'say', text });
+    castSend({ t: 'say', text, pause: !!pause });
+    if (pause && musicPlaying()) { musicPause(); setTimeout(musicPlay, 1500 + text.length * 75); }
     if (done) setTimeout(done, 1500 + text.length * 75);
     return;
   }
+  if (pause && musicPlaying()) { musicPause(); const d0 = done; done = () => { musicPlay(); if (d0) d0(); }; }
   if (NATIVE) { // en la app Android habla el teléfono (también con la pantalla apagada)
     if (musicPlaying()) { yt.setVolume(Math.round(M.vol * 0.25)); ducked = true; }
     try { AndroidPasos.speak(text); } catch (e) {}
@@ -1933,6 +1942,12 @@ function bindAlerts() {
   $('aBlockOn').addEventListener('change', () => { A.blockOn = $('aBlockOn').checked; save(); });
   $('aWalkOn').checked = A.walkOn;
   $('aWalkOn').addEventListener('change', () => { A.walkOn = $('aWalkOn').checked; save(); unlockSound(); });
+  $('aStillOn').checked = A.stillOn; $('aStillSec').value = A.stillSec;
+  $('aStillOn').addEventListener('change', () => { A.stillOn = $('aStillOn').checked; save(); unlockSound(); });
+  $('aStillSec').addEventListener('change', () => {
+    const v = Math.round(Number($('aStillSec').value));
+    if (v >= 20 && v <= 600) { A.stillSec = v; save(); } else $('aStillSec').value = A.stillSec;
+  });
   $('aRestOn').checked = A.restOn; $('aRestMin').value = A.restMin;
   $('aRestOn').addEventListener('change', () => { A.restOn = $('aRestOn').checked; save(); unlockSound(); });
   $('aRestMin').addEventListener('change', () => {
@@ -2467,10 +2482,21 @@ function scrRemoteSend() {
   if (scrRemoteDb && f && f.contentWindow) f.contentWindow.postMessage({ t: 'db', db: scrRemoteDb }, '*');
 }
 // Aviso hablado que llega del móvil: suena en el altavoz del PC (baja el vídeo mientras habla)
-function scrSay(text) {
+function scrSay(text, pause) {
   if (!text) return;
+  let paused = false;
+  try {
+    if (pause && scrYTReady && [YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(scrYT.getPlayerState())) { paused = true; scrYT.pauseVideo(); }
+  } catch (e) {}
+  const resume = () => {
+    if (!paused) return; paused = false;
+    try { if (!scrBreakHold && !scrDeskHold && !$('scrVideoBox').classList.contains('off')) scrYT.playVideo(); } catch (e) {}
+    setTimeout(scrCheckPlaying, 500);
+  };
   quietBypass = true;
-  try { speak(text); } finally { quietBypass = false; }
+  try { speak(text, resume); } finally { quietBypass = false; }
+  setTimeout(resume, 2500 + text.length * 90); // por si la voz no avisa de que ha terminado
+  if (paused) return; // con la música pausada no hace falta bajarle el volumen
   try {
     if (scrYTReady && !scrYT.isMuted()) {
       const vol = Number($('sVol').value) || 60;
@@ -2483,7 +2509,7 @@ function scrData(m) {
   if (!m || typeof m !== 'object') return;
   if (m.t === 'db') { scrRemoteDb = m.db; scrRemoteSend(); return; }
   if (m.t === 'state' && m.gp) { const g = { ...m.gp, version: m.gp.version || VERSION }; gpSend(g); }
-  if (m.t === 'say') { scrSay(String(m.text || '')); return; }
+  if (m.t === 'say') { scrSay(String(m.text || ''), !!m.pause); return; }
   if (m.t === 'sound') { quietBypass = true; try { const c = audio(); if (c && SOUNDS[m.s]) SOUNDS[m.s](c.currentTime + 0.02); } finally { quietBypass = false; } return; }
   if (m.t === 'fanfare') { quietBypass = true; try { startFanfare(true); } finally { quietBypass = false; } return; }
   if (m.t === 'chime') { quietBypass = true; try { chime(); } finally { quietBypass = false; } return; }
@@ -3376,6 +3402,23 @@ function dayEndTick() {
     castSend({ t: 'toast', text: '🌙 Ojos de noche: pon la pantalla en modo noche (f.lux o la «Luz nocturna» de Windows)' });
   }
 }
+// «Recuerda seguir caminando»: si llevabas un rato caminando y te paras el tiempo elegido, una voz te lo dice (y la música se pausa mientras habla)
+let stillRun = 0, stillLast = null, stillMoveAt = 0;
+function stillTick() {
+  if (SCREEN || REMOTE) return;
+  const A = db.alerts, steps = Math.round(today().steps), now = Date.now();
+  if (stillLast === null || steps < stillLast) { stillLast = steps; stillMoveAt = now; stillRun = 0; return; }
+  if (steps > stillLast) { stillRun += steps - stillLast; stillLast = steps; stillMoveAt = now; return; }
+  if (!A.stillOn) { stillRun = 0; return; }
+  const gap = now - stillMoveAt, need = (A.stillSec || 60) * 1000;
+  if (gap < need) return;
+  const ok = stillRun >= 30 && gap < need + 90000 && !isQuiet() && !vBreakEnd && !vAlerting && !(A.rest && A.rest.until > now);
+  if (ok) {
+    speak('Recuerda seguir caminando.', null, true);
+    castSend({ t: 'toast', text: '🚶 Recuerda seguir caminando' });
+  }
+  stillRun = 0; // un solo aviso por parada: hasta volver a caminar no se repite
+}
 // Descanso entre bloques de pasos: al completar cada bloque (hasta la meta) te sientas restMin minutos y luego caminas el siguiente
 function restTick() {
   if (SCREEN || REMOTE) return;
@@ -3473,6 +3516,7 @@ function bindSalud() {
   $('hAlertSnooze').addEventListener('click', () => saludAnswer(false));
   setInterval(saludTick, 20000);
   setInterval(restTick, 3000);
+  setInterval(stillTick, 5000);
   // Pausi
   const P = db.pausi;
   $('pausiOn').checked = P.voiceOn; $('pausiEvery').value = P.every;
