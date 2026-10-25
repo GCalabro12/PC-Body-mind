@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.14</title>
+<title>Amable PC v2.15</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -655,6 +655,9 @@
   #home .home-btn h3 { color: var(--c); }
   #home .home-btn .st { color: #F8FAFC; }
   #home .home-btn .st::before { background: var(--c); }
+  /* mantener pulsado sobre un texto no lo selecciona (sí dentro de los campos de escribir) */
+  body:not(.screen) { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  body:not(.screen) input, body:not(.screen) textarea { -webkit-user-select: text; user-select: text; }
 </style>
 </head>
 <body>
@@ -1138,7 +1141,7 @@
       <div class="hint">Durante la concentración no suena nada más. Solo te diré «ahora estás en…» y lo que hayas escrito. Si dura 25 minutos o menos, la pausa de vista espera al final; si dura más, sí te aviso de las pausas de vista entre medias.</div>
       <p class="hint" id="fErr" style="color:#F87171"></p>
       <button id="fGo">🎯 Empezar a concentrarme</button>
-      <button id="fCancel" class="btn-outline">Cancelar</button>
+      <button id="fCancel" class="btn-outline">← Volver al inicio</button>
     </div>
     <div id="focusRunning" class="hidden">
       <div class="f-now" id="fNow"></div>
@@ -1308,7 +1311,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.14';
+const VERSION = 'v2.15';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2240,7 +2243,7 @@ function sendState() {
   const d = today(), st = dayStats(d);
   const b = batteryInfo();
   castSend({ t: 'state', steps: d.steps, goal: db.settings.goal, km: st.km, kcal: st.kcal, mins: st.mins, block: db.alerts.block, running, video: M.id, pos: M.pos,
-    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION, dev: DEV_ID, quiet: isQuiet(), gp: gpLocal(),
+    battery: b ? b.level : -1, charging: b ? b.charging : false, vista: vistaState(), bloque: bloqueState(), salud: saludState(), ver: VERSION, dev: DEV_ID, quiet: isQuiet(), qbtn: !!db.settings.quiet, gp: gpLocal(),
     desk: desk().has ? { mode: desk().mode, music: desk().music } : null,
     focus: focusOn() ? { task: db.settings.focus.task || '', left: Math.max(0, db.settings.focus.until - Date.now()), min: db.settings.focus.min, every: db.settings.focus.every || 0 } : null });
 }
@@ -2325,19 +2328,22 @@ function scrStart() {
     });
   }).catch(e => { scrConn(e.message); setTimeout(scrStart, 5000); });
 }
-let scrVista = null, scrBreakHold = false, scrDeskHold = false, scrDeskMode = null;
+let scrVista = null, scrBreakHold = false, scrDeskHold = false, scrDeskMode = null, scrQuietHold = false;
 // Vídeo/música de la pantalla: se para durante la pausa de vista (y vuelve sola al acabar) y según estés sentado o de pie
 function scrMusicSync(m) {
   if (!scrYTReady) return;
   const playing = () => [YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(scrYT.getPlayerState());
   const off = $('scrVideoBox').classList.contains('off');
   const inBreak = !!(m.vista && m.vista.breakLeft > 0);
+  // botón «Pausar avisos y voces» del móvil: el vídeo tampoco suena
+  if (m.qbtn) { if (playing()) { scrQuietHold = true; scrYT.pauseVideo(); } }
+  else if (scrQuietHold) { scrQuietHold = false; if (!scrBreakHold && !scrDeskHold && !off) scrYT.playVideo(); }
   if (inBreak && !scrBreakHold && playing()) { scrBreakHold = true; scrYT.pauseVideo(); }
-  else if (!inBreak && scrBreakHold) { scrBreakHold = false; if (!scrDeskHold && !off) scrYT.playVideo(); }
+  else if (!inBreak && scrBreakHold) { scrBreakHold = false; if (!scrDeskHold && !scrQuietHold && !off) scrYT.playVideo(); }
   const dm = m.desk && m.desk.music ? m.desk.mode : null;
   if (dm && scrDeskMode && dm !== scrDeskMode) {
     if (dm === 'sit') { scrDeskHold = true; if (playing()) scrYT.pauseVideo(); }
-    else { scrDeskHold = false; if (!scrBreakHold && !off) scrYT.playVideo(); }
+    else { scrDeskHold = false; if (!scrBreakHold && !scrQuietHold && !off) scrYT.playVideo(); }
   }
   scrDeskMode = dm;
   if (!dm) scrDeskHold = false;
@@ -2526,7 +2532,7 @@ function scrSay(text, pause) {
   } catch (e) {}
   const resume = () => {
     if (!paused) return; paused = false;
-    try { if (!scrBreakHold && !scrDeskHold && !$('scrVideoBox').classList.contains('off')) scrYT.playVideo(); } catch (e) {}
+    try { if (!scrBreakHold && !scrDeskHold && !scrQuietHold && !$('scrVideoBox').classList.contains('off')) scrYT.playVideo(); } catch (e) {}
     setTimeout(scrCheckPlaying, 500);
   };
   quietBypass = true;
@@ -2843,6 +2849,36 @@ function showView() {
   if (id === 'app') { render(); deskRender(); }
   if (id === 'bloques') { bloquesReset(); renderBloques(true); }
   window.scrollTo(0, 0);
+}
+// Deslizar con el dedo: a la derecha = pantalla anterior, a la izquierda = pantalla siguiente (Inicio · Pausa de la vista · Pasos · Ver pantalla en el PC)
+const SWIPE_ORDER = ['', 'vista', 'pasos', 'pc'];
+function swipeNav(dir) {
+  const cur = Math.max(0, SWIPE_ORDER.indexOf(location.hash.replace('#', '')));
+  const to = cur + dir;
+  if (to < 0 || to >= SWIPE_ORDER.length) return;
+  fromHome = false;
+  history.replaceState(null, '', location.pathname + location.search + (SWIPE_ORDER[to] ? '#' + SWIPE_ORDER[to] : ''));
+  showView();
+}
+function swipeInit() {
+  let x0 = 0, y0 = 0, t0 = 0, ok = false;
+  const blocked = el => {
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName) || n.classList.contains('grip') || n.classList.contains('home-btn') && n.classList.contains('dragging')) return true;
+      if (n.scrollWidth > n.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(n).overflowX)) return true; // zonas que se desplazan de lado
+    }
+    return false;
+  };
+  addEventListener('touchstart', e => {
+    ok = e.touches.length === 1 && !blocked(e.target) && !document.querySelector('.cele:not(.hidden)') && $('splash').classList.contains('hidden');
+    if (ok) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); }
+  }, { passive: true });
+  addEventListener('touchend', e => {
+    if (!ok) return; ok = false;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    if (Date.now() - t0 > 800 || Math.abs(dx) < 70 || Math.abs(dx) < 2 * Math.abs(dy)) return;
+    swipeNav(dx > 0 ? -1 : 1);
+  }, { passive: true });
 }
 function goBack() {
   if (fromHome) { fromHome = false; history.back(); return; }
@@ -3248,7 +3284,7 @@ function deskSetMode(mode) {
 }
 // Música con la mesa: de pie suena; al sentarte se para (la de este móvil y, por el estado, la de la pantalla del PC)
 function deskMusic(mode) {
-  if (REMOTE || SCREEN || !desk().music) return;
+  if (REMOTE || SCREEN || !desk().music || db.settings.quiet) return;
   try { if (mode === 'stand') { if (!vBreakEnd) musicPlay(); } else musicPause(); } catch (e) {}
 }
 function deskRender() {
@@ -4053,6 +4089,7 @@ function initShell() {
   homeOrderInit();
   document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', goBack));
   addEventListener('hashchange', showView);
+  swipeInit();
   bindVista();
   bindBloques();
   bindSalud();
@@ -4108,13 +4145,16 @@ function quietRender() {
   b.setAttribute('aria-pressed', q ? 'true' : 'false');
   b.textContent = q ? '▶ Avisos en pausa · tocar para activarlos' : '⏸ Pausar avisos y voces';
 }
+let quietMusicHold = false; // la música del móvil estaba sonando cuando se pulsó pausar
 function quietToggle() {
   db.settings.quiet = !db.settings.quiet;
   const now = Date.now();
   if (db.settings.quiet) {
+    try { if (musicPlaying()) { quietMusicHold = true; musicPause(); } } catch (e) {}
     try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
     if (vAlerting) { clearInterval(vReminder); clearTimeout(vAlertSpeak); vAlerting = false; $('vAlert').classList.add('hidden'); vistaNotifClose(); }
   } else {
+    if (quietMusicHold) { quietMusicHold = false; try { musicPlay(); } catch (e) {} }
     // al volver: los avisos empiezan de nuevo desde ahora (no salen todos de golpe)
     const V = db.vista, S = db.salud;
     if (V.active) V.nextAt = now + V.every * 60000;
