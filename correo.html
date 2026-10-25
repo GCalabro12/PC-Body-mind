@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v2.15';
+const VERSION = 'v2.16';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -424,9 +424,26 @@ function notify(list) {
   } catch (e) {}
 }
 function disconnect() {
-  if (!confirm('¿Desconectar tu Gmail de Amable PC? Las etiquetas y filtros que ya están en Gmail se quedan.')) return;
-  try { if (token && window.google && !DEMO) google.accounts.oauth2.revoke(token, () => {}); } catch (e) {}
-  token = null; st = {}; save(); render();
+  appConfirm('Desconectar Gmail', '¿Desconectar tu Gmail de Amable PC? Las etiquetas y filtros que ya están en Gmail se quedan.', 'Desconectar', () => {
+    try { if (token && window.google && !DEMO) google.accounts.oauth2.revoke(token, () => {}); } catch (e) {}
+    token = null; st = {}; save(); render();
+  });
+}
+// Ventana de confirmación con el mismo aspecto que el resto de la app (en vez de la del navegador)
+function appConfirm(title, text, okLabel, onYes) {
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;inset:0;z-index:99;background:rgba(2,6,23,0.8);display:flex;align-items:center;justify-content:center;padding:20px;';
+  box.innerHTML = '<div style="background:#1E293B;border:3px solid #818CF8;border-radius:1.4rem;padding:1.6rem 1.3rem;max-width:380px;width:100%;text-align:center;color:#F8FAFC">'
+    + '<div style="font-size:1.25rem;font-weight:800;color:#A5B4FC;margin-bottom:8px"></div>'
+    + '<div style="color:#CBD5E1;line-height:1.45;margin-bottom:16px"></div>'
+    + '<div style="display:flex;gap:10px"><button data-no style="flex:1;padding:12px;border-radius:14px;border:1px solid #475569;background:transparent;color:#CBD5E1;font-weight:700;font-size:1rem">Cancelar</button>'
+    + '<button data-yes style="flex:1;padding:12px;border-radius:14px;border:0;background:#4F46E5;color:#fff;font-weight:700;font-size:1rem"></button></div></div>';
+  box.children[0].children[0].textContent = title;
+  box.children[0].children[1].textContent = text;
+  box.querySelector('[data-yes]').textContent = okLabel || 'Aceptar';
+  box.querySelector('[data-no]').onclick = () => box.remove();
+  box.querySelector('[data-yes]').onclick = () => { box.remove(); onYes(); };
+  document.body.appendChild(box);
 }
 
 // ---------- Modo de prueba (sin Gmail): correos inventados ----------

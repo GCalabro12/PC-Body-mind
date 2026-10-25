@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.15</title>
+<title>Amable PC v2.16</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1160,7 +1160,14 @@
     <div class="cele-title" style="color:#A5B4FC" id="infoTitle"></div>
     <div class="cele-sub" id="infoSub"></div>
     <div id="infoExtra" style="margin-bottom:14px"></div>
-    <button id="infoOk" style="background:#4F46E5">Vale</button>
+    <button id="infoOk" style="background:#4F46E5">Aceptar</button>
+  </div>
+</div>
+<div class="cele hidden" id="confirmModal">
+  <div class="cele-box" style="border-color:#818CF8">
+    <div class="cele-title" style="color:#A5B4FC" id="confirmTitle"></div>
+    <div class="cele-sub" id="confirmSub"></div>
+    <div class="f-row2"><button id="confirmNo" class="btn-outline">Cancelar</button><button id="confirmYes" style="background:#4F46E5">Aceptar</button></div>
   </div>
 </div>
 <div class="cele hidden" id="bSleep">
@@ -1311,7 +1318,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.15';
+const VERSION = 'v2.16';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1961,9 +1968,10 @@ function bindSettings() {
   $('sens').addEventListener('input', () => { s.sens = Number($('sens').value); $('sensVal').textContent = s.sens; save(); });
   $('addBtn').addEventListener('click', () => { unlockSound(); if (NATIVE) { AndroidPasos.addSteps(100); nativePoll(); } else addSteps(100, 0); });
   $('resetBtn').addEventListener('click', () => {
-    if (!confirm('¿Poner a cero los pasos de hoy?')) return;
-    if (NATIVE) { AndroidPasos.resetToday(); nativePoll(); return; }
-    db.days[dayKey()] = { steps: 0, activeMs: 0 }; save(); render();
+    appConfirm('Poner a cero', '¿Poner a cero los pasos de hoy?', 'Poner a cero', () => {
+      if (NATIVE) { AndroidPasos.resetToday(); nativePoll(); return; }
+      db.days[dayKey()] = { steps: 0, activeMs: 0 }; save(); render();
+    });
   });
 }
 
@@ -1999,7 +2007,7 @@ function bindAlerts() {
   });
   $('aCelUrl').addEventListener('change', () => {
     const v = $('aCelUrl').value.trim();
-    if (v && !parseYouTube(v)) { alert('No reconozco ese enlace de YouTube.'); $('aCelUrl').value = A.celUrl; return; }
+    if (v && !parseYouTube(v)) { infoModal('🎵 Enlace de YouTube', 'No reconozco ese enlace de YouTube.'); $('aCelUrl').value = A.celUrl; return; }
     A.celUrl = v; save();
   });
   $('aTest').addEventListener('click', () => { unlockSound(); playSound(); setTimeout(() => speak(`Llevas ${A.every} pasos.`), 650); });
@@ -2109,7 +2117,7 @@ function bindMusic() {
   });
   $('mUse').addEventListener('click', () => {
     const p = parseYouTube($('mUrl').value.trim());
-    if (!p) return alert('No reconozco ese enlace de YouTube.');
+    if (!p) return infoModal('🎵 Enlace de YouTube', 'No reconozco ese enlace de YouTube.');
     setMusic(p.id, p.pos);
   });
   $('mDefault').addEventListener('click', () => {
@@ -2850,34 +2858,27 @@ function showView() {
   if (id === 'bloques') { bloquesReset(); renderBloques(true); }
   window.scrollTo(0, 0);
 }
-// Deslizar con el dedo: a la derecha = pantalla anterior, a la izquierda = pantalla siguiente (Inicio · Pausa de la vista · Pasos · Ver pantalla en el PC)
-const SWIPE_ORDER = ['', 'vista', 'pasos', 'pc'];
-function swipeNav(dir) {
-  const cur = Math.max(0, SWIPE_ORDER.indexOf(location.hash.replace('#', '')));
-  const to = cur + dir;
-  if (to < 0 || to >= SWIPE_ORDER.length) return;
-  fromHome = false;
-  history.replaceState(null, '', location.pathname + location.search + (SWIPE_ORDER[to] ? '#' + SWIPE_ORDER[to] : ''));
-  showView();
-}
+// Deslizar el dedo hacia la derecha = volver atrás: desde cualquier pantalla al Inicio, o cerrar la ventana de concentración. No hay deslizar hacia delante.
 function swipeInit() {
   let x0 = 0, y0 = 0, t0 = 0, ok = false;
   const blocked = el => {
     for (let n = el; n && n !== document.body; n = n.parentElement) {
-      if (/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName) || n.classList.contains('grip') || n.classList.contains('home-btn') && n.classList.contains('dragging')) return true;
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName) || n.classList.contains('grip')) return true;
       if (n.scrollWidth > n.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(n).overflowX)) return true; // zonas que se desplazan de lado
     }
     return false;
   };
   addEventListener('touchstart', e => {
-    ok = e.touches.length === 1 && !blocked(e.target) && !document.querySelector('.cele:not(.hidden)') && $('splash').classList.contains('hidden');
+    const otherModal = [...document.querySelectorAll('.cele:not(.hidden)')].some(m => m.id !== 'focusModal');
+    ok = e.touches.length === 1 && !blocked(e.target) && !otherModal && $('splash').classList.contains('hidden');
     if (ok) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); }
   }, { passive: true });
   addEventListener('touchend', e => {
     if (!ok) return; ok = false;
     const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
-    if (Date.now() - t0 > 800 || Math.abs(dx) < 70 || Math.abs(dx) < 2 * Math.abs(dy)) return;
-    swipeNav(dx > 0 ? -1 : 1);
+    if (dx <= 0 || Date.now() - t0 > 800 || dx < 70 || dx < 2 * Math.abs(dy)) return;
+    if (!$('focusModal').classList.contains('hidden')) { focusClose(); return; }
+    if (VIEWS[location.hash.replace('#', '')] && VIEWS[location.hash.replace('#', '')] !== 'home') goBack();
   }, { passive: true });
 }
 function goBack() {
@@ -3503,6 +3504,13 @@ async function fMicToggle() {
 const DAYEND_DEF = { on: true, time: '19:00', done: '', nightOn: true, nightTime: '20:30', nightDone: '' };
 const dayEnd = () => (db.settings.dayEnd = { ...DAYEND_DEF, ...(db.settings.dayEnd || {}) });
 const toMin = t => { const [h, m] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+let confirmYesFn = null;
+function appConfirm(title, sub, okLabel, onYes) {
+  $('confirmTitle').textContent = title; $('confirmSub').textContent = sub;
+  $('confirmYes').textContent = okLabel || 'Aceptar';
+  confirmYesFn = onYes;
+  $('confirmModal').classList.remove('hidden');
+}
 const infoQueue = [];
 function infoModal(title, sub, extraHtml) {
   if (!$('infoModal').classList.contains('hidden')) { infoQueue.push([title, sub, extraHtml]); return; } // si ya hay uno, sale después
@@ -4028,10 +4036,12 @@ function bindBloques() {
       return;
     }
     const el = e.target.closest('[data-del]'); if (!el) return;
-    if (!confirm('¿Borrar esta actividad? (Para marcarla como hecha, toca el cuadradito amarillo de la izquierda.)')) return;
-    bActs(bSel, true).splice(Number(el.dataset.del), 1); save();
-    if (!bActs(bSel).length) bMode = 'edit';
-    renderBloques();
+    const delIdx = Number(el.dataset.del);
+    appConfirm('Borrar actividad', '¿Borrar esta actividad? (Para marcarla como hecha, toca el cuadradito amarillo de la izquierda.)', 'Borrar', () => {
+      bActs(bSel, true).splice(delIdx, 1); save();
+      if (!bActs(bSel).length) bMode = 'edit';
+      renderBloques();
+    });
   });
   const moveBlock = step => {
     bSel += step;
@@ -4081,7 +4091,7 @@ function initShell() {
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.go === 'concentracion') { focusOpen(); return; }
     if (b.dataset.go === 'correo') { // página aparte; dentro de la app de Android la ventana de Google no funciona
-      if (NATIVE) { alert('El gestor de email se usa en el ordenador: abre Amable PC en Chrome o Brave y toca «Gestor de email».'); return; }
+      if (NATIVE) { infoModal('✉️ Gestor de email', 'El gestor de email se usa en el ordenador: abre Amable PC en Chrome o Brave y toca «Gestor de email».'); return; }
       location.href = 'correo.html'; return;
     }
     fromHome = true; location.hash = b.dataset.go;
@@ -4194,6 +4204,8 @@ function homeOrderInit() {
       setTimeout(() => { $('eqCopy').textContent = '📋 Copiar mis bloques para Amable Life'; }, 4000);
     } catch (e) { manual(); }
   });
+  $('confirmNo').addEventListener('click', () => { confirmYesFn = null; $('confirmModal').classList.add('hidden'); });
+  $('confirmYes').addEventListener('click', () => { const f = confirmYesFn; confirmYesFn = null; $('confirmModal').classList.add('hidden'); if (f) f(); });
   $('infoOk').addEventListener('click', () => { $('infoModal').classList.add('hidden'); if (infoQueue.length) infoModal(...infoQueue.shift()); });
   homeBlkTick(); setInterval(homeBlkTick, 1000);
   const box = document.querySelector('.home-btns'); if (!box) return;
