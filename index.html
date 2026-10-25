@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.17</title>
+<title>Amable PC v2.18</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -749,6 +749,9 @@
       <div><label for="vMoveDur">Duración (minutos)</label><input type="number" id="vMoveDur" min="1" max="15" inputmode="numeric"></div>
     </div>
     <div class="hint">Cuando toca, la pausa de vista se convierte en una pausa de movimiento: estiramientos, manos y muñecas, piernas o caminar (en la mesa elevadora o por casa).</div>
+    <label for="vWalkRest">Tras caminar más de 1.000 pasos seguidos, esperar (minutos; 0 = no esperar)</label>
+    <input type="number" id="vWalkRest" min="0" max="120" inputmode="numeric">
+    <div class="hint">Si acabas de caminar, no hace falta otra pausa de movimiento enseguida: se espera ese tiempo.</div>
     <label class="check" style="margin-top:14px"><input type="checkbox" id="deOn"> 🌇 Cierre de jornada (resumen del día y «apaga el ordenador»)</label>
     <label class="check"><input type="checkbox" id="niOn"> 🌙 Ojos de noche (recordar poner la pantalla en modo noche, con f.lux)</label>
     <div class="row">
@@ -1318,7 +1321,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.17';
+const VERSION = 'v2.18';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1327,7 +1330,7 @@ const AGUA_STEP = 0.5; // cada aviso sugiere medio vaso
 const fmtVasos = n => String(n).replace('.', ',');
 const SALUD_DEFAULT = { aguaOn: true, aguaMin: 45, aguaGoal: 8, movOn: true, movMin: 60, aguaNext: 0, movNext: 0, days: {} };
 const BLOQUES_DEFAULT = { days: {}, sleepOn: true, sleepDone: '', startVoice: true, remindOn: true, remindMin: 5 };
-const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0, moveOn: true, moveEvery: 60, moveDur: 2, lastMove: 0 };
+const VISTA_DEFAULT = { every: 20, dur: 20, dist: 6, remind: 3, active: false, nextAt: 0, moveOn: true, moveEvery: 60, moveDur: 2, lastMove: 0, walkRest: 30, lastWalkEnd: 0 };
 const ALERTS_DEFAULT = { voice: true, every: 500, sound: 'campana', blockOn: true, block: 2000, celUrl: '', walkOn: true, walkDone: null, restOn: true, restMin: 60, rest: null, stillOn: true, stillSec: 60, standNag: 2 };
 const SCREEN = new URLSearchParams(location.search).has('pantalla');
 // ?remoto: la app completa dentro de la pantalla del PC, trabajando con los datos del móvil (no guarda nada en el PC)
@@ -3033,6 +3036,8 @@ function vistaStop() {
 // ¿La próxima pausa toca de movimiento? (cada «moveEvery» minutos; si no, micropausa de vista)
 function vistaIsMove() {
   const V = db.vista;
+  // después de caminar más de 1.000 pasos seguidos, descanso de «walkRest» minutos antes de otra pausa de movimiento
+  if (V.walkRest > 0 && V.lastWalkEnd && Date.now() - V.lastWalkEnd < V.walkRest * 60000) return false;
   if (vForceMove) return true; // al terminar el modo concentración
   if (!V.moveOn) return false;
   if (!V.lastMove) { V.lastMove = Date.now(); save(); return false; }
@@ -3550,12 +3555,18 @@ function dayEndTick() {
   }
 }
 // «Recuerda seguir caminando»: si llevabas un rato caminando y te paras el tiempo elegido, una voz te lo dice (y la música se pausa mientras habla)
-let stillRun = 0, stillLast = null, stillMoveAt = 0, standNagAt = 0, stillMode = null, stillModeAt = 0;
+let stillRun = 0, stillLast = null, stillMoveAt = 0, standNagAt = 0, stillMode = null, stillModeAt = 0, walkEp = 0, walkEpSaved = 0;
 function stillTick() {
   if (SCREEN || REMOTE) return;
   const A = db.alerts, steps = Math.round(today().steps), now = Date.now();
-  if (stillLast === null || steps < stillLast) { stillLast = steps; stillMoveAt = now; stillRun = 0; return; }
-  if (steps > stillLast) { stillRun += steps - stillLast; stillLast = steps; stillMoveAt = now; return; }
+  if (stillLast === null || steps < stillLast) { stillLast = steps; stillMoveAt = now; stillRun = 0; walkEp = 0; return; }
+  if (steps > stillLast) {
+    stillRun += steps - stillLast; walkEp += steps - stillLast; stillLast = steps; stillMoveAt = now;
+    // una caminata de más de 1.000 pasos: mientras dura, y hasta media hora después, no toca pausa de movimiento
+    if (walkEp > 1000) { db.vista.lastWalkEnd = now; if (now - walkEpSaved > 30000) { walkEpSaved = now; save(); } }
+    return;
+  }
+  if (now - stillMoveAt > 180000) walkEp = 0; // más de 3 minutos sin pasos: la caminata terminó
   // De pie por pasos: si los pasos no avanzan, avisa cada standNag minutos hasta que camines
   const D = desk();
   if (D.mode !== stillMode) { stillMode = D.mode; stillModeAt = now; }
@@ -3715,6 +3726,7 @@ function bindVista() {
   $('vMoveOn').checked = V.moveOn; $('vMoveEvery').value = V.moveEvery; $('vMoveDur').value = V.moveDur;
   $('vMoveOn').addEventListener('change', () => { V.moveOn = $('vMoveOn').checked; V.lastMove = Date.now(); save(); });
   num('vMoveEvery', 'moveEvery', 20, 240); num('vMoveDur', 'moveDur', 1, 15);
+  $('vWalkRest').value = V.walkRest; num('vWalkRest', 'walkRest', 0, 120);
   // cierre de jornada y ojos de noche
   const E = dayEnd();
   $('deOn').checked = E.on; $('niOn').checked = E.nightOn; $('deTime').value = E.time; $('niTime').value = E.nightTime;
