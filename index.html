@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.21</title>
+<title>Amable PC v2.22</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -674,13 +674,15 @@
   .steps-snd { width: 42px; height: 42px; margin: 14px 0 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1; background: rgba(74,222,128,0.16); border: 2px solid #4ADE80; color: #4ADE80; animation: stepsSndPulse 2s ease-in-out infinite; }
   .steps-snd.off { background: rgba(148,163,184,0.14); border-color: #64748B; color: #94A3B8; animation: none; }
   @keyframes stepsSndPulse { 50% { box-shadow: 0 0 0 7px rgba(74,222,128,0.18); } }
-  .help-card { margin-top: 14px; padding: 14px; border-radius: 18px; border: 1px solid rgba(248,250,252,0.10); background: #1E293B; text-align: center; }
+  .help-card { box-sizing: border-box; width: 100%; margin-top: 14px; padding: 14px; border-radius: 18px; border: 1px solid rgba(248,250,252,0.10); background: #1E293B; text-align: center; }
   .help-title { font-weight: 800; font-size: 15px; color: #F8FAFC; }
   .help-text { color: #CBD5E1; font-size: 14px; line-height: 1.45; margin: 4px 0 10px; }
   .help-btn { display: block; margin-top: 8px; padding: 11px 14px; border-radius: 14px; font-weight: 700; font-size: 15px; text-decoration: none; background: #4F46E5; color: #fff; }
   .help-btn.wa { background: #16A34A; }
   .help-small { color: #94A3B8; font-size: 12px; margin-top: 10px; line-height: 1.4; }
   body.remote .help-card { display: none; }
+  .web-link { display: block; margin: 2px 0 4px; padding: 10px; border-radius: 14px; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.5); color: #7DD3FC; font-weight: 800; font-size: 16px; text-decoration: none; overflow-wrap: anywhere; }
+  .help-btn.share { width: 100%; border: 0; background: #0EA5E9; cursor: pointer; font-family: inherit; }
 </style>
 </head>
 <body>
@@ -718,6 +720,12 @@
       <button class="eq-copy" id="eqCopy">📋 Copiar mis bloques para Amable Life</button>
       <textarea class="eq-json hidden" id="eqJson" readonly aria-label="Tus bloques para pegar en Amable Life"></textarea>
       <div class="eq-hint" id="eqHint">Abre Amable Life → Ajustes → Bloques de Amable PC → pega el texto y toca «Traer el texto pegado».</div></div>
+    <div class="help-card" id="webCard">
+      <div class="help-title">🌐 Amable PC Web y compartir</div>
+      <div class="help-text">Amable PC también funciona en el navegador, en cualquier móvil u ordenador:</div>
+      <a class="web-link" href="https://gcalabro12.github.io/PC-Body-mind/" target="_blank" rel="noopener">🌐 gcalabro12.github.io/PC-Body-mind</a>
+      <button class="help-btn share" id="shareApp">📤 Recomendar Amable PC</button>
+    </div>
     <div class="help-card" id="helpCard">
       <div class="help-title">🆘 Ayuda y soporte</div>
       <div class="help-text">¿Algo no funciona o tienes una duda? Escríbenos y te ayudamos.</div>
@@ -1360,7 +1368,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.21';
+const VERSION = 'v2.22';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2960,6 +2968,16 @@ function helpLinks() {
     + '&body=' + encodeURIComponent('Hola, os escribo por Amable PC. Me pasa esto: \n\n\n--\nVersión: ' + ver);
   wa.href = 'https://wa.me/34658825799?text=' + encodeURIComponent('Hola, os escribo por Amable PC (' + ver + '). Me pasa esto: ');
 }
+// Recomendar la app: menú de compartir de Android (APK nueva), compartir del navegador o WhatsApp
+async function shareApp() {
+  const url = 'https://gcalabro12.github.io/PC-Body-mind/';
+  const text = 'Te recomiendo Amable PC, una app que me está gustando mucho para cuidar tu cuerpo, tu mente y tu tiempo mientras trabajas con el ordenador. Pruébala aquí: ' + url;
+  if (NATIVE && typeof AndroidPasos.share === 'function') { try { AndroidPasos.share(text); return; } catch (e) {} }
+  if (!NATIVE && navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(text); } catch (e) {}
+  const wa = 'https://wa.me/?text=' + encodeURIComponent(text);
+  if (NATIVE) location.href = wa; else window.open(wa, '_blank');
+}
 function homeStepsRender() {
   if (!$('homeSteps')) return;
   const D = desk();
@@ -3778,6 +3796,7 @@ function bindSalud() {
   setInterval(restTick, 3000);
   setInterval(stillTick, 5000);
   setInterval(stepsSndTick, 2000);
+  $('shareApp').addEventListener('click', shareApp);
   $('stepsSnd').addEventListener('click', () => { stepsMuted = !stepsMuted; syncNative(); stepsSndTick(); });
   // Pausi
   const P = db.pausi;
