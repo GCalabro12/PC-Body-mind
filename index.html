@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.13</title>
+<title>Amable PC v2.14</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -523,7 +523,13 @@
   .f-chips { display: flex; gap: 8px; margin-top: 8px; }
   .f-chips button { width: auto; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; background: rgba(251,113,133,0.15); border: 1px solid rgba(251,113,133,0.5); color: #FECDD3; }
   #fGo { width: 100%; margin-top: 16px; background: #E11D48; }
-  #fCancel, #fStop2, #fClose { width: 100%; margin-top: 8px; }
+  #fCancel { width: 100%; margin-top: 8px; }
+  #focusModal .cele-box { position: relative; }
+  #focusModal.running .cele-box { padding-top: 3.4rem; }
+  .f-back { position: absolute; top: 12px; left: 12px; width: auto; margin: 0; padding: 6px 14px; font-size: 14px; font-weight: 700; background: transparent; border: 1px solid #475569; border-radius: 999px; color: #CBD5E1; }
+  .f-row2 { display: flex; gap: 10px; margin-top: 14px; }
+  .f-row2 button { flex: 1; width: auto; margin: 0; }
+  #fDone { width: 100%; margin-top: 10px; }
   .f-now { text-align: center; font-size: 1.15rem; font-weight: 700; color: #F8FAFC; margin: 8px 0; line-height: 1.4; }
   .f-count { text-align: center; font-size: 2.4rem; font-weight: 800; color: #FB7185; font-variant-numeric: tabular-nums; }
   .eq-note { display: block; margin-top: 14px; padding: 12px 14px; border-radius: 16px; border: 1px dashed rgba(74,222,128,0.5); background: rgba(74,222,128,0.07); color: #CBD5E1; font-size: 14px; line-height: 1.45; text-align: center; }
@@ -1115,6 +1121,7 @@
 <!-- Aviso: hora de dormir -->
 <div class="cele hidden" id="focusModal">
   <div class="cele-box" style="border-color:#FB7185">
+    <button id="fClose" class="f-back hidden">← Volver</button>
     <div class="cele-title" style="color:#FDA4AF" id="focusTitle">🎯 Modo concentración</div>
     <div id="focusForm">
       <label for="fTask">¿Qué vas a hacer?</label>
@@ -1137,8 +1144,11 @@
       <div class="f-now" id="fNow"></div>
       <div class="f-count" id="fCount"></div>
       <div class="hint" style="text-align:center" id="fNext"></div>
-      <button id="fStop2" style="background:#E11D48">Terminar ahora</button>
-      <button id="fClose" class="btn-outline">Seguir concentrado</button>
+      <div class="f-row2">
+        <button id="fPause" class="btn-outline">⏸ Pausar</button>
+        <button id="fStop2" style="background:#E11D48">⏹ Parar</button>
+      </div>
+      <button id="fDone" style="background:#16A34A">✅ Tarea finalizada</button>
     </div>
   </div>
 </div>
@@ -1298,7 +1308,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.13';
+const VERSION = 'v2.14';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3343,7 +3353,7 @@ function focusStart(min, task, every) {
 function focusStop(finished) {
   const F = db.settings.focus; if (!F) return;
   const task = F.task;
-  F.until = 0; save(); focusRender(); quietRender();
+  F.until = 0; F.pausedLeft = 0; save(); focusRender(); quietRender();
   const V = db.vista;
   if (V.active) V.nextAt = Date.now() + V.every * 60000;
   if (finished) { // fin de la concentración: pausa activa (de movimiento)
@@ -3366,33 +3376,46 @@ function focusTick() {
     castSend({ t: 'toast', text: '🎯 ' + text });
   }
 }
+const focusPaused = () => { const F = db.settings.focus; return !!(F && !(F.until > Date.now()) && F.pausedLeft > 0); };
 function focusRender() {
-  const on = focusOn(), F = db.settings.focus || {};
+  const on = focusOn(), paused = focusPaused(), F = db.settings.focus || {};
   const card = document.querySelector('.home-btn.focus');
   if (card) card.classList.toggle('on', on);
-  if ($('homeFocus')) $('homeFocus').textContent = on ? `🎯 ${F.task ? F.task + ' · ' : ''}${mmss(F.until - Date.now())}` : 'Tarea y tiempo, sin avisos';
+  if ($('homeFocus')) $('homeFocus').textContent = on ? `🎯 ${F.task ? F.task + ' · ' : ''}${mmss(F.until - Date.now())}`
+    : paused ? `⏸ En pausa · ${F.task ? F.task + ' · ' : ''}${mmss(F.pausedLeft)}` : 'Tarea y tiempo, sin avisos';
   if (!$('focusModal').classList.contains('hidden') && !$('focusRunning').classList.contains('hidden')) {
-    if (!on) { $('focusModal').classList.add('hidden'); return; }
-    $('fCount').textContent = mmss(F.until - Date.now());
+    if (!on && !paused) { $('focusModal').classList.add('hidden'); return; }
+    $('fCount').textContent = mmss(on ? F.until - Date.now() : F.pausedLeft);
   }
+}
+// Pausar / reanudar: al pausar se congela el tiempo y vuelven los avisos; al reanudar sigue donde iba
+function focusPauseToggle() {
+  const F = db.settings.focus; if (!F) return;
+  const now = Date.now();
+  if (F.until > now) { F.pausedLeft = Math.max(1000, F.until - now); F.until = 0; }
+  else if (F.pausedLeft > 0) { F.until = now + F.pausedLeft; F.pausedLeft = 0; F.lastRemind = now; }
+  save(); focusRender(); quietRender(); setTimeout(sendState, 50); focusOpen();
 }
 function focusOpen() {
   unlockSound();
   const F = db.settings.focus || {}, P = db.settings.focusPref || {};
-  const on = focusOn();
-  $('focusForm').classList.toggle('hidden', on);
-  $('focusRunning').classList.toggle('hidden', !on);
-  $('focusTitle').textContent = on ? '🎯 Concentrado' : '🎯 Modo concentración';
-  if (on) {
-    $('fNow').textContent = F.task ? 'Ahora estás en: ' + F.task : 'En modo concentración';
+  const on = focusOn(), paused = focusPaused(), run = on || paused;
+  $('focusForm').classList.toggle('hidden', run);
+  $('focusRunning').classList.toggle('hidden', !run);
+  $('fClose').classList.toggle('hidden', !run);
+  $('focusModal').classList.toggle('running', run);
+  $('focusTitle').textContent = paused ? '⏸ Concentración en pausa' : on ? '🎯 Concentrado' : '🎯 Modo concentración';
+  $('fPause').textContent = paused ? '▶ Reanudar' : '⏸ Pausar';
+  if (run) {
+    $('fNow').textContent = (paused ? 'En pausa: ' : 'Ahora estás en: ') + (F.task || 'concentración');
     $('fNext').textContent = F.every > 0 ? `Te lo recuerdo cada ${F.every} min.` : 'Sin recordatorios.';
-    $('fCount').textContent = mmss(F.until - Date.now());
+    $('fCount').textContent = mmss(on ? F.until - Date.now() : F.pausedLeft);
   } else {
     $('fTask').value = ''; $('fMin').value = P.min || 25; $('fEvery').value = P.every != null ? P.every : 10;
     $('fErr').textContent = ''; $('fMicHint').classList.remove('warn'); $('fMicHint').textContent = 'Escríbelo o pulsa el micrófono y díctalo.';
   }
   $('focusModal').classList.remove('hidden');
-  if (!on) setTimeout(() => $('fTask').focus(), 100);
+  if (!run) setTimeout(() => $('fTask').focus(), 100);
 }
 function focusClose() {
   if (fRec) { try { fRec.stop(); } catch (e) {} fRec = null; }
@@ -4113,6 +4136,8 @@ function homeOrderInit() {
   $('fCancel').addEventListener('click', focusClose);
   $('fClose').addEventListener('click', focusClose);
   $('fStop2').addEventListener('click', () => { focusClose(); focusStop(false); });
+  $('fPause').addEventListener('click', focusPauseToggle);
+  $('fDone').addEventListener('click', () => { focusClose(); focusStop(true); }); // tarea terminada: toca una pausa activa
   $('fMic').addEventListener('click', fMicToggle);
   document.querySelectorAll('.f-chips [data-m]').forEach(b => b.addEventListener('click', () => { $('fMin').value = b.dataset.m; }));
   focusRender(); setInterval(() => { focusRender(); if (!REMOTE) focusTick(); }, 1000);
