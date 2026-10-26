@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.24</title>
+<title>Amable PC v2.25</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -699,6 +699,11 @@
   .eye-box.move .eye-lid, .scr-eye.move #sEyeLid { display: none; }
   .eye-box.move .run-ico, .scr-eye.move .run-ico { display: inline; }
   .scr-sndhint { order: -1; flex: 0 0 auto; background: #92400E; color: #FEF3C7; border: 2px solid #FACC15; border-radius: 12px; font-weight: 800; text-align: center; padding: 8px 10px; font-size: clamp(14px, 1.6vw, 20px); line-height: 1.25; }
+  /* deslizar hacia abajo para actualizar */
+  html { overscroll-behavior-y: contain; }
+  .pull-ind { position: fixed; top: 0; left: 50%; z-index: 45; transform: translate(-50%, -120%); padding: 8px 16px; border-radius: 999px; background: #1E293B; border: 1px solid rgba(56,189,248,0.6); color: #7DD3FC; font-size: 14px; font-weight: 700; box-shadow: 0 6px 18px rgba(2,6,23,0.5); pointer-events: none; white-space: nowrap; transition: transform 0.2s ease; }
+  .pull-ind.drag { transition: none; }
+  .pull-ind.ready { border-color: #4ADE80; color: #4ADE80; }
 </style>
 </head>
 <body>
@@ -1396,7 +1401,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.24';
+const VERSION = 'v2.25';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2950,6 +2955,53 @@ function showView() {
   if (id === 'bloques') { bloquesReset(); renderBloques(true); }
   window.scrollTo(0, 0);
 }
+// Deslizar hacia abajo desde arriba del todo: actualizar la app (como Amable Sleep y Amable Skills)
+function doReload(url) { location.replace(url); }
+async function refreshApp() {
+  const ind = $('pullInd'); ind.textContent = '⟳ Actualizando…'; ind.classList.remove('drag'); ind.classList.add('ready'); ind.style.transform = 'translate(-50%, 14px)';
+  try { save(); } catch (e) {}
+  let ver = '';
+  try { const r = await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' }); const m = (await r.text()).match(/const VERSION = '([^']+)'/); if (m) ver = m[1]; } catch (e) {}
+  const u = new URL(location.href);
+  u.searchParams.set('v', ver || VERSION); u.searchParams.set('r', Date.now());
+  setTimeout(() => doReload(u.toString()), 350);
+}
+function pullInit() {
+  if (SCREEN || REMOTE) return;
+  const ind = document.createElement('div'); ind.id = 'pullInd'; ind.className = 'pull-ind'; document.body.appendChild(ind);
+  let x0 = 0, y0 = 0, on = false, dist = 0, busy = false;
+  const blocked = el => {
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName) || n.classList.contains('grip')) return true;
+      if (n.scrollTop > 0 || n.scrollLeft > 0) return true; // dentro de una zona que ya se ha desplazado
+    }
+    return false;
+  };
+  const reset = () => { ind.classList.remove('drag', 'ready'); ind.style.transform = ''; dist = 0; };
+  addEventListener('touchstart', e => {
+    on = !busy && e.touches.length === 1 && window.scrollY <= 0 && !blocked(e.target) && !vBreakEnd
+      && !document.querySelector('.cele:not(.hidden)') && $('splash').classList.contains('hidden');
+    if (on) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dist = 0; }
+  }, { passive: true });
+  addEventListener('touchmove', e => {
+    if (!on) return;
+    const dy = e.touches[0].clientY - y0, dx = e.touches[0].clientX - x0;
+    if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) { on = false; reset(); return; } // gesto de lado: no es actualizar
+    if (dy <= 0) { reset(); return; }
+    if (window.scrollY > 0) { reset(); return; }
+    dist = Math.min(dy * 0.5, 110);
+    if (dist > 8 && e.cancelable) e.preventDefault();
+    ind.classList.add('drag');
+    ind.classList.toggle('ready', dist >= 70);
+    ind.textContent = dist >= 70 ? '⟳ Suelta para actualizar' : '⬇ Desliza para actualizar';
+    ind.style.transform = `translate(-50%, ${dist - 36}px)`;
+  }, { passive: false });
+  addEventListener('touchend', () => {
+    if (!on) return; on = false;
+    if (dist >= 70) { busy = true; refreshApp(); } else reset();
+  }, { passive: true });
+  addEventListener('touchcancel', () => { on = false; reset(); }, { passive: true });
+}
 // Deslizar el dedo hacia la derecha = volver atrás: desde cualquier pantalla al Inicio, o cerrar la ventana de concentración. No hay deslizar hacia delante.
 function swipeInit() {
   let x0 = 0, y0 = 0, t0 = 0, ok = false;
@@ -4332,6 +4384,7 @@ function initShell() {
   document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', goBack));
   addEventListener('hashchange', showView);
   swipeInit();
+  pullInit();
   bindVista();
   bindBloques();
   bindSalud();
