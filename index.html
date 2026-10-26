@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.22</title>
+<title>Amable PC v2.23</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -683,6 +683,10 @@
   body.remote .help-card { display: none; }
   .web-link { display: block; margin: 2px 0 4px; padding: 10px; border-radius: 14px; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.5); color: #7DD3FC; font-weight: 800; font-size: 16px; text-decoration: none; overflow-wrap: anywhere; }
   .help-btn.share { width: 100%; border: 0; background: #0EA5E9; cursor: pointer; font-family: inherit; }
+  .run-ico { display: none; }
+  .eye-box.move .eye-lid, .scr-eye.move #sEyeLid { display: none; }
+  .eye-box.move .run-ico, .scr-eye.move .run-ico { display: inline; }
+  .scr-sndhint { order: -1; flex: 0 0 auto; background: #92400E; color: #FEF3C7; border: 2px solid #FACC15; border-radius: 12px; font-weight: 800; text-align: center; padding: 8px 10px; font-size: clamp(14px, 1.6vw, 20px); line-height: 1.25; }
 </style>
 </head>
 <body>
@@ -757,8 +761,9 @@
         <defs>
           <radialGradient id="eyeWhite" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#0b1220"/></radialGradient>
         </defs>
-        <path d="M14 110 C90 -30 250 -30 326 110 C250 250 90 250 14 110 Z" fill="url(#eyeWhite)" stroke="#38bdf8" stroke-width="5" stroke-linejoin="round"/>
+        <path class="eye-lid" d="M14 110 C90 -30 250 -30 326 110 C250 250 90 250 14 110 Z" fill="url(#eyeWhite)" stroke="#38bdf8" stroke-width="5" stroke-linejoin="round"/>
         <circle cx="170" cy="110" r="78" fill="#0f172a" stroke="#334155" stroke-width="12"/>
+        <g class="run-ico" transform="translate(170 58)" fill="none" stroke="#4ADE80" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="-15" r="7" fill="#4ADE80" stroke="none"/><path d="M3 -6 L-3 13"/><path d="M3 -3 L16 5 L23 -1"/><path d="M3 -3 L-9 1 L-14 11"/><path d="M-3 13 L9 23 L5 34"/><path d="M-3 13 L-14 25 L-25 23"/></g>
         <circle id="vRing" cx="170" cy="110" r="78" fill="none" stroke="#38bdf8" stroke-width="12" stroke-linecap="round" transform="rotate(-90 170 110)" style="transition: stroke-dashoffset 0.4s ease"/>
       </svg>
       <div class="eye-center">
@@ -1241,8 +1246,9 @@
   <div class="eye-box break-eye-box">
     <svg viewBox="0 0 340 220" aria-hidden="true">
       <defs><radialGradient id="eyeWhiteB" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#0b1220"/></radialGradient></defs>
-      <path d="M14 110 C90 -30 250 -30 326 110 C250 250 90 250 14 110 Z" fill="url(#eyeWhiteB)" stroke="#38bdf8" stroke-width="5" stroke-linejoin="round"/>
+      <path class="eye-lid" d="M14 110 C90 -30 250 -30 326 110 C250 250 90 250 14 110 Z" fill="url(#eyeWhiteB)" stroke="#38bdf8" stroke-width="5" stroke-linejoin="round"/>
       <circle cx="170" cy="110" r="78" fill="#0f172a" stroke="#334155" stroke-width="12"/>
+      <g class="run-ico" transform="translate(170 58)" fill="none" stroke="#4ADE80" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="-15" r="7" fill="#4ADE80" stroke="none"/><path d="M3 -6 L-3 13"/><path d="M3 -3 L16 5 L23 -1"/><path d="M3 -3 L-9 1 L-14 11"/><path d="M-3 13 L9 23 L5 34"/><path d="M-3 13 L-14 25 L-25 23"/></g>
       <circle id="vBreakRing" cx="170" cy="110" r="78" fill="none" stroke="#38bdf8" stroke-width="12" stroke-linecap="round" transform="rotate(-90 170 110)"/>
     </svg>
     <div class="eye-center"><div class="steps" id="vBreakCount" style="font-size:3.4rem">20</div><div class="goal-txt">segundos</div></div>
@@ -1271,6 +1277,7 @@
   <div class="scr-video" id="scrVideoBox"><div id="scrVideo"></div></div>
   <div class="scr-shade"></div>
   <div class="scr-panel">
+    <div class="scr-sndhint hidden" id="sSndHint">🔇 Haz clic una vez en esta página del PC para activar el sonido</div>
     <div class="scr-nolink hidden" id="sNoLink">📵 FALTA CONECTAR<br>CON EL MÓVIL<small id="sNoLinkCode"></small></div>
     <div class="scr-focus hidden" id="sFocus" data-box="concentracion">
       <button class="scr-fold" data-fold="concentracion" aria-label="Plegar o desplegar">▴</button>
@@ -1328,6 +1335,7 @@
         <defs><radialGradient id="eyeWhiteS" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#0b1220"/></radialGradient></defs>
         <path id="sEyeLid" d="M14 110 C90 -30 250 -30 326 110 C250 250 90 250 14 110 Z" fill="url(#eyeWhiteS)" fill-opacity="0.85" stroke="#38bdf8" stroke-width="6" stroke-linejoin="round"/>
         <circle cx="170" cy="110" r="78" fill="#0f172a" stroke="#334155" stroke-width="12"/>
+        <g class="run-ico" transform="translate(170 58)" fill="none" stroke="#4ADE80" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="-15" r="7" fill="#4ADE80" stroke="none"/><path d="M3 -6 L-3 13"/><path d="M3 -3 L16 5 L23 -1"/><path d="M3 -3 L-9 1 L-14 11"/><path d="M-3 13 L9 23 L5 34"/><path d="M-3 13 L-14 25 L-25 23"/></g>
         <circle id="sEyeRing" cx="170" cy="110" r="78" fill="none" stroke="#38bdf8" stroke-width="12" stroke-linecap="round" transform="rotate(-90 170 110)"/>
       </svg>
       <div class="scr-eye-batt hidden" id="sEyeBatt"><span class="batt-v"><span id="sEyeBattFill"></span></span><b id="sEyeBattPct">--</b></div>
@@ -1368,7 +1376,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.22';
+const VERSION = 'v2.23';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1685,7 +1693,8 @@ const focusLong = () => { const F = db.settings && db.settings.focus; return !!(
 const vistaBusy = () => { try { return vAlerting || !!vBreakEnd; } catch (e) { return false; } };
 const isQuiet = () => !quietBypass && !!(db.settings && (db.settings.quiet || (db.settings.focus && db.settings.focus.until > Date.now() && !(focusLong() && vistaBusy()))));
 // Con el PC conectado, toda la voz y los avisos suenan en el PC; sin PC, en el móvil
-const pcLinked = () => !SCREEN && !REMOTE && !!(conn && conn.open);
+let pcAudioOk = true; // la pantalla del PC dice si el navegador le deja sonar (hace falta un clic en esa página)
+const pcLinked = () => !SCREEN && !REMOTE && !!(conn && conn.open) && pcAudioOk;
 // APK nuevo: sabe callarse cuando el PC está conectado (el JS se lo avisa cada 5 s; si el aviso caduca, vuelve a hablar el móvil)
 const NATIVE_PC = NATIVE && typeof window.AndroidPasos.pcLink === 'function';
 // pause = true: mientras habla se pausa la música (la del móvil y la del PC) y después vuelve
@@ -2253,6 +2262,7 @@ function castCommand(m) {
     castStatus('Esta pantalla ya está conectada con otro móvil. Lo vuelvo a intentar cada minuto.', 'err');
     return;
   }
+  if (m && m.t === 'audio') { pcAudioOk = m.ok !== false; return; }
   if (!m || m.t !== 'cmd') return;
   const S = db.salud;
   switch (m.c) {
@@ -2319,7 +2329,7 @@ function bloqueState() {
 }
 function vistaState() {
   const V = db.vista, now = Date.now();
-  return { active: V.active, left: V.active ? Math.max(0, V.nextAt - now) : 0, every: V.every, dur: vBreakEnd ? vBreakDur : V.dur, dist: V.dist, move: !!vBreakEnd && vBreakMove,
+  return { active: V.active, left: V.active ? Math.max(0, V.nextAt - now) : 0, every: V.every, dur: vBreakEnd ? vBreakDur : V.dur, dist: V.dist, move: (!!vBreakEnd && vBreakMove) || (vAlerting && !vBreakEnd && vAlertMove), nextMove: vistaNextIsMove(),
     alerting: vAlerting, breakLeft: vBreakEnd ? Math.max(0, vBreakEnd - now) : 0, act: vBreakEnd ? vBreakAct : '' };
 }
 function bindCast() {
@@ -2522,6 +2532,15 @@ function scrFocusTick() {
   $('sFocusCount').textContent = mmss(left);
   $('sFocusHint').textContent = f.min > 25 ? 'Sin avisos; solo las pausas de vista' : 'Sin avisos hasta que termine';
 }
+// El navegador del PC no deja sonar hasta que se hace clic en la página: se avisa al móvil para que hable él mientras tanto
+let scrAudioSent = null, scrAudioAt = 0;
+function scrAudioTick() {
+  const ok = navigator.userActivation ? navigator.userActivation.hasBeenActive : true;
+  const h = $('sSndHint'); if (h) h.classList.toggle('hidden', ok);
+  if (scrLink && scrLink.open && (ok !== scrAudioSent || Date.now() - scrAudioAt > 15000)) {
+    try { scrLink.send({ t: 'audio', ok }); scrAudioSent = ok; scrAudioAt = Date.now(); } catch (e) {}
+  }
+}
 function scrNoLinkTick() {
   const b = $('sNoLink'); if (!b) return;
   const alive = scrLink && scrLink.open && Date.now() - scrLinkAt < 25000;
@@ -2531,6 +2550,7 @@ function scrNoLinkTick() {
 function scrEyeTick() {
   scrFocusTick();
   scrNoLinkTick();
+  scrAudioTick();
   scrSaludTick();
   if (Date.now() - scrPausiAt > 5 * 60000) scrPausiNext(false); // Pausi cambia de consejo cada 5 minutos
   const v = scrVista;
@@ -2546,11 +2566,12 @@ function scrEyeTick() {
     const left = Math.max(0, v.breakLeft - since);
     time = mmss(left); lbl = v.move ? 'pausa de movimiento' : `mirando a ${v.dist} m`; frac = left / (v.dur * 1000);
   } else if (v.alerting) {
-    time = '¡Ya!'; lbl = 'toca pausa de vista'; frac = 0;
+    time = '¡Ya!'; lbl = v.move ? 'toca pausa de movimiento' : 'toca pausa de vista'; frac = 0;
   } else {
     const left = Math.max(0, v.left - since);
-    time = mmss(left); lbl = 'próxima pausa de vista'; frac = left / (v.every * 60000);
+    time = mmss(left); lbl = v.nextMove ? 'próxima pausa de movimiento' : 'próxima pausa de vista'; frac = left / (v.every * 60000);
   }
+  $('sEye').classList.toggle('move', !!(v.breakLeft > 0 ? v.move : v.alerting ? v.move : v.nextMove));
   $('sEye').classList.toggle('alert', !!v.alerting && !(v.breakLeft > 0));
   const inBreak = v.breakLeft > 0 && (v.breakLeft - since) > 0;
   $('sEyeStart').classList.toggle('hidden', !(v.alerting && !inBreak));
@@ -3112,11 +3133,21 @@ function vistaIsMove() {
   if (!V.lastMove) { V.lastMove = Date.now(); save(); return false; }
   return Date.now() - V.lastMove >= (V.moveEvery - 1) * 60000;
 }
+// ¿La próxima pausa será de movimiento? (misma regla que vistaIsMove, mirada en el momento en que toque)
+function vistaNextIsMove() {
+  const V = db.vista; if (!V.moveOn || !V.lastMove) return false;
+  const at = V.active && V.nextAt > Date.now() ? V.nextAt : Date.now();
+  if (V.walkRest > 0 && V.lastWalkEnd && at - V.lastWalkEnd < V.walkRest * 60000) return false;
+  return at - V.lastMove >= (V.moveEvery - 1) * 60000;
+}
+let vAlertMove = false;
 function vistaAlert() {
   vAlerting = true;
   const move = vistaIsMove();
+  vAlertMove = move;
   $('vAlertSub').textContent = move ? `Levántate y muévete ${db.vista.moveDur} ${db.vista.moveDur === 1 ? 'minuto' : 'minutos'}` : `Llevas ${db.vista.every} minutos mirando la pantalla`;
-  document.querySelector('#vAlert .cele-title').textContent = move ? 'Pausa de movimiento' : 'Pausa de vista';
+  document.querySelector('#vAlert .cele-title').textContent = move ? '🏃 Pausa de movimiento' : 'Pausa de vista';
+  $('vStartBreak').lastChild.textContent = move ? 'Comenzar pausa de movimiento' : 'Comenzar pausa de vista';
   $('vAlert').classList.remove('hidden');
   chime();
   const pre = vAlertPrefix; vAlertPrefix = '';
@@ -3166,6 +3197,9 @@ function vistaBreak() {
   if (move) V.lastMove = Date.now();
   vBreakEnd = Date.now() + vBreakDur * 1000;
   $('vBreakMsg').textContent = move ? 'Pausa de movimiento: levántate y muévete' : `Mira al menos a ${V.dist} metros de distancia`;
+  document.querySelector('#vBreak .eye-box').classList.toggle('move', move);
+  document.querySelector('#vBreak .break-kicker').textContent = move ? 'PAUSA DE MOVIMIENTO' : 'PAUSA DE VISTA · 20-20-20';
+  document.querySelector('#vBreak .break-hint').textContent = move ? 'Respira y muévete a tu ritmo' : 'Parpadea despacio y relaja los hombros';
   let act = vistaNextAct(move);
   // sin mesa elevadora: la pausa de movimiento es para caminar los pasos que faltan para ir al día
   if (move && desk().has === false) {
@@ -3227,7 +3261,9 @@ function vistaTick() {
   const total = V.every * 60000;
   const left = V.active ? Math.max(0, V.nextAt - now) : total;
   $('vCount').textContent = mmss(left);
-  $('vCountLbl').textContent = V.active ? 'hasta la próxima pausa' : 'cada ' + V.every + ' minutos';
+  const nextMove = V.active && (vAlerting ? vAlertMove : vBreakEnd ? vBreakMove : vistaNextIsMove());
+  document.querySelector('#vista .eye-box').classList.toggle('move', !!nextMove);
+  $('vCountLbl').textContent = V.active ? (nextMove ? 'hasta la próxima pausa de movimiento' : 'hasta la próxima pausa') : 'cada ' + V.every + ' minutos';
   const EYE_C = 2 * Math.PI * 78;
   $('vRing').style.strokeDasharray = EYE_C;
   $('vRing').style.strokeDashoffset = EYE_C * (1 - left / total);
