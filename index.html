@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.27</title>
+<title>Amable PC v2.28</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1435,7 +1435,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.27';
+const VERSION = 'v2.28';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3106,7 +3106,17 @@ async function shareApp() {
   if (NATIVE) location.href = wa; else window.open(wa, '_blank');
 }
 // ---------- Cuenta: nombre, usuario y contraseña (de momento guardada en este dispositivo) ----------
-const ACC_KEY = 'pcbm_account', SES_KEY = 'pcbm_session';
+const ACC_KEY = 'pcbm_account', SES_KEY = 'pcbm_session', TOK_KEY = 'pcbm_token';
+const AUTH_API = ''; // dirección del servidor de cuentas de Amable PC (Cloudflare Worker); vacío = cuenta solo en este dispositivo
+async function authApi(ruta, cuerpo, token) {
+  let res;
+  try {
+    res = await fetch(AUTH_API + ruta, { method: cuerpo ? 'POST' : 'GET', headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: 'Bearer ' + token } : {}), body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+  } catch (e) { const x = new Error('No hay conexión con el servidor. Comprueba Internet e inténtalo otra vez.'); x.red = true; throw x; }
+  let d = {}; try { d = await res.json(); } catch (e) {}
+  if (!res.ok) { const x = new Error(d.error || 'No se ha podido completar. Inténtalo otra vez.'); x.status = res.status; throw x; }
+  return d;
+}
 const acctGet = () => { try { return JSON.parse(localStorage.getItem(ACC_KEY)); } catch (e) { return null; } };
 const acctName = () => { const a = acctGet(); return a && a.name ? a.name : ''; };
 async function hashPass(pass, salt) {
@@ -3132,8 +3142,9 @@ function authShow(mode) {
   $('authSwitch').textContent = reg ? (a ? 'Ya tengo cuenta · entrar' : '') : 'Crear una cuenta nueva';
   $('authSwitch').classList.toggle('hidden', reg && !a);
   $('authPass').autocomplete = reg ? 'new-password' : 'current-password';
-  $('authNote').textContent = reg ? 'Tu cuenta se guarda en este dispositivo. Más adelante podrás entrar también con Google.'
-    : 'Si olvidaste la contraseña, crea una cuenta nueva: tus datos de la app se mantienen.';
+  $('authNote').textContent = AUTH_API
+    ? (reg ? 'Tu cuenta se guarda en el servidor de Amable PC: podrás entrar desde cualquier móvil. Más adelante, también con Google.' : 'Entra con el usuario y la contraseña que creaste.')
+    : (reg ? 'Tu cuenta se guarda en este dispositivo. Más adelante podrás entrar también con Google.' : 'Si olvidaste la contraseña, crea una cuenta nueva: tus datos de la app se mantienen.');
   $('authErr').textContent = ''; $('authPass').value = '';
   if (!reg && a) $('authUser').value = a.user;
   $('authModal').classList.remove('hidden');
@@ -3146,15 +3157,32 @@ async function authSubmit() {
     if (!name) return err('Escribe tu nombre.');
     if (!/^[a-z0-9._-]{3,30}$/.test(user)) return err('El usuario: de 3 a 30 letras, números, punto, guion o guion bajo, sin espacios.');
     if (pass.length < 6) return err('La contraseña necesita al menos 6 caracteres.');
-    const salt = newSalt();
-    localStorage.setItem(ACC_KEY, JSON.stringify({ name, user, salt, hash: await hashPass(pass, salt), at: Date.now() }));
+    if (AUTH_API) {
+      try {
+        $('authGo').disabled = true; $('authErr').textContent = 'Creando tu cuenta…';
+        const d = await authApi('/registro', { nombre: name, usuario: user, password: pass });
+        localStorage.setItem(ACC_KEY, JSON.stringify({ name: d.nombre, user: d.usuario, server: true, at: Date.now() })); localStorage.setItem(TOK_KEY, d.token);
+      } catch (e) { $('authGo').disabled = false; return err(e.message); }
+      $('authGo').disabled = false;
+    } else {
+      const salt = newSalt();
+      localStorage.setItem(ACC_KEY, JSON.stringify({ name, user, salt, hash: await hashPass(pass, salt), at: Date.now() }));
+    }
+  } else if (AUTH_API) {
+    try {
+      $('authGo').disabled = true; $('authErr').textContent = 'Entrando…';
+      const d = await authApi('/login', { usuario: user, password: pass });
+      localStorage.setItem(ACC_KEY, JSON.stringify({ name: d.nombre, user: d.usuario, server: true, at: Date.now() })); localStorage.setItem(TOK_KEY, d.token);
+    } catch (e) { $('authGo').disabled = false; return err(e.message); }
+    $('authGo').disabled = false;
   } else {
     const a = acctGet();
     if (!a || a.user !== user || a.hash !== await hashPass(pass, a.salt)) return err('Usuario o contraseña incorrectos.');
   }
+  $('authErr').textContent = '';
   localStorage.setItem(SES_KEY, user);
   $('authModal').classList.add('hidden');
-  const a = acctGet(); if (a && !db.settings.userName) { db.settings.userName = a.name; save(); }
+  const a = acctGet(); if (a && (!db.settings.userName || AUTH_API)) { db.settings.userName = a.name; save(); }
   homeHello();
 }
 function homeHello() {
@@ -3168,10 +3196,21 @@ function authInit() {
   $('authSwitch').addEventListener('click', () => authShow(authMode === 'register' ? 'login' : 'register'));
   $('authEye').addEventListener('click', () => { const i = $('authPass'); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; $('authEye').textContent = show ? 'Ocultar' : 'Ver'; });
   ['authName', 'authUser', 'authPass'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); }));
-  $('logoutBtn').addEventListener('click', () => appConfirm('Cerrar sesión', '¿Cerrar la sesión? Tus datos de la app se quedan; para volver a entrar necesitas tu usuario y contraseña.', 'Cerrar sesión', () => { localStorage.removeItem(SES_KEY); authShow('login'); }));
+  $('logoutBtn').addEventListener('click', () => appConfirm('Cerrar sesión', '¿Cerrar la sesión? Tus datos de la app se quedan; para volver a entrar necesitas tu usuario y contraseña.', 'Cerrar sesión', () => { if (AUTH_API) { const t = localStorage.getItem(TOK_KEY); if (t) authApi('/salir', {}, t).catch(() => {}); } localStorage.removeItem(SES_KEY); localStorage.removeItem(TOK_KEY); authShow('login'); }));
   homeHello();
   const a = acctGet();
-  if (!a || localStorage.getItem(SES_KEY) !== a.user) authShow(a ? 'login' : 'register');
+  if (AUTH_API && a && !a.server) { // cuenta antigua, solo de este dispositivo: se vuelve a crear en el servidor
+    localStorage.removeItem(ACC_KEY); localStorage.removeItem(SES_KEY); homeHello();
+    authShow('register'); $('authName').value = a.name || ''; $('authUser').value = a.user || '';
+    $('authSub').textContent = 'Ahora tu cuenta vive en un servidor: vuelve a crearla con tu usuario y una contraseña.';
+    return;
+  }
+  if (!a || localStorage.getItem(SES_KEY) !== a.user) { authShow(a ? 'login' : 'register'); return; }
+  if (AUTH_API) { // la sesión sigue valiendo? (sin conexión se deja pasar)
+    const t = localStorage.getItem(TOK_KEY);
+    authApi('/yo', null, t || 'x').then(d => { if (d.nombre && d.nombre !== a.name) { localStorage.setItem(ACC_KEY, JSON.stringify({ ...a, name: d.nombre })); homeHello(); } })
+      .catch(e => { if (e.status === 401) { localStorage.removeItem(SES_KEY); localStorage.removeItem(TOK_KEY); authShow('login'); } });
+  }
 }
 function homeStepsRender() {
   if (!$('homeSteps')) return;
