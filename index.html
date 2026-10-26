@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.31</title>
+<title>Amable PC v2.32</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -670,7 +670,7 @@
   .pact-line { min-height: 44px; border-bottom: 2px dotted #92400E; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; font-family: 'Brush Script MT', 'Segoe Script', cursive; font-size: 1.6rem; color: #166534; }
   .pact-lbl { font-family: system-ui, sans-serif; font-size: 0.75rem; color: #92400E; margin-top: 4px; }
   .pact-name { width: 100%; box-sizing: border-box; margin: 0 0 12px; padding: 10px; border-radius: 12px; border: 1px solid #D97706; background: #fff !important; color: #1E293B !important; font-size: 1rem; text-align: center; font-family: system-ui, sans-serif; }
-  .pact-time { font-family: system-ui, sans-serif; font-size: 0.9rem; font-weight: 700; color: #92400E; min-height: 1.2em; margin-top: 2px; }
+  .pact-time { font-family: 'Brush Script MT', 'Segoe Script', cursive; font-size: 1.6rem; color: #166534; min-height: 1.3em; margin-top: 2px; }
   .pact-hold { position: relative; width: 100%; overflow: hidden; background: #FACC15; color: #1E293B; font-weight: 800; font-size: 1.05rem; border: 0; border-radius: 14px; padding: 16px; touch-action: none; -webkit-user-select: none; user-select: none; font-family: system-ui, sans-serif; }
   .pact-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0; background: #F59E0B; }
   .pact-holdtxt { position: relative; }
@@ -709,7 +709,10 @@
   .pull-ind.ready { border-color: #4ADE80; color: #4ADE80; }
   /* sin el fondo naranja al tocar los botones en el móvil */
   * { -webkit-tap-highlight-color: transparent; }
-  button:focus:not(:focus-visible) { outline: none; }
+  button, button:focus, button:active, .btn-outline:focus, .btn-outline:active { outline: 0 !important; -webkit-tap-highlight-color: rgba(0,0,0,0) !important; -webkit-touch-callout: none; }
+  #focusModal button:focus, #focusModal button:active { box-shadow: none; }
+  #fPause:active { background: #334155; }
+  #fStop2:active { background: #BE123C !important; }
   /* registro / entrada */
   #authModal { z-index: 200; background: #0b1220; overflow-y: auto; }
   #authModal .cele-box { max-width: 380px; text-align: left; border-color: #4ADE80; }
@@ -1440,7 +1443,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.31';
+const VERSION = 'v2.32';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3834,7 +3837,8 @@ function pactVisual() {
 function pactOpen(min, task, every) {
   pactPending = { min, task, every, signed: false };
   pactTextInto($('pactText'), min, task);
-  $('pactName').value = db.settings.userName || acctName();
+  const known = acctName() || db.settings.userName || '';
+  $('pactName').value = known; $('pactName').classList.toggle('hidden', !!known); // si ya conocemos el nombre, no se repite arriba: se ve escrito en la firma
   pactProg = 0; pactLetters = 0; pactHolding = false; pactAuto = false;
   $('pactLbl').style.cssText = '';
   $('pactSig').textContent = ''; $('pactTime').textContent = ''; $('pactLbl').textContent = 'Firma';
