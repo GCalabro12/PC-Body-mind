@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.28</title>
+<title>Amable PC v2.29</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -710,7 +710,9 @@
   /* registro / entrada */
   #authModal { z-index: 200; background: #0b1220; overflow-y: auto; }
   #authModal .cele-box { max-width: 380px; text-align: left; border-color: #4ADE80; }
-  #authModal .cele-title { text-align: center; color: #F8FAFC; }
+  #authModal .cele-title { text-align: center; color: #F8FAFC; margin-top: 4px; }
+  .auth-app { text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -0.4px; color: #F8FAFC; }
+  .auth-app b { color: #FACC15; }
   #authModal .cele-sub { text-align: center; margin-bottom: 14px; }
   #authModal label { display: block; margin-top: 10px; font-size: 14px; font-weight: 700; color: #CBD5E1; }
   #authModal input { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0F172A; color: #fff; font-size: 16px; font-family: inherit; margin-top: 4px; }
@@ -1246,9 +1248,10 @@
 </div>
 <div class="cele hidden" id="authModal">
   <div class="cele-box">
-    <div class="cele-title" id="authTitle">👋 Crea tu cuenta</div>
-    <div class="cele-sub" id="authSub">Para empezar, dinos cómo llamarte.</div>
-    <div id="authNameRow"><label for="authName">Tu nombre</label><input id="authName" type="text" maxlength="40" autocomplete="name" placeholder="Por ejemplo: Gustavo"></div>
+    <div class="auth-app"><b>Amable</b> PC</div>
+    <div class="cele-title" id="authTitle">Crea tu cuenta</div>
+    <div class="cele-sub" id="authSub">Con tu nombre real.</div>
+    <div id="authNameRow"><label for="authName">Tu nombre real</label><input id="authName" type="text" maxlength="40" autocomplete="name" placeholder="Nombre y apellido"></div>
     <label for="authUser">Usuario</label><input id="authUser" type="text" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Tu usuario">
     <label for="authPass">Contraseña</label>
     <div class="a-pass"><input id="authPass" type="password" maxlength="60" autocomplete="new-password" placeholder="Mínimo 6 caracteres"><button class="a-eye" id="authEye" type="button" aria-label="Mostrar u ocultar la contraseña">Ver</button></div>
@@ -1435,7 +1438,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.28';
+const VERSION = 'v2.29';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3135,8 +3138,8 @@ let authMode = 'register';
 function authShow(mode) {
   authMode = mode;
   const reg = mode === 'register', a = acctGet();
-  $('authTitle').textContent = reg ? '👋 Crea tu cuenta' : '👋 Hola de nuevo';
-  $('authSub').textContent = reg ? 'Para empezar, dinos cómo llamarte.' : 'Entra con tu usuario y contraseña.';
+  $('authTitle').textContent = reg ? 'Crea tu cuenta' : 'Entra en tu cuenta';
+  $('authSub').textContent = reg ? 'Con tu nombre real.' : 'Con tu usuario y contraseña.';
   $('authNameRow').classList.toggle('hidden', !reg);
   $('authGo').textContent = reg ? 'Crear cuenta' : 'Entrar';
   $('authSwitch').textContent = reg ? (a ? 'Ya tengo cuenta · entrar' : '') : 'Crear una cuenta nueva';
