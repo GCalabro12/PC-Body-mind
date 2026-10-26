@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.29</title>
+<title>Amable PC v2.30</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1438,7 +1438,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.29';
+const VERSION = 'v2.30';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3792,7 +3792,7 @@ function focusOpen() {
     $('fErr').textContent = ''; $('fMicHint').classList.remove('warn'); $('fMicHint').textContent = 'Escríbelo o pulsa el micrófono y díctalo.';
   }
   $('focusModal').classList.remove('hidden');
-  if (!run) setTimeout(() => $('fTask').focus(), 100);
+  if (!run && !(/Android|iPhone|iPad/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1)) setTimeout(() => $('fTask').focus(), 100); // en el móvil no se abre el teclado solo
 }
 function focusClose() {
   if (fRec) { try { fRec.stop(); } catch (e) {} fRec = null; }
@@ -3896,6 +3896,12 @@ async function fMicToggle() {
   const fallback = () => {
     $('fMic').classList.remove('rec');
     const touch = /Android|iPhone|iPad/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
+    if (touch) { // móvil sin dictado en la página (p. ej. Brave): no se abre el teclado; se explica y se ofrece la app
+      hint.classList.remove('warn'); hint.textContent = 'Escríbelo o pulsa el micrófono y díctalo.';
+      infoModal('🎤 Dictar con la voz', 'Este navegador no deja dictar desde la página. Con la app de Amable PC para Android, el micrófono dicta directamente, sin teclado.',
+        '<a class="btn-link" href="https://github.com/GCalabro12/PC-Body-mind-Android/releases/latest/download/PC-Body-mind.apk" target="_blank" rel="noopener">📲 Descargar la app para Android</a><div class="hint">O usa el micrófono de tu teclado.</div>');
+      return;
+    }
     const input = $('fTask'); input.focus();
     try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
     hint.classList.add('warn');
@@ -4647,9 +4653,7 @@ function homeOrderInit() {
   $('fPactView').addEventListener('click', pactView);
   $('fDone').addEventListener('click', () => { focusClose(); focusStop(true); }); // tarea terminada: toca una pausa activa
   $('fMic').addEventListener('click', fMicToggle);
-  { const touchDev = /Android|iPhone|iPad/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
-    const SRx = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (touchDev && !NATIVE && (!SRx || navigator.brave)) $('fMic').classList.add('hidden'); }
+
   document.querySelectorAll('.f-chips [data-m]').forEach(b => b.addEventListener('click', () => { $('fMin').value = b.dataset.m; }));
   focusRender(); setInterval(() => { focusRender(); if (!REMOTE) focusTick(); }, 1000);
   // mesa elevadora y aviso de fin de jornada
