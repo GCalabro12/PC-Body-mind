@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.32</title>
+<title>Amable PC v2.33</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1443,7 +1443,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.32';
+const VERSION = 'v2.33';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3115,7 +3115,7 @@ async function shareApp() {
 }
 // ---------- Cuenta: nombre, usuario y contraseña (de momento guardada en este dispositivo) ----------
 const ACC_KEY = 'pcbm_account', SES_KEY = 'pcbm_session', TOK_KEY = 'pcbm_token';
-const AUTH_API = ''; // dirección del servidor de cuentas de Amable PC (Cloudflare Worker); vacío = cuenta solo en este dispositivo
+const AUTH_API = 'https://amable-pc-api.proud-hill-016b.workers.dev'; // servidor de cuentas de Amable PC (Cloudflare Worker + D1); vacío = cuenta solo en este dispositivo
 async function authApi(ruta, cuerpo, token) {
   let res;
   try {
