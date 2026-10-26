@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.26</title>
+<title>Amable PC v2.27</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -704,6 +704,24 @@
   .pull-ind { position: fixed; top: 0; left: 50%; z-index: 45; transform: translate(-50%, -120%); padding: 8px 16px; border-radius: 999px; background: #1E293B; border: 1px solid rgba(56,189,248,0.6); color: #7DD3FC; font-size: 14px; font-weight: 700; box-shadow: 0 6px 18px rgba(2,6,23,0.5); pointer-events: none; white-space: nowrap; transition: transform 0.2s ease; }
   .pull-ind.drag { transition: none; }
   .pull-ind.ready { border-color: #4ADE80; color: #4ADE80; }
+  /* sin el fondo naranja al tocar los botones en el móvil */
+  * { -webkit-tap-highlight-color: transparent; }
+  button:focus:not(:focus-visible) { outline: none; }
+  /* registro / entrada */
+  #authModal { z-index: 200; background: #0b1220; overflow-y: auto; }
+  #authModal .cele-box { max-width: 380px; text-align: left; border-color: #4ADE80; }
+  #authModal .cele-title { text-align: center; color: #F8FAFC; }
+  #authModal .cele-sub { text-align: center; margin-bottom: 14px; }
+  #authModal label { display: block; margin-top: 10px; font-size: 14px; font-weight: 700; color: #CBD5E1; }
+  #authModal input { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0F172A; color: #fff; font-size: 16px; font-family: inherit; margin-top: 4px; }
+  #authModal .a-pass { position: relative; }
+  #authModal .a-eye { position: absolute; right: 6px; top: 8px; width: auto; padding: 4px 10px; background: transparent; color: #94A3B8; font-size: 14px; }
+  #authErr { color: #F87171; font-size: 14px; font-weight: 700; min-height: 1.2em; margin: 10px 0 0; text-align: center; }
+  #authGo { margin-top: 12px; }
+  #authSwitch { width: 100%; margin-top: 8px; background: transparent; color: #7DD3FC; font-size: 14px; text-decoration: underline; }
+  .a-note { color: #94A3B8; font-size: 12px; line-height: 1.4; margin-top: 10px; text-align: center; }
+  .home-hello { font-size: 16px; font-weight: 700; color: #4ADE80; margin: 4px 0 0; text-align: center; min-height: 1.2em; }
+  .help-logout { display: block; width: auto; margin: 10px auto 0; background: transparent; color: #94A3B8; font-size: 12px; text-decoration: underline; padding: 4px 8px; }
 </style>
 </head>
 <body>
@@ -726,6 +744,7 @@
   <div class="home">
     <div class="logo" id="homeLogo" data-logo role="button" tabindex="0" aria-label="Escuchar la banda sonora"></div>
     <h1 class="home-title"><b>Amable</b> PC</h1>
+    <p class="home-hello" id="homeHello"></p>
     <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
     <div class="focus-row"><button class="quiet-btn" id="quietBtn" aria-pressed="false"></button><button class="steps-snd hidden" id="stepsSnd" aria-label="Sonido de los pasos" title="Sonido de los pasos: tocar para apagarlo">🔊</button></div>
     <button class="home-link" data-go="pc">🖥️ Ver pantalla del móvil en el PC <span id="homePc"></span></button>
@@ -753,6 +772,7 @@
       <a class="help-btn" id="helpMail" target="_blank" rel="noopener">✉️ Escribir a soporte</a>
       <a class="help-btn wa" id="helpWa" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>
       <div class="help-small">Email: info@practicaintegral.club · WhatsApp: +34 658 82 57 99</div>
+      <button class="help-logout" id="logoutBtn">Cerrar sesión</button>
     </div>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
     <div class="seal-wrap">
@@ -1224,6 +1244,20 @@
     </div>
   </div>
 </div>
+<div class="cele hidden" id="authModal">
+  <div class="cele-box">
+    <div class="cele-title" id="authTitle">👋 Crea tu cuenta</div>
+    <div class="cele-sub" id="authSub">Para empezar, dinos cómo llamarte.</div>
+    <div id="authNameRow"><label for="authName">Tu nombre</label><input id="authName" type="text" maxlength="40" autocomplete="name" placeholder="Por ejemplo: Gustavo"></div>
+    <label for="authUser">Usuario</label><input id="authUser" type="text" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Tu usuario">
+    <label for="authPass">Contraseña</label>
+    <div class="a-pass"><input id="authPass" type="password" maxlength="60" autocomplete="new-password" placeholder="Mínimo 6 caracteres"><button class="a-eye" id="authEye" type="button" aria-label="Mostrar u ocultar la contraseña">Ver</button></div>
+    <div id="authErr"></div>
+    <button id="authGo">Crear cuenta</button>
+    <button id="authSwitch">Ya tengo cuenta</button>
+    <div class="a-note" id="authNote">Tu cuenta se guarda en este dispositivo. Más adelante podrás entrar también con Google.</div>
+  </div>
+</div>
 <div class="cele hidden" id="pactModal">
   <div class="cele-box pact-box" id="pactBox">
     <div class="pact-head">🤝 Mi compromiso</div>
@@ -1401,7 +1435,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.26';
+const VERSION = 'v2.27';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -1721,7 +1755,7 @@ const isQuiet = () => !quietBypass && !!(db.settings && (db.settings.quiet || (d
 let pcAudioOk = true; // la pantalla del PC dice si el navegador le deja sonar (hace falta un clic en esa página)
 const pcLinked = () => !SCREEN && !REMOTE && !!(conn && conn.open) && pcAudioOk;
 // APK nuevo: sabe callarse cuando el PC está conectado (el JS se lo avisa cada 5 s; si el aviso caduca, vuelve a hablar el móvil)
-const NATIVE_PC = NATIVE && typeof window.AndroidPasos.pcLink === 'function';
+const NATIVE_PC = NATIVE && (() => { try { AndroidPasos.pcLink(false); return true; } catch (e) { return false; } })();
 // pause = true: mientras habla se pausa la música (la del móvil y la del PC) y después vuelve
 function speak(text, done, pause) {
   if (REMOTE || isQuiet()) { if (done) setTimeout(done, 50); return; }
@@ -3065,11 +3099,79 @@ function helpLinks() {
 async function shareApp() {
   const url = 'https://gcalabro12.github.io/PC-Body-mind/';
   const text = 'Te recomiendo Amable PC, una app que me está gustando mucho para cuidar tu cuerpo, tu mente y tu tiempo mientras trabajas con el ordenador. Pruébala aquí: ' + url;
-  if (NATIVE && typeof AndroidPasos.share === 'function') { try { AndroidPasos.share(text); return; } catch (e) {} }
+  if (NATIVE) { try { AndroidPasos.share(text); return; } catch (e) {} }
   if (!NATIVE && navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(text); } catch (e) {}
   const wa = 'https://wa.me/?text=' + encodeURIComponent(text);
   if (NATIVE) location.href = wa; else window.open(wa, '_blank');
+}
+// ---------- Cuenta: nombre, usuario y contraseña (de momento guardada en este dispositivo) ----------
+const ACC_KEY = 'pcbm_account', SES_KEY = 'pcbm_session';
+const acctGet = () => { try { return JSON.parse(localStorage.getItem(ACC_KEY)); } catch (e) { return null; } };
+const acctName = () => { const a = acctGet(); return a && a.name ? a.name : ''; };
+async function hashPass(pass, salt) {
+  try {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode(salt), iterations: 150000 }, key, 256);
+    return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) { // navegador sin crypto.subtle: resumen sencillo
+    let h = 5381; const t = salt + pass; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) >>> 0;
+    return 'x' + h.toString(16);
+  }
+}
+const newSalt = () => { try { return [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''); } catch (e) { return String(Math.random()).slice(2); } };
+let authMode = 'register';
+function authShow(mode) {
+  authMode = mode;
+  const reg = mode === 'register', a = acctGet();
+  $('authTitle').textContent = reg ? '👋 Crea tu cuenta' : '👋 Hola de nuevo';
+  $('authSub').textContent = reg ? 'Para empezar, dinos cómo llamarte.' : 'Entra con tu usuario y contraseña.';
+  $('authNameRow').classList.toggle('hidden', !reg);
+  $('authGo').textContent = reg ? 'Crear cuenta' : 'Entrar';
+  $('authSwitch').textContent = reg ? (a ? 'Ya tengo cuenta · entrar' : '') : 'Crear una cuenta nueva';
+  $('authSwitch').classList.toggle('hidden', reg && !a);
+  $('authPass').autocomplete = reg ? 'new-password' : 'current-password';
+  $('authNote').textContent = reg ? 'Tu cuenta se guarda en este dispositivo. Más adelante podrás entrar también con Google.'
+    : 'Si olvidaste la contraseña, crea una cuenta nueva: tus datos de la app se mantienen.';
+  $('authErr').textContent = ''; $('authPass').value = '';
+  if (!reg && a) $('authUser').value = a.user;
+  $('authModal').classList.remove('hidden');
+}
+async function authSubmit() {
+  const err = t => { $('authErr').textContent = t; };
+  const user = $('authUser').value.trim().toLowerCase(), pass = $('authPass').value;
+  if (authMode === 'register') {
+    const name = $('authName').value.trim();
+    if (!name) return err('Escribe tu nombre.');
+    if (!/^[a-z0-9._-]{3,30}$/.test(user)) return err('El usuario: de 3 a 30 letras, números, punto, guion o guion bajo, sin espacios.');
+    if (pass.length < 6) return err('La contraseña necesita al menos 6 caracteres.');
+    const salt = newSalt();
+    localStorage.setItem(ACC_KEY, JSON.stringify({ name, user, salt, hash: await hashPass(pass, salt), at: Date.now() }));
+  } else {
+    const a = acctGet();
+    if (!a || a.user !== user || a.hash !== await hashPass(pass, a.salt)) return err('Usuario o contraseña incorrectos.');
+  }
+  localStorage.setItem(SES_KEY, user);
+  $('authModal').classList.add('hidden');
+  const a = acctGet(); if (a && !db.settings.userName) { db.settings.userName = a.name; save(); }
+  homeHello();
+}
+function homeHello() {
+  const n = acctName().split(/\s+/)[0];
+  if ($('homeHello')) $('homeHello').textContent = n ? 'Hola, ' + n + ' 👋' : '';
+  if ($('logoutBtn')) $('logoutBtn').classList.toggle('hidden', !acctGet());
+}
+function authInit() {
+  if (SCREEN || REMOTE) return;
+  $('authGo').addEventListener('click', authSubmit);
+  $('authSwitch').addEventListener('click', () => authShow(authMode === 'register' ? 'login' : 'register'));
+  $('authEye').addEventListener('click', () => { const i = $('authPass'); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; $('authEye').textContent = show ? 'Ocultar' : 'Ver'; });
+  ['authName', 'authUser', 'authPass'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); }));
+  $('logoutBtn').addEventListener('click', () => appConfirm('Cerrar sesión', '¿Cerrar la sesión? Tus datos de la app se quedan; para volver a entrar necesitas tu usuario y contraseña.', 'Cerrar sesión', () => { localStorage.removeItem(SES_KEY); authShow('login'); }));
+  homeHello();
+  const a = acctGet();
+  if (!a || localStorage.getItem(SES_KEY) !== a.user) authShow(a ? 'login' : 'register');
 }
 function homeStepsRender() {
   if (!$('homeSteps')) return;
@@ -3677,16 +3779,18 @@ function pactTextInto(el, min, task) {
 }
 function pactVisual() {
   const name = pactPending ? (pactPending.name || $('pactName').value.trim()) : '';
+  const when = 'a las ' + pactTime();
   $('pactFill').style.width = (pactProg * 100) + '%';
-  const n = Math.ceil(pactProg * name.length);
+  const n = Math.max(0, Math.ceil(pactProg * (name.length + when.length)));
   $('pactSig').textContent = name.slice(0, n);
+  $('pactTime').textContent = when.slice(0, Math.max(0, n - name.length));
   if (n > pactLetters) { try { const c = audio(); if (c) tone(1500, c.currentTime + 0.01, 0.03, 'square', 0.04); } catch (e) {} } // tic suave por cada letra
   pactLetters = n;
 }
 function pactOpen(min, task, every) {
   pactPending = { min, task, every, signed: false };
   pactTextInto($('pactText'), min, task);
-  $('pactName').value = db.settings.userName || '';
+  $('pactName').value = db.settings.userName || acctName();
   pactProg = 0; pactLetters = 0; pactHolding = false; pactAuto = false;
   $('pactLbl').style.cssText = '';
   $('pactSig').textContent = ''; $('pactTime').textContent = ''; $('pactLbl').textContent = 'Firma';
@@ -3731,7 +3835,7 @@ function pactDone() {
   try { const c = audio(); if (c) { const t0 = c.currentTime + 0.02; tone(659.3, t0, 0.18, 'triangle', 0.25); tone(880, t0 + 0.14, 0.18, 'triangle', 0.25); tone(1318.5, t0 + 0.28, 0.6, 'sine', 0.28); } } catch (e) {}
   $('pactSig').textContent = P.name; $('pactTime').textContent = 'a las ' + pactTime(); $('pactLbl').textContent = 'Firmado'; $('pactHoldTxt').textContent = '✔ Firmado';
   $('pactBox').classList.add('signed');
-  setTimeout(() => { $('pactModal').classList.add('hidden'); pactPending = null; focusStart(P.min, P.task, P.every, { name: P.name, at: Date.now() }); }, 1600);
+  setTimeout(() => { $('pactModal').classList.add('hidden'); pactPending = null; focusStart(P.min, P.task, P.every, { name: P.name, at: Date.now() }); focusOpen(); }, 1600); // y salta a la pantalla de concentración
 }
 // Ver el contrato ya firmado (desde la ventana de concentración)
 function pactView() {
@@ -3758,7 +3862,9 @@ async function fMicToggle() {
       : '🎤 Ya puedes dictar: pulsa las teclas <b>Windows + H</b> y habla.';
   };
   if (fRec) { try { fRec.stop(); } catch (e) {} fRec = null; stop(''); return; }
-  if (NATIVE && typeof AndroidPasos.dictate === 'function') { dictTarget = $('fTask'); hint.textContent = 'Habla cuando aparezca la ventana de dictado…'; AndroidPasos.dictate(); return; }
+  if (NATIVE) { // app Android: dictado del teléfono, sin abrir el teclado
+    try { dictTarget = $('fTask'); hint.textContent = 'Habla cuando aparezca la ventana de dictado…'; AndroidPasos.dictate(); return; } catch (e) { dictTarget = null; }
+  }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (navigator.brave || !SR || NATIVE) { fallback(); return; }
   $('fMic').classList.add('rec'); hint.textContent = 'Pidiendo permiso para el micrófono…';
@@ -4119,10 +4225,8 @@ function bMicStop(msg) {
 async function bMicToggle() {
   if (bRec) { try { bRec.stop(); } catch (e) {} bRec = null; bMicStop(''); return; }
   // App Android (v1.22 o más nueva): dicta con el dictado de Google del propio teléfono
-  if (NATIVE && typeof AndroidPasos.dictate === 'function') {
-    $('bMicHint').textContent = 'Habla cuando aparezca la ventana de dictado…';
-    AndroidPasos.dictate();
-    return;
+  if (NATIVE) {
+    try { $('bMicHint').textContent = 'Habla cuando aparezca la ventana de dictado…'; AndroidPasos.dictate(); return; } catch (e) {}
   }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   // Brave y el visor de la app Android no tienen dictado por voz (Brave bloquea el servicio de Google)
@@ -4402,6 +4506,7 @@ function initShell() {
   bindBloques();
   bindSalud();
   showView();
+  authInit();
   if (!location.hash) runSplash();
 }
 
@@ -4500,6 +4605,9 @@ function homeOrderInit() {
   $('fPactView').addEventListener('click', pactView);
   $('fDone').addEventListener('click', () => { focusClose(); focusStop(true); }); // tarea terminada: toca una pausa activa
   $('fMic').addEventListener('click', fMicToggle);
+  { const touchDev = /Android|iPhone|iPad/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
+    const SRx = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (touchDev && !NATIVE && (!SRx || navigator.brave)) $('fMic').classList.add('hidden'); }
   document.querySelectorAll('.f-chips [data-m]').forEach(b => b.addEventListener('click', () => { $('fMin').value = b.dataset.m; }));
   focusRender(); setInterval(() => { focusRender(); if (!REMOTE) focusTick(); }, 1000);
   // mesa elevadora y aviso de fin de jornada
