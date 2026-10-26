@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.25</title>
+<title>Amable PC v2.26</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -1401,7 +1401,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.25';
+const VERSION = 'v2.26';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3687,7 +3687,8 @@ function pactOpen(min, task, every) {
   pactPending = { min, task, every, signed: false };
   pactTextInto($('pactText'), min, task);
   $('pactName').value = db.settings.userName || '';
-  pactProg = 0; pactLetters = 0; pactHolding = false;
+  pactProg = 0; pactLetters = 0; pactHolding = false; pactAuto = false;
+  $('pactLbl').style.cssText = '';
   $('pactSig').textContent = ''; $('pactTime').textContent = ''; $('pactLbl').textContent = 'Firma';
   $('pactFill').style.width = '0'; $('pactHoldTxt').textContent = '✍️ Mantén pulsado para firmar';
   $('pactBox').classList.remove('signed', 'viewing');
@@ -3700,21 +3701,33 @@ function pactLoop(ts) {
   if (pactProg >= 1) { pactDone(); return; }
   if (pactHolding || pactProg > 0) pactRaf = requestAnimationFrame(pactLoop);
 }
+let pactAuto = false, pactDownAt = 0;
+function pactNeedName() {
+  const lbl = $('pactLbl'), inp = $('pactName');
+  lbl.textContent = '⚠️ Escribe tu nombre arriba para poder firmar'; lbl.style.cssText = 'color:#B91C1C;font-weight:800;font-size:0.95rem';
+  inp.style.borderColor = '#DC2626'; inp.style.boxShadow = '0 0 0 3px rgba(220,38,38,0.3)';
+  inp.focus();
+  setTimeout(() => { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 2500);
+}
 function pactDown(e) {
-  if (e) e.preventDefault();
-  if (!pactPending || pactPending.signed || pactHolding) return;
+  if (e && e.cancelable) e.preventDefault();
+  if (!pactPending || pactPending.signed || pactHolding || pactAuto) return;
   const name = $('pactName').value.trim();
-  if (!name) { $('pactLbl').textContent = 'Escribe tu nombre para firmar'; $('pactName').focus(); return; }
+  if (!name) { pactNeedName(); return; }
+  $('pactLbl').style.cssText = ''; $('pactLbl').textContent = 'Firma';
   pactPending.name = name; db.settings.userName = name; save();
-  pactHolding = true; pactHoldAt = performance.now() - pactProg * PACT_MS;
+  pactDownAt = performance.now();
+  pactHolding = true; pactHoldAt = pactDownAt - pactProg * PACT_MS;
   cancelAnimationFrame(pactRaf); pactRaf = requestAnimationFrame(pactLoop);
 }
 function pactUp() {
+  if (pactAuto) return;
+  if (pactHolding && performance.now() - pactDownAt < 350 && pactProg < 0.2) { pactAuto = true; return; } // un toque corto: la firma se escribe sola
   pactHolding = false;
   if (pactPending && !pactPending.signed) { cancelAnimationFrame(pactRaf); pactRaf = requestAnimationFrame(pactLoop); } // si se suelta antes, la firma se borra
 }
 function pactDone() {
-  const P = pactPending; pactHolding = false; P.signed = true;
+  const P = pactPending; pactHolding = false; pactAuto = false; P.signed = true;
   try { const c = audio(); if (c) { const t0 = c.currentTime + 0.02; tone(659.3, t0, 0.18, 'triangle', 0.25); tone(880, t0 + 0.14, 0.18, 'triangle', 0.25); tone(1318.5, t0 + 0.28, 0.6, 'sine', 0.28); } } catch (e) {}
   $('pactSig').textContent = P.name; $('pactTime').textContent = 'a las ' + pactTime(); $('pactLbl').textContent = 'Firmado'; $('pactHoldTxt').textContent = '✔ Firmado';
   $('pactBox').classList.add('signed');
@@ -4473,12 +4486,16 @@ function homeOrderInit() {
   $('fStop2').addEventListener('click', () => { focusClose(); focusStop(false); });
   $('fPause').addEventListener('click', focusPauseToggle);
   const hold = $('pactHold');
-  hold.addEventListener('pointerdown', e => { try { hold.setPointerCapture(e.pointerId); } catch (x) {} pactDown(e); });
-  ['pointerup', 'pointercancel'].forEach(ev => hold.addEventListener(ev, pactUp));
+  hold.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; try { hold.setPointerCapture(e.pointerId); } catch (x) {} pactDown(e); });
+  hold.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') pactUp(); });
+  hold.addEventListener('pointercancel', e => { if (e.pointerType !== 'touch') pactUp(); });
+  hold.addEventListener('touchstart', e => pactDown(e), { passive: false });
+  hold.addEventListener('touchend', e => { if (e.cancelable) e.preventDefault(); pactUp(); }, { passive: false });
+  hold.addEventListener('touchcancel', () => pactUp());
   hold.addEventListener('contextmenu', e => e.preventDefault());
   hold.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) pactDown(e); });
   hold.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') pactUp(); });
-  $('pactBack').addEventListener('click', () => { if (pactPending && pactPending.signed) return; pactHolding = false; cancelAnimationFrame(pactRaf); pactPending = null; $('pactModal').classList.add('hidden'); $('focusModal').classList.remove('hidden'); }); // vuelve al formulario con lo escrito
+  $('pactBack').addEventListener('click', () => { if (pactPending && pactPending.signed) return; pactHolding = false; pactAuto = false; cancelAnimationFrame(pactRaf); pactPending = null; $('pactModal').classList.add('hidden'); $('focusModal').classList.remove('hidden'); }); // vuelve al formulario con lo escrito
   $('pactClose').addEventListener('click', () => { $('pactModal').classList.add('hidden'); $('pactBox').classList.remove('viewing'); });
   $('fPactView').addEventListener('click', pactView);
   $('fDone').addEventListener('click', () => { focusClose(); focusStop(true); }); // tarea terminada: toca una pausa activa
