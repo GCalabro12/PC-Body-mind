@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.34</title>
+<title>Amable PC v2.35</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -723,6 +723,8 @@
   .auth-tabs button { flex: 1; width: auto; padding: 10px 6px; font-size: 14px; border-radius: 10px; background: transparent; color: #94A3B8; }
   .auth-tabs button.on { background: #4ADE80; color: #0F172A; }
   #authSwitch { display: none; }
+  #authForgot { width: 100%; margin-top: 6px; background: transparent; color: #FCD34D; font-size: 14px; text-decoration: underline; }
+  #authErr.ok { color: #4ADE80; }
   #authModal .cele-sub { text-align: center; margin-bottom: 14px; }
   #authModal label { display: block; margin-top: 10px; font-size: 14px; font-weight: 700; color: #CBD5E1; }
   #authModal input { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0F172A; color: #fff; font-size: 16px; font-family: inherit; margin-top: 4px; }
@@ -1262,11 +1264,17 @@
     <div class="cele-title" id="authTitle">Crea tu cuenta</div>
     <div class="cele-sub" id="authSub">Con tu nombre real.</div>
     <div id="authNameRow"><label for="authName">Tu nombre real</label><input id="authName" type="text" maxlength="40" autocomplete="name" placeholder="Nombre y apellido"></div>
-    <label for="authUser">Usuario</label><input id="authUser" type="text" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Tu usuario">
-    <label for="authPass">Contraseña</label>
+    <div id="authEmailRow"><label for="authEmail">Tu email (para recuperar la contraseña)</label><input id="authEmail" type="email" maxlength="120" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="nombre@correo.com"></div>
+    <div id="authUserRow"><label for="authUser">Usuario</label><input id="authUser" type="text" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Tu usuario"></div>
+    <div id="authForgotBox" class="hidden">
+      <label for="authDato">Tu usuario o tu email</label><input id="authDato" type="text" maxlength="120" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Usuario o email">
+      <div id="authCodeRow" class="hidden"><label for="authCode">Código de 6 cifras que te hemos mandado por email</label><input id="authCode" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></div>
+    </div>
+    <label for="authPass" id="authPassLbl">Contraseña</label>
     <div class="a-pass"><input id="authPass" type="password" maxlength="60" autocomplete="new-password" placeholder="Mínimo 6 caracteres"><button class="a-eye" id="authEye" type="button" aria-label="Mostrar u ocultar la contraseña">Ver</button></div>
     <div id="authErr"></div>
     <button id="authGo">Crear cuenta</button>
+    <button id="authForgot" class="hidden">He olvidado mi contraseña</button>
     <button id="authSwitch">Ya tengo cuenta</button>
     <div class="a-note" id="authNote">Tu cuenta se guarda en este dispositivo. Más adelante podrás entrar también con Google.</div>
   </div>
@@ -1448,7 +1456,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.34';
+const VERSION = 'v2.35';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3145,34 +3153,71 @@ async function hashPass(pass, salt) {
 }
 const newSalt = () => { try { return [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''); } catch (e) { return String(Math.random()).slice(2); } };
 let authMode = 'register';
+let forgotStep = 1;
 function authShow(mode) {
   authMode = mode;
-  const reg = mode === 'register', a = acctGet();
-  $('authTitle').textContent = reg ? 'Crea tu cuenta' : 'Entra en tu cuenta';
-  $('authSub').textContent = reg ? 'Con tu nombre real.' : 'Con tu usuario y contraseña.';
+  const reg = mode === 'register', forgot = mode === 'forgot', a = acctGet();
+  if (forgot) forgotStep = 1;
+  $('authTitle').textContent = reg ? 'Crea tu cuenta' : forgot ? 'Recupera tu contraseña' : 'Entra en tu cuenta';
+  $('authSub').textContent = reg ? 'Con tu nombre real.' : forgot ? 'Te mandamos un código por email.' : 'Con tu usuario y contraseña.';
   $('authNameRow').classList.toggle('hidden', !reg);
-  $('authGo').textContent = reg ? 'Crear cuenta' : 'Entrar';
+  $('authEmailRow').classList.toggle('hidden', !(reg && AUTH_API));
+  $('authUserRow').classList.toggle('hidden', forgot);
+  $('authForgotBox').classList.toggle('hidden', !forgot);
+  $('authCodeRow').classList.add('hidden');
+  $('authPassLbl').classList.toggle('hidden', forgot); document.querySelector('#authModal .a-pass').classList.toggle('hidden', forgot);
+  $('authForgot').classList.toggle('hidden', !(AUTH_API && mode === 'login'));
+  $('authGo').textContent = reg ? 'Crear cuenta' : forgot ? 'Enviarme el código' : 'Entrar';
   $('authTabReg').classList.toggle('on', reg); $('authTabLog').classList.toggle('on', !reg);
-  $('authPass').autocomplete = reg ? 'new-password' : 'current-password';
+  $('authPass').autocomplete = reg ? 'new-password' : 'current-password'; $('authPass').placeholder = reg ? 'Mínimo 6 caracteres' : '';
   $('authNote').textContent = AUTH_API
-    ? (reg ? 'Tu cuenta se guarda en el servidor de Amable PC: podrás entrar desde cualquier móvil. Más adelante, también con Google.' : 'Entra con el usuario y la contraseña que creaste.')
+    ? (reg ? 'Tu cuenta se guarda en el servidor de Amable PC: podrás entrar desde cualquier móvil. Más adelante, también con Google.' : forgot ? 'Si la cuenta tiene un email, el código llega en un minuto. Mira también el spam.' : 'Entra con el usuario y la contraseña que creaste.')
     : (reg ? 'Tu cuenta se guarda en este dispositivo. Más adelante podrás entrar también con Google.' : 'Si olvidaste la contraseña, crea una cuenta nueva: tus datos de la app se mantienen.');
-  $('authErr').textContent = ''; $('authPass').value = '';
-  if (!reg && a) $('authUser').value = a.user;
+  $('authErr').className = ''; $('authErr').textContent = ''; $('authPass').value = ''; $('authCode').value = '';
+  if (!reg && !forgot && a) $('authUser').value = a.user;
+  if (forgot && a) $('authDato').value = a.user;
   $('authModal').classList.remove('hidden');
 }
 async function authSubmit() {
-  const err = t => { $('authErr').textContent = t; };
+  const err = t => { $('authErr').className = ''; $('authErr').textContent = t; };
   const user = $('authUser').value.trim().toLowerCase(), pass = $('authPass').value;
+  if (authMode === 'forgot') { // recuperar la contraseña: 1) pedir el código  2) código + contraseña nueva
+    const dato = $('authDato').value.trim().toLowerCase();
+    if (!dato) return err('Escribe tu usuario o tu email.');
+    $('authGo').disabled = true;
+    try {
+      if (forgotStep === 1) {
+        err('Enviando el código…');
+        const d = await authApi('/recuperar/pedir', { dato });
+        forgotStep = 2; $('authCodeRow').classList.remove('hidden'); $('authPassLbl').classList.remove('hidden'); document.querySelector('#authModal .a-pass').classList.remove('hidden');
+        $('authPassLbl').textContent = 'Contraseña nueva'; $('authPass').placeholder = 'Mínimo 6 caracteres'; $('authPass').autocomplete = 'new-password';
+        $('authGo').textContent = 'Cambiar contraseña y entrar';
+        $('authErr').className = 'ok'; $('authErr').textContent = d.mensaje; $('authCode').focus();
+        $('authGo').disabled = false; return;
+      }
+      const codigo = $('authCode').value.replace(/\D/g, '');
+      if (codigo.length !== 6) { $('authGo').disabled = false; return err('Escribe el código de 6 cifras del email.'); }
+      if (pass.length < 6) { $('authGo').disabled = false; return err('La contraseña nueva necesita al menos 6 caracteres.'); }
+      err('Cambiando la contraseña…');
+      const d = await authApi('/recuperar/cambiar', { dato, codigo, password: pass });
+      localStorage.setItem(ACC_KEY, JSON.stringify({ name: d.nombre, user: d.usuario, server: true, at: Date.now() })); localStorage.setItem(TOK_KEY, d.token);
+      localStorage.setItem(SES_KEY, d.usuario);
+      $('authGo').disabled = false; $('authErr').textContent = '';
+      $('authModal').classList.add('hidden'); db.settings.userName = d.nombre; save(); homeHello();
+      infoModal('✅ Contraseña cambiada', 'Ya estás dentro con tu contraseña nueva.');
+      return;
+    } catch (e) { $('authGo').disabled = false; return err(e.message); }
+  }
   if (authMode === 'register') {
-    const name = $('authName').value.trim();
+    const name = $('authName').value.trim(), email = $('authEmail').value.trim();
     if (!name) return err('Escribe tu nombre.');
+    if (AUTH_API && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return err('Escribe un email válido: lo necesitas para recuperar tu contraseña.');
     if (!/^[a-z0-9._-]{3,30}$/.test(user)) return err('El usuario: de 3 a 30 letras, números, punto, guion o guion bajo, sin espacios.');
     if (pass.length < 6) return err('La contraseña necesita al menos 6 caracteres.');
     if (AUTH_API) {
       try {
         $('authGo').disabled = true; $('authErr').textContent = 'Creando tu cuenta…';
-        const d = await authApi('/registro', { nombre: name, usuario: user, password: pass });
+        const d = await authApi('/registro', { nombre: name, usuario: user, password: pass, email });
         localStorage.setItem(ACC_KEY, JSON.stringify({ name: d.nombre, user: d.usuario, server: true, at: Date.now() })); localStorage.setItem(TOK_KEY, d.token);
       } catch (e) {
         $('authGo').disabled = false;
@@ -3211,8 +3256,9 @@ function authInit() {
   $('authGo').addEventListener('click', authSubmit);
   $('authTabReg').addEventListener('click', () => { if (authMode !== 'register') authShow('register'); });
   $('authTabLog').addEventListener('click', () => { if (authMode !== 'login') authShow('login'); });
+  $('authForgot').addEventListener('click', () => authShow('forgot'));
   $('authEye').addEventListener('click', () => { const i = $('authPass'); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; $('authEye').textContent = show ? 'Ocultar' : 'Ver'; });
-  ['authName', 'authUser', 'authPass'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); }));
+  ['authName', 'authEmail', 'authUser', 'authPass', 'authDato', 'authCode'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); }));
   $('logoutBtn').addEventListener('click', () => appConfirm('Cerrar sesión', '¿Cerrar la sesión? Tus datos de la app se quedan; para volver a entrar necesitas tu usuario y contraseña.', 'Cerrar sesión', () => { if (AUTH_API) { const t = localStorage.getItem(TOK_KEY); if (t) authApi('/salir', {}, t).catch(() => {}); } localStorage.removeItem(SES_KEY); localStorage.removeItem(TOK_KEY); authShow('login'); }));
   homeHello();
   const a = acctGet();
