@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.43</title>
+<title>Amable PC v2.44</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -445,6 +445,14 @@
   .home-link:hover { background: rgba(56,189,248,0.08); }
   .home-link span { color: #4ADE80; font-weight: 600; }
   .home.pre .home-link { animation: none; opacity: 0; }
+  .how-btn { display: block; width: 100%; margin: 0 0 12px; padding: 0.8rem; border-radius: 14px; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.5); color: #7DD3FC; font-weight: 800; font-size: 15px; }
+  .how-btn:hover { background: rgba(56,189,248,0.2); }
+  #focusModal.running .how-btn { display: none; }
+  #infoModal .cele-box { max-height: 90vh; overflow-y: auto; }
+  .how-list { text-align: left; margin: 10px 0 0; padding-left: 1.1rem; color: #CBD5E1; font-size: 14px; line-height: 1.5; }
+  .how-list li { margin-bottom: 7px; }
+  .pc-acts { display: flex; gap: 8px; }
+  .pc-acts button { flex: 1; width: auto; margin: 0; }
   .pc-steps { display: flex; flex-direction: column; gap: 8px; color: #cbd5e1; font-size: 0.92rem; line-height: 1.45; }
   .pill { display: inline-flex; align-items: center; font-size: 13px; font-weight: 700; color: #FACC15; background: rgba(250,204,21,0.14); border-radius: 999px; padding: 4px 10px; margin-top: 6px; }
   .tip { display: flex; gap: 12px; align-items: center; width: 100%; margin-top: 18px; padding: 12px 16px 12px 8px; border-radius: 24px; background: rgba(30,41,59,0.55); border: 1px dashed #334155; animation: pcbm-text-in 0.6s var(--ease-out) 0.5s both; }
@@ -808,27 +816,21 @@
     <div class="logo" id="homeLogo" data-logo role="button" tabindex="0" aria-label="Escuchar la banda sonora"></div>
     <h1 class="home-title"><b>Amable</b> PC</h1>
     <p class="home-hello" id="homeHello"></p>
-    <p class="home-sub">Cuida tu cuerpo, tu mente y tu tiempo</p>
+    <p class="home-sub">Usa tu PC de forma amable contigo</p>
     <div class="focus-row"><button class="quiet-btn" id="quietBtn" aria-pressed="false"></button><button class="steps-snd hidden" id="stepsSnd" aria-label="Sonido de los pasos" title="Sonido de los pasos: tocar para apagarlo">🔊</button></div>
-    <button class="home-link" data-go="pc">🖥️ Ver pantalla del móvil en el PC <span id="homePc"></span></button>
+    <button class="home-link" data-go="pc">🖥️ ¿Quieres ver Amable PC en tu ordenador? <span id="homePc"></span></button>
     <div class="home-btns">
       <button class="home-btn vista" data-go="vista"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#38BDF8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34 C15 19 49 19 58 34 C49 49 15 49 6 34Z"/><path d="M20 12 L23 17 M32 8 L32 14 M44 12 L41 17"/></g><circle cx="32" cy="34" r="8.5" fill="#38BDF8"/><circle cx="35" cy="31" r="2.6" fill="#0F172A"/></svg></span><span><h3>Pausa de la vista</h3><span class="st" id="homeVista">Regla 20-20-20</span><span class="bar"><span id="homeVistaBar"></span></span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn bloques" data-go="bloques"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#FACC15" stroke-width="5.5" stroke-linecap="round"><path d="M36.78 9.50 A23 23 0 0 1 43.50 51.92"/><path d="M36.78 54.50 A23 23 0 0 1 14.91 47.39"/><path d="M10.99 41.35 A23 23 0 0 1 27.22 9.50"/><path d="M32 32 L32 20 M32 32 L40 37"/></g><circle cx="32" cy="32" r="3.2" fill="#FACC15"/></svg></span><span><h3 class="h-row">Bloques de tiempo<span class="blk-left hidden" id="homeBlkLeft" title="Tiempo que falta para terminar el bloque"></span></h3><span class="st" id="homeBloques">De 5:30 a 22:00</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn pasos" data-go="pasos"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(21 38) rotate(-12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g><g transform="translate(43 24) rotate(12)"><ellipse cx="0" cy="-6" rx="7.5" ry="11" fill="#4ADE80"/><ellipse cx="0" cy="11.5" rx="5.5" ry="5" fill="#4ADE80"/></g></svg></span><span><h3>Pasos en tu jornada</h3><span class="st" id="homeSteps">0 pasos hoy</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn agua" data-go="agua"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7 C25 19 15 29 15 40 a17 17 0 0 0 34 0 C49 29 39 19 32 7z" fill="none" stroke="#2DD4BF" stroke-width="5.5" stroke-linejoin="round"/><path d="M24 42 a8 8 0 0 0 8 8" fill="none" stroke="#2DD4BF" stroke-width="4.5" stroke-linecap="round"/></svg></span><span><h3>Agua y movimiento</h3><span class="st" id="homeAgua">Avisos para beber y moverte</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="home-btn focus" data-go="concentracion"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="none" stroke="#FB7185" stroke-width="5.5"/><circle cx="32" cy="32" r="12" fill="none" stroke="#FB7185" stroke-width="5.5"/><circle cx="32" cy="32" r="3.5" fill="#FB7185"/></svg></span><span><h3>Modo concentración</h3><span class="st" id="homeFocus">Tarea y tiempo, sin avisos</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      <button class="home-btn correo" data-go="correo"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="15" width="46" height="34" rx="7" fill="none" stroke="#A78BFA" stroke-width="5.5"/><path d="M12 20 L32 35 L52 20" fill="none" stroke="#A78BFA" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><h3>Gestor de email</h3><span class="st" id="homeCorreo">Etiquetas, urgentes y adjuntos</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="home-btn correo" data-go="correo"><span class="grip" title="Arrastra para cambiar el orden" aria-hidden="true"><svg viewBox="0 0 10 16"><circle cx="2.5" cy="2" r="1.4"/><circle cx="7.5" cy="2" r="1.4"/><circle cx="2.5" cy="6" r="1.4"/><circle cx="7.5" cy="6" r="1.4"/><circle cx="2.5" cy="10" r="1.4"/><circle cx="7.5" cy="10" r="1.4"/><circle cx="2.5" cy="14" r="1.4"/><circle cx="7.5" cy="14" r="1.4"/></svg></span><span class="ico"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="15" width="46" height="34" rx="7" fill="none" stroke="#A78BFA" stroke-width="5.5"/><path d="M12 20 L32 35 L52 20" fill="none" stroke="#A78BFA" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><h3>Gestor de Gmail</h3><span class="st" id="homeCorreo">Solo para Gmail: etiquetas y urgentes</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <div class="eq-note">💧 Seguimiento del agua, ⏱ trabajo en bloques de tiempo y otras cosas más, en la app <a href="https://gcalabro12.github.io/Equilibra/" target="_blank" rel="noopener">Amable Life →</a><br><a href="https://github.com/GCalabro12/Equilibra-Android/releases/latest/download/Equilibra.apk" target="_blank" rel="noopener">📲 Descargar la app de Amable Life para Android</a>
       <button class="eq-copy" id="eqCopy">📋 Copiar mis bloques para Amable Life</button>
       <textarea class="eq-json hidden" id="eqJson" readonly aria-label="Tus bloques para pegar en Amable Life"></textarea>
       <div class="eq-hint" id="eqHint">Abre Amable Life → Ajustes → Bloques de Amable PC → pega el texto y toca «Traer el texto pegado».</div></div>
-    <div class="help-card" id="webCard">
-      <div class="help-title">🌐 Amable PC Web y compartir</div>
-      <div class="help-text">Amable PC también funciona en el navegador, en cualquier móvil u ordenador:</div>
-      <a class="web-link" href="https://gcalabro12.github.io/PC-Body-mind/" target="_blank" rel="noopener">🌐 gcalabro12.github.io/PC-Body-mind</a>
-      <button class="help-btn share" id="shareApp">📤 Recomendar Amable PC</button>
-    </div>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
     <div class="seal-wrap">
       <div class="sellos">
@@ -846,6 +848,7 @@
     <h1 class="sky">👁 Pausa de la vista</h1>
     <span></span>
   </header>
+  <button class="how-btn" data-how="vista">ℹ️ Cómo funciona</button>
   <div class="card" style="text-align:center">
     <!-- Ojo: el anillo de la cuenta atrás es el iris -->
     <div class="eye-box">
@@ -942,18 +945,22 @@
   <p class="hint" style="text-align:center">Los avisos suenan solo entre las 5:30 y las 22:00, con la app abierta.</p>
 </div>
 
-<!-- Ver la pantalla del móvil en el PC -->
+<!-- Ver Amable PC en el ordenador -->
 <div class="wrap view hidden" id="pc">
   <header>
     <button class="back" data-back>← Inicio</button>
-    <h1 class="sky">🖥️ Ver pantalla</h1>
+    <h1 class="sky">🖥️ En tu ordenador</h1>
     <span></span>
   </header>
+  <button class="how-btn" data-how="pc">ℹ️ Cómo funciona</button>
   <div class="card">
     <div class="pc-steps">
-      <div><b>1.</b> En el ordenador abre esta dirección:</div>
+      <div><b>1.</b> En tu ordenador abre el navegador (Chrome, Edge o Brave) y escribe esta dirección:</div>
       <div class="url-box" id="castUrl"></div>
-      <div><b>2.</b> Saldrá un código de 4 números. Escríbelo aquí y pulsa <b>Conectar</b>.</div>
+      <div class="pc-acts"><button class="btn-outline" id="castCopy">📋 Copiar</button><button class="btn-outline" id="castSend">📤 Enviármela</button></div>
+      <div class="note">«Enviármela» te deja mandarte la dirección por WhatsApp o email para abrirla desde el ordenador sin escribirla.</div>
+      <div><b>2.</b> En la pantalla del ordenador saldrá un código de 4 números.</div>
+      <div><b>3.</b> Escríbelo aquí y pulsa <b>Conectar</b>.</div>
     </div>
     <div class="row mt">
       <div><input type="text" id="castCode" class="code-input" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Código de la pantalla del PC"></div>
@@ -1031,6 +1038,7 @@
     <button class="install hidden" id="installBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg>Instalar</button>
     <span class="date" id="dateTxt"></span>
   </header>
+  <button class="how-btn" data-how="pasos">ℹ️ Cómo funciona</button>
 
   <!-- Mesa elevadora: primero se pregunta; con mesa → sentado / de pie; sin mesa → pausas para caminar -->
   <div class="card hidden" id="deskAsk">
@@ -1227,14 +1235,6 @@
     </details>
   </div>
 
-  <div class="card">
-    <details>
-      <summary>Cómo funciona</summary>
-      <p class="note">La app usa el <b>acelerómetro</b> del teléfono y detecta el balanceo de cada paso. Solo empieza a sumar cuando detecta <b>4 pasos seguidos</b>, así se ignoran movimientos sueltos.</p>
-      <p class="note">⚠️ Al ser una app web, <b>solo cuenta mientras está abierta y con la pantalla encendida</b>. La app mantiene la pantalla despierta mientras cuenta; si la bloqueas o cambias de app, se pausa el conteo (lo ya contado se guarda).</p>
-      <p class="note">Los datos se guardan en este teléfono. Cada día empieza de cero a medianoche y el historial queda guardado.</p>
-    </details>
-  </div>
 </div>
 
 <!-- Aviso: toca pausa de vista -->
@@ -1264,6 +1264,7 @@
   <div class="cele-box" style="border-color:#FB7185">
     <button id="fClose" class="f-back hidden">← Volver</button>
     <div class="cele-title" style="color:#FDA4AF" id="focusTitle">🎯 Modo concentración</div>
+    <button class="how-btn" data-how="focus">ℹ️ Cómo funciona</button>
     <div id="focusForm">
       <label for="fTask">¿Qué vas a hacer?</label>
       <div class="f-task">
@@ -1348,6 +1349,14 @@
       </details>
       <div id="pfMsg"></div>
       <button class="mn-logout" id="menuLogout">↪ Cerrar sesión</button>
+    </div>
+  </details>
+  <details class="mn-det" id="mnShare" name="menu">
+    <summary>📤 Recomendar Amable PC</summary>
+    <div class="mn-body">
+      <div class="help-text">Amable PC también funciona en el navegador, en cualquier móvil u ordenador:</div>
+      <a class="web-link" href="https://gcalabro12.github.io/PC-Body-mind/" target="_blank" rel="noopener">🌐 gcalabro12.github.io/PC-Body-mind</a>
+      <button class="help-btn share" id="shareApp">📤 Recomendar Amable PC</button>
     </div>
   </details>
   <details class="mn-det" id="mnAyuda" name="menu">
@@ -1544,7 +1553,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.43';
+const VERSION = 'v2.44';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -2501,7 +2510,13 @@ function vistaState() {
     alerting: vAlerting, breakLeft: vBreakEnd ? Math.max(0, vBreakEnd - now) : 0, act: vBreakEnd ? vBreakAct : '' };
 }
 function bindCast() {
-  $('castUrl').textContent = location.origin + location.pathname + '?pantalla';
+  const PC_URL = (NATIVE ? 'https://gcalabro12.github.io/PC-Body-mind/' : location.origin + location.pathname) + '?pantalla';
+  $('castUrl').textContent = PC_URL;
+  $('castCopy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(PC_URL); $('castCopy').textContent = '✓ Copiada'; setTimeout(() => { $('castCopy').textContent = '📋 Copiar'; }, 2500); }
+    catch (e) { const rg = document.createRange(); rg.selectNode($('castUrl')); getSelection().removeAllRanges(); getSelection().addRange(rg); $('castCopy').textContent = 'Selecciónala y copia'; }
+  });
+  $('castSend').addEventListener('click', () => shareText('Amable PC en el ordenador: abre esta dirección en el navegador del PC y escribe el código de 4 números que te salga en el móvil. ' + PC_URL));
   if (db.cast) $('castCode').value = db.cast.code;
   $('castBtn').addEventListener('click', () => {
     const code = $('castCode').value.replace(/\D/g, '');
@@ -3205,9 +3220,8 @@ function helpLinks() {
   wa.href = 'https://wa.me/34658825799?text=' + encodeURIComponent('Hola, os escribo por Amable PC (' + ver + '). Me pasa esto: ');
 }
 // Recomendar la app: menú de compartir de Android (APK nueva), compartir del navegador o WhatsApp
-async function shareApp() {
-  const url = 'https://gcalabro12.github.io/PC-Body-mind/';
-  const text = 'Te recomiendo Amable PC, una app que me está gustando mucho para cuidar tu cuerpo, tu mente y tu tiempo mientras trabajas con el ordenador. Pruébala aquí: ' + url;
+const shareApp = () => shareText('Te recomiendo Amable PC, una app que me está gustando mucho para cuidar tu cuerpo, tu mente y tu tiempo mientras trabajas con el ordenador. Pruébala aquí: https://gcalabro12.github.io/PC-Body-mind/');
+async function shareText(text) {
   if (NATIVE) { try { AndroidPasos.share(text); return; } catch (e) {} }
   if (!NATIVE && navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(text); } catch (e) {}
@@ -3380,7 +3394,7 @@ async function perfilAbrir() {
   const a = acctGet();
   const td = $('pfData'); td.innerHTML = '';
   helpLinks();
-  $('pfPassBox').open = false; $('pfEmailBox').open = false; ['mnPerfil', 'mnAyuda', 'mnLegal'].forEach(id => { $(id).open = false; });
+  $('pfPassBox').open = false; $('pfEmailBox').open = false; ['mnPerfil', 'mnShare', 'mnAyuda', 'mnLegal'].forEach(id => { $(id).open = false; });
   $('profileModal').classList.remove('hidden'); $('menuBtn').setAttribute('aria-expanded', 'true');
   if (!a) return;
   const fila = (k, v) => { const d = document.createElement('div'); d.className = 'pf-row'; const s1 = document.createElement('span'); s1.textContent = k; const b = document.createElement('b'); b.textContent = v; d.append(s1, b); td.append(d); return b; };
@@ -4179,6 +4193,37 @@ function appConfirm(title, sub, okLabel, onYes) {
   confirmYesFn = onYes;
   $('confirmModal').classList.remove('hidden');
 }
+// «Cómo funciona» de cada ventana (botón alargado al principio)
+const HOW = {
+  vista: ['👁 Pausa de la vista', 'Te ayuda a descansar los ojos y el cuerpo mientras trabajas.', [
+    'Pulsa <b>Empezar</b> y la cuenta atrás corre sola. Cuando toca, te aviso con voz y sonido.',
+    'Cada 20 minutos, mira 20 segundos algo que esté a unos 6 metros: es la <b>regla 20-20-20</b> de los oftalmólogos.',
+    'De vez en cuando la pausa se convierte en una <b>pausa de movimiento</b>: estiramientos, manos y muñecas, piernas o caminar un rato.',
+    'Si acabas de caminar más de 1.000 pasos seguidos, espero un rato antes de pedirte otra pausa de movimiento.',
+    'Si no haces la pausa, te lo recuerdo una vez más tarde.',
+    'Los tiempos se cambian en <b>Programar los cronómetros</b>. También puedes activar el cierre de jornada y los ojos de noche.',
+    'Si tienes el PC conectado, los avisos salen por el ordenador.']],
+  pasos: ['👣 Pasos en tu jornada', 'Cuenta tus pasos con el teléfono y te ayuda a moverte más.', [
+    'Pulsa <b>Empezar a contar</b> y lleva el móvil encima (bolsillo o mano). Usa el acelerómetro y empieza a sumar tras 4 pasos seguidos.',
+    'En el navegador solo cuenta con la app abierta y la pantalla encendida. La <b>app Android</b> cuenta siempre, también con la pantalla apagada, y te avisa en voz alta.',
+    'Verás tus pasos, km, kcal y minutos activos de hoy, y cuánto te falta para tu meta (se cambia en Ajustes).',
+    'Te aviso por voz cada 250, 500 o 1.000 pasos y celebro cada bloque de pasos.',
+    'Si tienes <b>mesa elevadora</b>, te aviso para alternar sentado y de pie. Si no, te propongo caminar en las pausas de movimiento.',
+    'Hay descansos entre bloques de pasos, un aviso si te paras mientras caminas y un recordatorio si vas atrasado con tu meta.',
+    'Los datos se guardan en tu dispositivo. Cada día empieza de cero y se guarda el historial de 7 días.']],
+  focus: ['🎯 Modo concentración', 'Te ayuda a hacer una tarea sin interrupciones.', [
+    'Escribe qué vas a hacer (o díctalo con el micrófono) y elige cuántos minutos: 25, 50, 90 o los que quieras.',
+    'Antes de empezar firmas un compromiso: mantén pulsado el botón amarillo hasta que se escriba tu firma.',
+    'Mientras dura, no recibes otros avisos (pausas, pasos…). Si quieres, te recuerdo la tarea cada cierto tiempo.',
+    'Puedes pausar, parar o pulsar <b>Tarea finalizada</b> cuando acabes. El contrato se puede volver a ver.',
+    'Si tienes el PC conectado, allí ves la tarea y el tiempo que queda.']],
+  pc: ['🖥️ Amable PC en tu ordenador', 'Para tener a la vista, en el ordenador, lo mismo que pasa en tu móvil.', [
+    'En el ordenador verás tus <b>pasos</b>, la cuenta atrás de la <b>pausa de vista</b> y el <b>bloque y la tarea</b> en la que estás, todo sincronizado con este móvil.',
+    'Abre la dirección en el navegador del PC, escribe aquí el código de 4 números que te salga y pulsa <b>Conectar</b>.',
+    'Con el PC conectado, las voces y los sonidos de los avisos salen por el ordenador.',
+    'Si no tienes la dirección a mano, pulsa <b>Enviármela</b> y te la mandas por WhatsApp o email.']]
+};
+function howOpen(k) { const h = HOW[k]; if (h) infoModal(h[0], h[1], '<ul class="how-list">' + h[2].map(x => '<li>' + x + '</li>').join('') + '</ul>'); }
 const infoQueue = [];
 function infoModal(title, sub, extraHtml) {
   if (!$('infoModal').classList.contains('hidden')) { infoQueue.push([title, sub, extraHtml]); return; } // si ya hay uno, sale después
@@ -4356,6 +4401,7 @@ function bindSalud() {
   setInterval(stillTick, 5000);
   setInterval(stepsSndTick, 2000);
   $('shareApp').addEventListener('click', shareApp);
+  document.addEventListener('click', e => { const b = e.target.closest('[data-how]'); if (b) howOpen(b.dataset.how); });
   $('stepsSnd').addEventListener('click', () => { stepsMuted = !stepsMuted; syncNative(); stepsSndTick(); });
   // Pausi
   const P = db.pausi;
@@ -4779,7 +4825,7 @@ function initShell() {
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.go === 'concentracion') { focusOpen(); return; }
     if (b.dataset.go === 'correo') { // página aparte; dentro de la app de Android la ventana de Google no funciona
-      if (NATIVE) { infoModal('✉️ Gestor de email', 'El gestor de email se usa en el ordenador: abre Amable PC en Chrome o Brave y toca «Gestor de email».'); return; }
+      if (NATIVE) { infoModal('✉️ Gestor de Gmail', 'El gestor de Gmail se usa en el ordenador: abre Amable PC en Chrome o Brave y toca «Gestor de Gmail». Solo sirve para cuentas de Gmail.'); return; }
       location.href = 'correo.html'; return;
     }
     fromHome = true; location.hash = b.dataset.go;

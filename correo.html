@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gestor de email · Amable PC</title>
+<title>Gestor de Gmail · Amable PC</title>
 <meta name="theme-color" content="#0f172a">
 <link rel="icon" href="icon-192.png">
 <style>
@@ -74,21 +74,39 @@
   .demo { background: rgba(250,204,21,0.12); border: 1px solid rgba(250,204,21,0.5); color: #FDE68A; border-radius: 12px; padding: 8px 12px; font-size: 13px; margin-top: 10px; }
   label.chk { display: flex; gap: 10px; align-items: center; color: var(--soft); margin-top: 10px; }
   label.chk input { width: 20px; height: 20px; accent-color: var(--acc); }
+  .hidden { display: none !important; }
+  .how-btn { display: block; width: 100%; margin: 0 0 12px; padding: 0.8rem; border-radius: 14px; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.5); color: #7DD3FC; font-weight: 800; font-size: 15px; cursor: pointer; }
+  .how-list { margin: 10px 0 0; padding-left: 1.1rem; line-height: 1.5; }
+  .how-list li { margin-bottom: 7px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header><a class="back" href="./#home">← Inicio</a><h1>✉️ Gestor de email</h1><span class="ver" id="ver"></span></header>
+  <header><a class="back" href="./#home">← Inicio</a><h1>✉️ Gestor de Gmail</h1><span class="ver" id="ver"></span></header>
+  <button class="how-btn" id="howBtn">ℹ️ Cómo funciona</button>
+  <div class="card hidden" id="howBox">
+    <p class="big">Este gestor es <b>solo para Gmail</b> (cuentas @gmail.com y de Google Workspace). Si tu correo es de Outlook, Yahoo u otro, no puede usarlo.</p>
+    <ul class="how-list">
+      <li>Pulsa <b>Conectar mi Gmail</b>: Google te pregunta qué cuenta quieres usar y te pide permiso.</li>
+      <li>Repasa <b>solo tu bandeja de entrada</b> de los últimos 3 meses y te propone 5 etiquetas. Tú eliges cuáles quieres.</li>
+      <li>Te muestra los <b>correos urgentes</b> y los que traen <b>facturas y documentos</b>.</li>
+      <li>Todo se hace en tu navegador: tus correos no se guardan en ningún servidor. Puedes desconectarlo cuando quieras.</li>
+      <li>Se usa mejor desde el ordenador.</li>
+    </ul>
+  </div>
   <div id="app"></div>
 </div>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v2.43';
+const VERSION = 'v2.44';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
-let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
+// ID de cliente común de Amable PC (proyecto «Amable PC» de Google Cloud, sin verificar: unas 100 personas). Quien ya pegó el suyo sigue con el suyo.
+const COMMON_CID = '907469278874-eqhisv2ns3is2rpi4l7p2eopb019l4ms.apps.googleusercontent.com';
+const ownCid = () => { try { return !!localStorage.getItem('pcbm_correo_cid'); } catch (e) { return false; } };
+let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim() || COMMON_CID; } catch (e) { return COMMON_CID; } })();
 const SCOPES = 'https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.settings.basic';
 const API = 'https://gmail.googleapis.com/gmail/v1/users/me/';
 const DEMO = new URLSearchParams(location.search).has('demo');
@@ -120,6 +138,7 @@ let st = load(), token = null, tokenExp = 0, tokenClient = null, tab = 'etiqueta
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
 const today = () => new Date().toISOString().slice(0, 10);
+document.getElementById('howBtn').onclick = () => { document.getElementById('howBox').classList.toggle('hidden'); };
 // Email de la cuenta de Amable PC: si es de Gmail, Google lo ofrece primero al conectar (se pide al abrir, para no perder el toque del botón)
 let cuentaMail = '';
 (async () => {
@@ -273,14 +292,15 @@ function renderIntro(a) {
   a.innerHTML = `<div class="card">
     <p class="big">¿Quieres que conecte tu correo para ayudarte a etiquetar tus emails, para que los puedas leer con facilidad y agrupados por temas?</p>
     <p>Repasaré <b>solo los correos de tu bandeja de entrada</b> de los últimos 3 meses y te sugeriré <b>5 etiquetas</b>. Tú eliges cuáles quieres. Además verás los <b>correos urgentes</b> y los que traen <b>facturas y documentos</b>, también de la bandeja de entrada.</p>
+    <p class="hint">⚠️ Este gestor <b>solo funciona con Gmail</b>. Google te enseñará el aviso «Google no ha verificado esta aplicación»: pulsa <b>Configuración avanzada</b> y luego <b>Ir a gcalabro12.github.io</b>. Es normal mientras Google verifica Amable PC.</p>
     <button class="btn" id="go">Sí, conectar mi Gmail</button>
     <button class="btn2" onclick="location.href='./#home'">Ahora no</button>
     <p class="hint">🔒 Todo se hace en tu navegador: tus correos no se guardan en ningún servidor. Puedes desconectarlo cuando quieras.</p>
-    ${DEMO ? '' : '<p class="hint"><a href="#" id="resetCid" style="color:var(--mut)">Cambiar el ID de cliente de Google</a></p>'}
+    ${DEMO || !ownCid() ? '' : '<p class="hint"><a href="#" id="resetCid" style="color:var(--mut)">Dejar de usar mi ID de cliente propio</a></p>'}
     ${DEMO ? '<div class="demo">Modo de prueba: son correos inventados, no se conecta a ningún Gmail.</div>' : ''}
     <p class="hint" id="err" style="color:var(--bad)"></p></div>`;
   $('go').onclick = startScan;
-  if ($('resetCid')) $('resetCid').onclick = e => { e.preventDefault(); try { localStorage.removeItem('pcbm_correo_cid'); } catch (er) {} GOOGLE_CLIENT_ID = ''; render(); };
+  if ($('resetCid')) $('resetCid').onclick = e => { e.preventDefault(); try { localStorage.removeItem('pcbm_correo_cid'); } catch (er) {} GOOGLE_CLIENT_ID = COMMON_CID; render(); };
 }
 function renderScan(a) {
   a.innerHTML = `<div class="card"><h2>Repasando tus correos…</h2><p id="scanTxt">Buscando temas</p><div class="prog"><div id="scanBar"></div></div><p class="hint" id="err" style="color:var(--bad)"></p></div>`;
