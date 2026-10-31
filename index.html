@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.42</title>
+<title>Amable PC v2.43</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -772,6 +772,9 @@
   #authModal input { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0F172A; color: #fff; font-size: 16px; font-family: inherit; margin-top: 4px; }
   #authModal .a-pass { position: relative; }
   #authModal .a-eye { position: absolute; right: 6px; top: 8px; width: auto; padding: 4px 10px; background: transparent; color: #94A3B8; font-size: 14px; }
+  #profileModal .a-pass { position: relative; }
+  #profileModal .a-pass input { padding-right: 84px; }
+  #profileModal .a-eye { position: absolute; right: 4px; top: 5px; width: auto; margin: 0; padding: 4px 10px; background: transparent; border: 0; color: #94A3B8; font-size: 14px; }
   #authErr { color: #F87171; font-size: 14px; font-weight: 700; min-height: 1.2em; margin: 10px 0 0; text-align: center; }
   #authGo { margin-top: 12px; }
   #authSwitch { width: 100%; margin-top: 8px; background: transparent; color: #7DD3FC; font-size: 14px; text-decoration: underline; }
@@ -1329,8 +1332,8 @@
       <details class="mn-sub" id="pfPassBox">
         <summary>🔑 Cambiar contraseña</summary>
         <div class="mn-body">
-          <label for="pfActual">Contraseña actual</label><input id="pfActual" type="password" autocomplete="current-password" maxlength="60">
-          <label for="pfNueva">Contraseña nueva (mínimo 6 caracteres)</label><input id="pfNueva" type="password" autocomplete="new-password" maxlength="60">
+          <label for="pfActual">Contraseña actual</label><div class="a-pass"><input id="pfActual" type="password" autocomplete="current-password" maxlength="60"><button class="a-eye" type="button" data-eye="pfActual" aria-label="Mostrar u ocultar la contraseña">Ver</button></div>
+          <label for="pfNueva">Contraseña nueva (mínimo 6 caracteres)</label><div class="a-pass"><input id="pfNueva" type="password" autocomplete="new-password" maxlength="60"><button class="a-eye" type="button" data-eye="pfNueva" aria-label="Mostrar u ocultar la contraseña">Ver</button></div>
           <button id="pfCambiar" style="margin-top:10px">Cambiar contraseña</button>
         </div>
       </details>
@@ -1339,7 +1342,7 @@
         <div class="mn-body">
           <div class="hint">Lo necesitas para recuperar tu contraseña si la olvidas.</div>
           <label for="pfEmail">Email</label><input id="pfEmail" type="email" autocomplete="email" maxlength="120">
-          <label for="pfEmailPass">Tu contraseña</label><input id="pfEmailPass" type="password" autocomplete="current-password" maxlength="60">
+          <label for="pfEmailPass">Tu contraseña</label><div class="a-pass"><input id="pfEmailPass" type="password" autocomplete="current-password" maxlength="60"><button class="a-eye" type="button" data-eye="pfEmailPass" aria-label="Mostrar u ocultar la contraseña">Ver</button></div>
           <button id="pfGuardarEmail" style="margin-top:10px">Guardar el email</button>
         </div>
       </details>
@@ -1541,7 +1544,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.42';
+const VERSION = 'v2.43';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3385,6 +3388,7 @@ async function perfilAbrir() {
   const bCorreo = fila('Email', 'Cargando…'), bGoogle = fila('Entras con', a.google ? 'Google' : 'Usuario y contraseña');
   $('pfMsg').className = ''; $('pfMsg').textContent = '';
   ['pfActual', 'pfNueva', 'pfEmail', 'pfEmailPass'].forEach(id => { $(id).value = ''; });
+  document.querySelectorAll('#profileModal [data-eye]').forEach(b => { $(b.dataset.eye).type = 'password'; b.textContent = 'Ver'; });
   $('pfPassBox').classList.toggle('hidden', !!a.google || !AUTH_API);
   $('pfEmailBox').classList.add('hidden');
   $('profileModal').classList.remove('hidden');
@@ -3404,6 +3408,9 @@ function perfilInit() {
   document.addEventListener('click', e => { if (!$('profileModal').classList.contains('hidden') && !e.target.closest('#profileModal, #menuBtn')) menuCerrar(); });
   addEventListener('keydown', e => { if (e.key === 'Escape') menuCerrar(); });
   $('pfClose').addEventListener('click', menuCerrar);
+  document.querySelectorAll('#profileModal [data-eye]').forEach(b => b.addEventListener('click', () => {
+    const i = $(b.dataset.eye); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.textContent = show ? 'Ocultar' : 'Ver';
+  }));
   $('menuLogout').addEventListener('click', () => { menuCerrar(); appConfirm('Cerrar sesión', '¿Cerrar la sesión? Tus datos de la app se quedan; para volver a entrar necesitas tu usuario y contraseña (o Google).', 'Cerrar sesión', () => {
     if (AUTH_API) { const t = localStorage.getItem(TOK_KEY); if (t) authApi('/salir', {}, t).catch(() => {}); }
     localStorage.removeItem(SES_KEY); localStorage.removeItem(TOK_KEY); authShow('login');
