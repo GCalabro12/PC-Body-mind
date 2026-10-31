@@ -11,7 +11,7 @@
 <script>document.write('<link rel="manifest" href="' + (location.search.indexOf('pantalla') >= 0 ? 'manifest-pantalla.json' : 'manifest.json') + '">');</script>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Amable PC v2.38</title>
+<title>Amable PC v2.39</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; }
@@ -469,10 +469,31 @@
   #bloques .back { background: #CA8A04; }
   #app .back { background: #16a34a; }
   #agua .back { background: #0D9488; }
-  .ver-badge { position: fixed; top: 6px; right: 10px; z-index: 40; color: #64748b; font-size: 0.72rem; font-variant-numeric: tabular-nums; pointer-events: none; }
-  body.has-badge { padding-top: 26px; }
+  /* barra de arriba: Grow Panel a la izquierda, versión en el centro y menú a la derecha */
+  .topbar { position: fixed; top: 0; left: 0; right: 0; height: 46px; z-index: 40; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 4px 10px; pointer-events: none; }
+  .ver-badge { color: #64748b; font-size: 0.72rem; font-variant-numeric: tabular-nums; pointer-events: none; justify-self: center; }
+  body.has-badge { padding-top: 50px; }
+  .menu-btn { justify-self: end; pointer-events: auto; width: 40px; height: 40px; padding: 0; margin: 0; border-radius: 12px; background: rgba(30,41,59,0.85); border: 1px solid #334155; color: #E2E8F0; display: grid; place-items: center; }
+  .menu-btn svg { width: 22px; height: 22px; }
+  .menu-panel { position: fixed; top: 52px; right: 10px; z-index: 60; width: min(280px, calc(100vw - 20px)); background: #1E293B; border: 1px solid #475569; border-radius: 16px; padding: 6px; box-shadow: 0 14px 34px rgba(2,6,23,0.6); }
+  .menu-panel button, .menu-panel a { display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; margin: 0; padding: 12px 12px; border-radius: 10px; background: transparent; color: #F8FAFC; font-size: 15px; font-weight: 600; text-align: left; text-decoration: none; border: 0; }
+  .menu-panel button:hover, .menu-panel a:hover { background: #334155; }
+  .menu-panel .m-sep { height: 1px; background: #334155; margin: 4px 6px; }
+  .menu-panel .m-danger { color: #FCA5A5; }
+  .menu-who { padding: 10px 12px 8px; color: #94A3B8; font-size: 13px; line-height: 1.35; }
+  .menu-who b { color: #F8FAFC; font-size: 15px; display: block; }
+  body.screen .topbar, body.remote .topbar { display: none; }
+  #profileModal .cele-box, #helpModal .cele-box { max-width: 400px; text-align: left; max-height: 90vh; overflow-y: auto; }
+  #profileModal .cele-title, #helpModal .cele-title { text-align: center; }
+  .pf-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #334155; font-size: 15px; }
+  .pf-row span { color: #94A3B8; } .pf-row b { color: #F8FAFC; text-align: right; overflow-wrap: anywhere; }
+  .pf-sec { margin-top: 16px; font-weight: 800; color: #7DD3FC; font-size: 15px; }
+  #profileModal label { display: block; margin-top: 8px; font-size: 13px; font-weight: 700; color: #CBD5E1; }
+  #profileModal input { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 10px; border: 1px solid #334155; background: #0F172A; color: #fff; font-size: 16px; margin-top: 3px; }
+  #pfMsg { min-height: 1.2em; margin-top: 8px; font-size: 14px; font-weight: 700; }
+  #pfMsg.ok { color: #4ADE80; } #pfMsg.err { color: #F87171; }
   /* botón de Grow Panel (lo pone grow-panel-boton.js): arriba a la derecha, bajo el número de versión */
-  .gp-slot { position: fixed; top: 24px; right: 8px; z-index: 40; }
+  .gp-slot { justify-self: start; pointer-events: auto; }
   body.screen .gp-slot, body.remote .gp-slot { display: none; }
   .cele-art svg { width: 120px; height: 132px; display: block; margin: 0 auto; }
 
@@ -744,8 +765,21 @@
 </style>
 </head>
 <body>
-<div class="ver-badge hidden" id="verBadge"></div>
-<div class="gp-slot"><span id="grow-panel-boton"></span></div>
+<div class="topbar" id="topbar">
+  <div class="gp-slot"><span id="grow-panel-boton"></span></div>
+  <div class="ver-badge hidden" id="verBadge"></div>
+  <button class="menu-btn" id="menuBtn" aria-label="Menú" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</div>
+<div class="menu-panel hidden" id="menuPanel" role="menu">
+  <div class="menu-who" id="menuWho"></div>
+  <div class="m-sep"></div>
+  <button id="menuPerfil" role="menuitem">👤 Perfil</button>
+  <button id="menuAyuda" role="menuitem">🆘 Ayuda y soporte</button>
+  <a href="condiciones.html" target="_blank" rel="noopener" role="menuitem">📄 Condiciones de uso</a>
+  <a href="privacidad.html" target="_blank" rel="noopener" role="menuitem">🔒 Política de privacidad</a>
+  <div class="m-sep"></div>
+  <button id="menuLogout" class="m-danger" role="menuitem">↪ Cerrar sesión</button>
+</div>
 <!-- Bienvenida: logo a pantalla completa que luego sube al inicio -->
 <div class="splash hidden" id="splash">
   <div class="splash-bg"></div>
@@ -784,15 +818,6 @@
       <div class="help-text">Amable PC también funciona en el navegador, en cualquier móvil u ordenador:</div>
       <a class="web-link" href="https://gcalabro12.github.io/PC-Body-mind/" target="_blank" rel="noopener">🌐 gcalabro12.github.io/PC-Body-mind</a>
       <button class="help-btn share" id="shareApp">📤 Recomendar Amable PC</button>
-    </div>
-    <div class="help-card" id="helpCard">
-      <div class="help-title">🆘 Ayuda y soporte</div>
-      <div class="help-text">¿Algo no funciona o tienes una duda? Escríbenos y te ayudamos.</div>
-      <a class="help-btn" id="helpMail" target="_blank" rel="noopener">✉️ Escribir a soporte</a>
-      <a class="help-btn wa" id="helpWa" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>
-      <div class="help-small">Email: info@practicaintegral.club · WhatsApp: +34 658 82 57 99</div>
-      <div class="help-small"><a href="condiciones.html" target="_blank" rel="noopener" style="color:#7DD3FC">Condiciones de uso</a> · <a href="privacidad.html" target="_blank" rel="noopener" style="color:#7DD3FC">Política de privacidad</a></div>
-      <button class="help-logout" id="logoutBtn">Cerrar sesión</button>
     </div>
     <div class="tip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" aria-hidden="true"><ellipse cx="100" cy="204" rx="50" ry="7" fill="#1E293B" opacity=".9"/><path d="M100 50 L100 34" stroke="#4ADE80" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="27" r="16" fill="#FACC15" opacity=".18"/><circle cx="100" cy="27" r="9" fill="#FACC15"/><g fill="none" stroke="#4ADE80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M42 104 L24 120"/><path d="M158 100 L176 70"/><path d="M82 146 L80 182"/><path d="M118 146 L120 182"/></g><circle cx="24" cy="120" r="7" fill="#4ADE80"/><circle cx="176" cy="70" r="7" fill="#4ADE80"/><rect x="62" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="108" y="180" width="30" height="16" rx="8" fill="#F8FAFC"/><rect x="62" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="108" y="190" width="30" height="6" rx="3" fill="#4ADE80"/><rect x="38" y="50" width="124" height="98" rx="30" fill="#38BDF8"/><rect x="50" y="62" width="100" height="74" rx="20" fill="#0F172A"/><ellipse cx="84" cy="94" rx="9" ry="11" fill="#F8FAFC"/><ellipse cx="116" cy="94" rx="9" ry="11" fill="#F8FAFC"/><circle cx="86" cy="96" r="5" fill="#0F172A"/><circle cx="118" cy="96" r="5" fill="#0F172A"/><circle cx="88" cy="93" r="1.8" fill="#F8FAFC"/><circle cx="120" cy="93" r="1.8" fill="#F8FAFC"/><path d="M90 113 Q100 122 110 113" fill="none" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/><circle cx="68" cy="116" r="6" fill="#FB7185" opacity=".7"/><circle cx="132" cy="116" r="6" fill="#FB7185" opacity=".7"/></svg><p><b>Pausi dice:</b> <span id="pausiTip">medio vaso de agua también es una pausa.</span><span class="tip-hint">Tócame para oír otro consejo</span></p></div>
     <div class="seal-wrap">
@@ -1287,6 +1312,37 @@
     <div class="a-note" id="authNote">Tu cuenta se guarda en este dispositivo. Más adelante podrás entrar también con Google.</div>
   </div>
 </div>
+<div class="cele hidden" id="helpModal">
+  <div class="cele-box">
+    <div class="help-title">🆘 Ayuda y soporte</div>
+    <div class="help-text">¿Algo no funciona o tienes una duda? Escríbenos y te ayudamos.</div>
+    <a class="help-btn" id="helpMail" target="_blank" rel="noopener">✉️ Escribir a soporte</a>
+    <a class="help-btn wa" id="helpWa" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>
+    <div class="help-small">Email: info@practicaintegral.club · WhatsApp: +34 658 82 57 99</div>
+    <button class="btn-outline" id="helpClose" style="margin-top:14px">Cerrar</button>
+  </div>
+</div>
+<div class="cele hidden" id="profileModal">
+  <div class="cele-box">
+    <div class="cele-title">👤 Mi perfil</div>
+    <div id="pfData"></div>
+    <div id="pfPassBox">
+      <div class="pf-sec">Cambiar contraseña</div>
+      <label for="pfActual">Contraseña actual</label><input id="pfActual" type="password" autocomplete="current-password" maxlength="60">
+      <label for="pfNueva">Contraseña nueva (mínimo 6 caracteres)</label><input id="pfNueva" type="password" autocomplete="new-password" maxlength="60">
+      <button id="pfCambiar" style="margin-top:10px">Cambiar contraseña</button>
+    </div>
+    <div id="pfEmailBox" class="hidden">
+      <div class="pf-sec">Añadir un email</div>
+      <div class="hint">Lo necesitas para recuperar tu contraseña si la olvidas.</div>
+      <label for="pfEmail">Email</label><input id="pfEmail" type="email" autocomplete="email" maxlength="120">
+      <label for="pfEmailPass">Tu contraseña</label><input id="pfEmailPass" type="password" autocomplete="current-password" maxlength="60">
+      <button id="pfGuardarEmail" style="margin-top:10px">Guardar el email</button>
+    </div>
+    <div id="pfMsg"></div>
+    <button class="btn-outline" id="pfClose" style="margin-top:12px">Cerrar</button>
+  </div>
+</div>
 <div class="cele hidden" id="pactModal">
   <div class="cele-box pact-box" id="pactBox">
     <div class="pact-head">🤝 Mi compromiso</div>
@@ -1464,7 +1520,7 @@
 </div>
 
 <script>
-const VERSION = 'v2.38';
+const VERSION = 'v2.39';
 const KEY = 'pasos_app_v1';
 const DEFAULTS = { goal: 8000, height: 170, weight: 70, sens: 5, autoStart: true };
 const MUSIC_DEFAULT = { id: '0XMpdr42Gcs', pos: 1018, vol: 80, auto: true };
@@ -3289,7 +3345,64 @@ async function authSubmit() {
 function homeHello() {
   const n = acctName().split(/\s+/)[0];
   if ($('homeHello')) $('homeHello').textContent = n ? 'Hola, ' + n + ' 👋' : '';
-  if ($('logoutBtn')) $('logoutBtn').classList.toggle('hidden', !acctGet());
+  const a = acctGet();
+  if ($('menuLogout')) { $('menuLogout').classList.toggle('hidden', !a); $('menuPerfil').classList.toggle('hidden', !a); }
+  if ($('menuWho')) $('menuWho').innerHTML = a ? '<b></b>@' : 'Amable PC';
+  if (a && $('menuWho')) { $('menuWho').firstChild.textContent = a.name || ''; $('menuWho').append(document.createTextNode(a.user || '')); }
+}
+// Menú de las tres rayitas: perfil, ayuda y soporte, condiciones y cerrar sesión
+function menuToggle(open) {
+  const show = open === undefined ? $('menuPanel').classList.contains('hidden') : open;
+  $('menuPanel').classList.toggle('hidden', !show); $('menuBtn').setAttribute('aria-expanded', show ? 'true' : 'false');
+}
+async function perfilAbrir() {
+  const a = acctGet(); if (!a) return;
+  const td = $('pfData'); td.innerHTML = '';
+  const fila = (k, v) => { const d = document.createElement('div'); d.className = 'pf-row'; const s1 = document.createElement('span'); s1.textContent = k; const b = document.createElement('b'); b.textContent = v; d.append(s1, b); td.append(d); return b; };
+  fila('Nombre', a.name || ''); fila('Usuario', a.user || '');
+  const bCorreo = fila('Email', 'Cargando…'), bGoogle = fila('Entras con', a.google ? 'Google' : 'Usuario y contraseña');
+  $('pfMsg').className = ''; $('pfMsg').textContent = '';
+  ['pfActual', 'pfNueva', 'pfEmail', 'pfEmailPass'].forEach(id => { $(id).value = ''; });
+  $('pfPassBox').classList.toggle('hidden', !!a.google || !AUTH_API);
+  $('pfEmailBox').classList.add('hidden');
+  $('profileModal').classList.remove('hidden');
+  if (!AUTH_API) { bCorreo.textContent = 'Solo en este dispositivo'; return; }
+  try {
+    const d = await authApi('/yo', null, localStorage.getItem(TOK_KEY) || 'x');
+    bCorreo.textContent = d.correo || 'Sin email';
+    bGoogle.textContent = d.google ? 'Google' : 'Usuario y contraseña';
+    $('pfPassBox').classList.toggle('hidden', !!d.google);
+    $('pfEmailBox').classList.toggle('hidden', !!d.correo);
+  } catch (e) { bCorreo.textContent = 'No se ha podido cargar'; }
+}
+function perfilInit() {
+  if (SCREEN || REMOTE) return;
+  const pm = (txt, ok) => { $('pfMsg').className = ok ? 'ok' : 'err'; $('pfMsg').textContent = txt; };
+  $('menuBtn').addEventListener('click', e => { e.stopPropagation(); menuToggle(); });
+  addEventListener('click', e => { if (!$('menuPanel').classList.contains('hidden') && !e.target.closest('#menuPanel')) menuToggle(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') menuToggle(false); });
+  $('menuPerfil').addEventListener('click', () => { menuToggle(false); perfilAbrir(); });
+  $('menuAyuda').addEventListener('click', () => { menuToggle(false); helpLinks(); $('helpModal').classList.remove('hidden'); });
+  $('helpClose').addEventListener('click', () => $('helpModal').classList.add('hidden'));
+  $('pfClose').addEventListener('click', () => $('profileModal').classList.add('hidden'));
+  $('menuLogout').addEventListener('click', () => { menuToggle(false); appConfirm('Cerrar sesión', '¿Cerrar la sesión? Tus datos de la app se quedan; para volver a entrar necesitas tu usuario y contraseña (o Google).', 'Cerrar sesión', () => {
+    if (AUTH_API) { const t = localStorage.getItem(TOK_KEY); if (t) authApi('/salir', {}, t).catch(() => {}); }
+    localStorage.removeItem(SES_KEY); localStorage.removeItem(TOK_KEY); authShow('login');
+  }); });
+  $('pfCambiar').addEventListener('click', async () => {
+    const actual = $('pfActual').value, nueva = $('pfNueva').value;
+    if (!actual) return pm('Escribe tu contraseña actual.', false);
+    if (nueva.length < 6) return pm('La contraseña nueva necesita al menos 6 caracteres.', false);
+    try { await authApi('/cambiar-password', { actual, nueva }, localStorage.getItem(TOK_KEY)); pm('✔ Contraseña cambiada.', true); $('pfActual').value = ''; $('pfNueva').value = ''; }
+    catch (e) { pm(e.message, false); }
+  });
+  $('pfGuardarEmail').addEventListener('click', async () => {
+    const email = $('pfEmail').value.trim(), password = $('pfEmailPass').value;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return pm('Escribe un email válido.', false);
+    if (!password) return pm('Escribe tu contraseña para confirmar.', false);
+    try { await authApi('/anadir-email', { email, password }, localStorage.getItem(TOK_KEY)); pm('✔ Email guardado.', true); perfilAbrir(); }
+    catch (e) { pm(e.message, false); }
+  });
 }
 function authInit() {
   if (SCREEN || REMOTE) return;
@@ -3299,8 +3412,7 @@ function authInit() {
   $('authForgot').addEventListener('click', () => authShow('forgot'));
   $('authEye').addEventListener('click', () => { const i = $('authPass'); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; $('authEye').textContent = show ? 'Ocultar' : 'Ver'; });
   ['authName', 'authEmail', 'authUser', 'authPass', 'authDato', 'authCode'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); }));
-  $('logoutBtn').addEventListener('click', () => appConfirm('Cerrar sesión', '¿Cerrar la sesión? Tus datos de la app se quedan; para volver a entrar necesitas tu usuario y contraseña.', 'Cerrar sesión', () => { if (AUTH_API) { const t = localStorage.getItem(TOK_KEY); if (t) authApi('/salir', {}, t).catch(() => {}); } localStorage.removeItem(SES_KEY); localStorage.removeItem(TOK_KEY); authShow('login'); }));
-  homeHello();
+  homeHello(); perfilInit();
   const a = acctGet();
   if (AUTH_API && a && !a.server) { // cuenta antigua, solo de este dispositivo: se vuelve a crear en el servidor
     localStorage.removeItem(ACC_KEY); localStorage.removeItem(SES_KEY); homeHello();
