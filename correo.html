@@ -78,6 +78,9 @@
   .how-btn { display: block; width: 100%; margin: 0 0 12px; padding: 0.8rem; border-radius: 14px; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.5); color: #7DD3FC; font-weight: 800; font-size: 15px; cursor: pointer; }
   .how-list { margin: 10px 0 0; padding-left: 1.1rem; line-height: 1.5; }
   .how-list li { margin-bottom: 7px; }
+  .guia { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.45); border-radius: 12px; padding: 10px 12px; margin: 10px 0; font-size: 0.92rem; }
+  .guia ol { margin: 6px 0 6px; padding-left: 1.2rem; line-height: 1.5; }
+  .guia li { margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -100,7 +103,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v2.46';
+const VERSION = 'v2.47';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 // ID de cliente común de Amable PC (proyecto «Amable PC» de Google Cloud, sin verificar: unas 100 personas). Quien ya pegó el suyo sigue con el suyo.
@@ -160,6 +163,7 @@ function getToken() {
       client_id: GOOGLE_CLIENT_ID, scope: SCOPES, hint: st.email || cuentaMail || undefined,
       callback: r => {
         if (r.error) return reject(new Error(r.error === 'access_denied' ? 'No se ha dado permiso' : r.error));
+        if (!/gmail\.modify/.test(r.scope || '') || !/gmail\.settings\.basic/.test(r.scope || '')) return reject(new Error('Falta marcar los dos permisos. Vuelve a pulsar y marca «Seleccionar todo».'));
         token = r.access_token; tokenExp = Date.now() + (Number(r.expires_in) || 3600) * 1000; resolve(token);
       },
       error_callback: e => reject(new Error(e && e.type === 'popup_closed' ? 'Se cerró la ventana de Google' : 'No se pudo abrir la ventana de Google'))
@@ -292,7 +296,15 @@ function renderIntro(a) {
   a.innerHTML = `<div class="card">
     <p class="big">¿Quieres que conecte tu correo para ayudarte a etiquetar tus emails, para que los puedas leer con facilidad y agrupados por temas?</p>
     <p>Repasaré <b>solo los correos de tu bandeja de entrada</b> de los últimos 3 meses y te sugeriré <b>5 etiquetas</b>. Tú eliges cuáles quieres. Además verás los <b>correos urgentes</b> y los que traen <b>facturas y documentos</b>, también de la bandeja de entrada.</p>
-    <p class="hint">⚠️ Este gestor <b>solo funciona con Gmail</b>. Google te enseñará el aviso «Google no ha verificado esta aplicación»: pulsa <b>Configuración avanzada</b> y luego <b>Ir a gcalabro12.github.io</b>. Es normal mientras Google verifica Amable PC.</p>
+    <div class="guia"><b>Paso a paso</b> (Google te lo irá pidiendo):
+      <ol>
+        <li>Pulsa el botón de abajo y <b>elige tu cuenta de Gmail</b>.</li>
+        <li>Saldrá un aviso rojo: «Google no ha verificado esta aplicación». Es normal. Pulsa <b>Configuración avanzada</b> (abajo, a la izquierda) y luego <b>Ir a gcalabro12.github.io (no seguro)</b>.</li>
+        <li>Marca la casilla <b>Seleccionar todo</b>, para que queden marcados los dos permisos. Si dejas alguno sin marcar, no funcionará.</li>
+        <li>Pulsa <b>Continuar</b>. ¡Listo!</li>
+      </ol>
+      <span class="hint">Este gestor solo funciona con Gmail.</span>
+    </div>
     <button class="btn" id="go">Sí, conectar mi Gmail</button>
     <button class="btn2" onclick="location.href='./#home'">Ahora no</button>
     <p class="hint">🔒 Todo se hace en tu navegador: tus correos no se guardan en ningún servidor. Puedes desconectarlo cuando quieras.</p>
