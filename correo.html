@@ -85,7 +85,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v2.41';
+const VERSION = 'v2.42';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 let GOOGLE_CLIENT_ID = (() => { try { return (localStorage.getItem('pcbm_correo_cid') || '').trim(); } catch (e) { return ''; } })();
@@ -120,6 +120,15 @@ let st = load(), token = null, tokenExp = 0, tokenClient = null, tab = 'etiqueta
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
 const today = () => new Date().toISOString().slice(0, 10);
+// Email de la cuenta de Amable PC: si es de Gmail, Google lo ofrece primero al conectar (se pide al abrir, para no perder el toque del botón)
+let cuentaMail = '';
+(async () => {
+  try {
+    const t = localStorage.getItem('pcbm_token'); if (!t) return;
+    const r = await fetch('https://amable-pc-api.proud-hill-016b.workers.dev/yo', { headers: { Authorization: 'Bearer ' + t } });
+    const d = await r.json(); if (/@(gmail|googlemail)\.com$/i.test(d.correo || '')) cuentaMail = d.correo;
+  } catch (e) {}
+})();
 
 // ---------- Conexión con Google ----------
 function getToken() {
@@ -129,7 +138,7 @@ function getToken() {
     if (!GOOGLE_CLIENT_ID) return reject(new Error('Falta la configuración con Google: sigue la guía de esta página.'));
     if (!window.google || !google.accounts || !google.accounts.oauth2) return reject(new Error('No ha cargado la conexión de Google. Revisa internet y vuelve a intentarlo.'));
     tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID, scope: SCOPES, hint: st.email || undefined,
+      client_id: GOOGLE_CLIENT_ID, scope: SCOPES, hint: st.email || cuentaMail || undefined,
       callback: r => {
         if (r.error) return reject(new Error(r.error === 'access_denied' ? 'No se ha dado permiso' : r.error));
         token = r.access_token; tokenExp = Date.now() + (Number(r.expires_in) || 3600) * 1000; resolve(token);
