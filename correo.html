@@ -100,7 +100,7 @@
 <script>
 // Gestor de email de PC & Body-mind (fase 2): todo pasa en el navegador del usuario.
 // Gmail se conecta con el permiso de Google del propio usuario; no hay servidor ni se guardan correos fuera.
-const VERSION = 'v2.45';
+const VERSION = 'v2.46';
 // ID de cliente de Google (no es secreto). Lo crea Gustavo en Google Cloud: ver instrucciones.
 // Se pega una sola vez en la guía de configuración de esta página y queda guardado en este navegador.
 // ID de cliente común de Amable PC (proyecto «Amable PC» de Google Cloud, sin verificar: unas 100 personas). Quien ya pegó el suyo sigue con el suyo.
@@ -403,7 +403,7 @@ async function cleanSent() {
 function renderPanel(a) {
   const needClean = !st.sentCleaned && st.labels && st.labels.length;
   a.innerHTML = `${needClean ? `<div class="card" style="border-color:rgba(250,204,21,0.6)"><p class="big">🧹 Tus correos enviados</p><p>Las etiquetas que puse antes pudieron caer también en correos que tú has <b>enviado</b>. Pulsa para quitárselas (tus enviados vuelven a quedar solo como «Enviados») y para que los filtros ignoren de ahora en adelante todo lo que envíes tú.</p><button class="btn" id="cleanSent">🧹 Limpiar mis enviados</button><p class="hint" id="errClean" style="color:var(--bad)"></p></div>` : ''}${st.lastRun !== today() ? `<div class="card"><p class="big">☀️ Buenos días: ¿repaso tu correo de hoy?</p><button class="btn" id="morning">Repasar mi correo</button></div>` : ''}
-    <div class="tabs"><button class="tab ${tab === 'etiquetas' ? 'on' : ''}" data-t="etiquetas">🏷️ Etiquetas</button><button class="tab ${tab === 'urgentes' ? 'on' : ''}" data-t="urgentes">🚨 Urgentes${st.urgent && st.urgent.length ? ' (' + st.urgent.length + ')' : ''}</button><button class="tab ${tab === 'adjuntos' ? 'on' : ''}" data-t="adjuntos">📎 Adjuntos</button></div>
+    <div class="tabs"><button class="tab ${tab === 'etiquetas' ? 'on' : ''}" data-t="etiquetas">🏷️ Por temas</button><button class="tab ${tab === 'urgentes' ? 'on' : ''}" data-t="urgentes">🚨 Urgentes${st.urgent && st.urgent.length ? ' (' + st.urgent.length + ')' : ''}</button><button class="tab ${tab === 'adjuntos' ? 'on' : ''}" data-t="adjuntos">📎 Facturas y docs</button></div>
     <div class="card" id="tabBody"></div>
     <div class="card"><div class="row"><button class="btn-sm" id="again">🔄 Repasar ahora</button><button class="btn-sm" id="resug">🏷️ Sugerir etiquetas otra vez</button><button class="btn-sm" id="off">Desconectar</button></div>
     ${st.cleanInfo ? `<p class="hint">🧹 Limpieza hecha: quité la etiqueta a ${st.cleanInfo.removed} correos enviados y rehice ${st.cleanInfo.fixed} filtros. Lo que envíes tú ya no se etiqueta.</p>` : ''}
@@ -417,14 +417,14 @@ function renderPanel(a) {
   $('off').onclick = disconnect;
   const b = $('tabBody');
   if (tab === 'etiquetas') {
-    b.innerHTML = st.labels.length ? `<h2>Tus etiquetas</h2>${st.labels.map(l => `<span class="tag">🏷️ ${esc(l.name)} · ${l.n}</span>`).join('')}
-      <p class="hint">${st.labels.every(l => l.filtro) ? 'Gmail pone estas etiquetas solo a los correos nuevos, cada día, aunque no abras la app.' : 'Las etiquetas sin filtro se repasan cuando abres esta página.'}</p>` : '<p class="empty">No has elegido etiquetas. Pulsa «Sugerir etiquetas otra vez» cuando quieras.</p>';
+    b.innerHTML = `<p class="hint" style="margin-top:0">Pon etiquetas a tus correos para poder leerlos agrupados por temas.</p>` + (st.labels.length ? `<h2>Tus temas</h2>${st.labels.map(l => `<span class="tag">🏷️ ${esc(l.name)} · ${l.n}</span>`).join('')}
+      <p class="hint">${st.labels.every(l => l.filtro) ? 'Gmail pone estas etiquetas solo a los correos nuevos, cada día, aunque no abras la app.' : 'Las etiquetas sin filtro se repasan cuando abres esta página.'}</p>` : '<p class="empty">No has elegido etiquetas. Pulsa «Sugerir etiquetas otra vez» cuando quieras.</p>');
   } else if (tab === 'urgentes') {
     const u = st.urgent || [];
-    b.innerHTML = `<h2>Correos urgentes sin leer (3 últimos días)</h2>` + (u.length ? u.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">Nada urgente. 🌿</p>');
+    b.innerHTML = `<p class="hint" style="margin-top:0">Los correos sin leer de los últimos 3 días que hablan de plazos, vencimientos o urgencias. Si llega uno nuevo con esta página abierta, te aviso.</p><h2>Correos urgentes sin leer</h2>` + (u.length ? u.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">Nada urgente. 🌿</p>');
   } else {
     const f = st.fact || [], d = st.docs || [];
-    b.innerHTML = `<h2>🧾 Facturas (60 días)</h2>` + (f.length ? f.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">No hay facturas recientes.</p>')
+    b.innerHTML = `<p class="hint" style="margin-top:0">Tus facturas y los documentos que te han enviado (PDF, Word, Excel…), juntos, sin tener que buscarlos.</p><h2>🧾 Facturas (60 días)</h2>` + (f.length ? f.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">No hay facturas recientes.</p>')
       + `<h2 style="margin-top:16px">📄 Otros documentos (30 días)</h2>` + (d.length ? d.map(m => `<a class="mail" href="${openLink(m)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b><span>${esc(m.from)} · ${fdate(m.date)}</span></a>`).join('') : '<p class="empty">No hay documentos recientes.</p>');
   }
 }
